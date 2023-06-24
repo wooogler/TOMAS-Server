@@ -11,6 +11,14 @@ const port = process.env.PORT;
 app.use(cors({ origin: "http://localhost:5173" }));
 app.use(express.json());
 
+interface Chat {
+  role: string;
+  content: string;
+  timestamp: string;
+}
+
+let chatHistory: Chat[] = [];
+
 const simplifyNestedStructure = (element: Element, targetTags: string[]) => {
   let currentElement = element;
   while (
@@ -229,6 +237,21 @@ app.post(
     }
   }
 );
+
+app.get("/chat", (req, res) => {
+  res.json(chatHistory);
+});
+
+app.post("/chat", async (req, res) => {
+  const { role, content } = req.body;
+  const timestamp = new Date().toISOString();
+  try {
+    chatHistory.push({ role, content, timestamp });
+    res.sendStatus(200);
+  } catch (error) {
+    res.status(500).send({ error: (error as Error).toString() });
+  }
+});
 
 app.listen(port, () => {
   console.log(`⚡️[server]: Server is running at http://localhost:${port}`);
