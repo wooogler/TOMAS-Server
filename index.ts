@@ -2,11 +2,13 @@ import dotenv from "dotenv";
 import express, { Request, Response } from "express";
 import puppeteer, { Browser, Page } from "puppeteer";
 import { JSDOM } from "jsdom";
+import cors from "cors";
 
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT;
+app.use(cors({ origin: "http://localhost:5173" }));
 app.use(express.json());
 
 const simplifyNestedStructure = (element: Element, targetTags: string[]) => {
