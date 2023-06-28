@@ -238,11 +238,16 @@ app.post(
   }
 );
 
-app.get("/chat", (req, res) => {
+app.get("/chat", (req: Request, res: Response) => {
   res.json(chatHistory);
 });
 
-app.post("/chat", async (req, res) => {
+interface ChatReqBody {
+  role: string;
+  content: string;
+}
+
+app.post("/chat", async (req: Request<{}, {}, ChatReqBody>, res: Response) => {
   const { role, content } = req.body;
   const timestamp = new Date().toISOString();
   try {

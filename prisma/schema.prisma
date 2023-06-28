@@ -1,0 +1,57 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Chat {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  role      Role
+  content   String
+}
+
+enum Role {
+  AI
+  HUMAN
+}
+
+model Screen {
+  id           String      @id @default(uuid())
+  url          String
+  html         String
+  simpleHtml   String?
+  elements     Component[]
+  prevAction   Action?     @relation(fields: [prevActionId], references: [id])
+  prevActionId String?     @unique
+}
+
+model Component {
+  id         String  @id @default(uuid())
+  html       String
+  acreen     Screen? @relation(fields: [screenId], references: [id])
+  screenId   String?
+  onAction   Action? @relation(fields: [onActionId], references: [id])
+  onActionId String? @unique
+}
+
+model Action {
+  id         String      @id @default(uuid())
+  type       Interaction
+  nextScreen Screen?
+  onElement  Component?
+}
+
+enum Interaction {
+  SCROLL
+  CLICK
+  INPUT
+  HOVER
+  BACK
+}
