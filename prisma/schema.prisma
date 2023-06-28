@@ -25,16 +25,18 @@ enum Role {
 model Screen {
   id           String      @id @default(uuid())
   url          String
-  html         String
+  rawHtml      String
   simpleHtml   String?
-  elements     Component[]
+  components   Component[]
   prevAction   Action?     @relation(fields: [prevActionId], references: [id])
   prevActionId String?     @unique
+  createdAt    DateTime    @default(now())
 }
 
 model Component {
   id         String  @id @default(uuid())
-  html       String
+  rawHtml    String
+  simpleHtml String?
   acreen     Screen? @relation(fields: [screenId], references: [id])
   screenId   String?
   onAction   Action? @relation(fields: [onActionId], references: [id])
@@ -42,13 +44,16 @@ model Component {
 }
 
 model Action {
-  id         String      @id @default(uuid())
-  type       Interaction
-  nextScreen Screen?
-  onElement  Component?
+  id          String      @id @default(uuid())
+  type        Interaction
+  value       String
+  nextScreen  Screen?
+  onComponent Component?
+  createdAt   DateTime    @default(now())
 }
 
 enum Interaction {
+  GOTO
   SCROLL
   CLICK
   INPUT

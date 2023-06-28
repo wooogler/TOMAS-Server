@@ -7,8 +7,8 @@ export async function navigateHandler(
   reply: FastifyReply
 ) {
   try {
-    await navigate(request.body);
-    return reply.code(200).send(`Successfully navigate to ${request.body.url}`);
+    const screenResult = await navigate(request.body);
+    return reply.code(200).send(screenResult);
   } catch (e) {
     console.error(e);
     return reply.code(500).send(e);
