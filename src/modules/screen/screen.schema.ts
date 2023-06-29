@@ -14,6 +14,14 @@ const inputSchema = z.object({
   value: z.string(),
 });
 
+const scrollSchema = z.object({
+  i: z.string(),
+});
+
+const hoverSchema = z.object({
+  i: z.string(),
+});
+
 const Interaction = z.enum([
   "GOTO",
   "SCROLL",
@@ -54,19 +62,25 @@ const Interaction = z.enum([
 //   prevActionId: z.string().optional(),
 // });
 
-const navigateResponseSchema = z.object({
+const screenResponseSchema = z.object({
   rawHtml: z.string(),
   simpleHtml: z.string(),
 });
 
 export type NavigateInput = z.infer<typeof navigateSchema>;
+export type clickInput = z.infer<typeof clickSchema>;
+export type textInput = z.infer<typeof inputSchema>;
+export type scrollInput = z.infer<typeof scrollSchema>;
+export type hoverInput = z.infer<typeof hoverSchema>;
 
 export const { schemas: screenSchemas, $ref } = buildJsonSchemas(
   {
     navigateSchema,
     clickSchema,
     inputSchema,
-    navigateResponseSchema,
+    scrollSchema,
+    hoverSchema,
+    screenResponseSchema,
   },
   {
     $id: "ScreenSchema",

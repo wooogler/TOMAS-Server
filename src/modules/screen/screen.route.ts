@@ -8,7 +8,7 @@ async function screenRoutes(server: FastifyInstance) {
     {
       schema: {
         body: $ref("navigateSchema"),
-        response: { 200: $ref("navigateResponseSchema") },
+        response: { 200: $ref("screenResponseSchema") },
       },
     },
     navigateHandler

@@ -46,7 +46,7 @@ model Component {
 model Action {
   id          String      @id @default(uuid())
   type        Interaction
-  value       String
+  value       String?
   nextScreen  Screen?
   onComponent Component?
   createdAt   DateTime    @default(now())
