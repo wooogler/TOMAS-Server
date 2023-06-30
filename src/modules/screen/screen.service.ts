@@ -1,31 +1,67 @@
 import puppeteer, { Browser, Page } from "puppeteer";
 import {
   NavigateInput,
-  clickInput,
-  hoverInput,
-  scrollInput,
-  textInput,
+  ClickInput,
+  HoverInput,
+  ScrollInput,
+  TextInput,
 } from "./screen.schema";
 import { simplifyHtml } from "../../utils/htmlHandler";
 import prisma from "../../utils/prisma";
 import { Interaction } from "@prisma/client";
+import { ChatOpenAI } from "langchain/chat_models/openai";
+import { HumanChatMessage } from "langchain/schema";
+
+import { JSDOM } from "jsdom";
+import { findComponentPrompts, makePromptMessages } from "../../utils/prompts";
 
 let globalBrowser: Browser | null = null;
 let globalPage: Page | null = null;
 
 const NO_GLOBAL_PAGE_ERROR = new Error("Cannot find globalPage.");
 
+const chat = new ChatOpenAI({
+  openAIApiKey: process.env.OPENAI_API_KEY,
+  modelName: "gpt-3.5-turbo-16k",
+  temperature: 0,
+});
+
 async function modifyDom() {
   if (globalPage) {
-    await globalPage.evaluate(() => {
+    const hiddenElementIds = await globalPage.evaluate(() => {
       let idCounter = 0;
       const elements = document.querySelectorAll("*");
+      const hiddenElementIds: string[] = [];
       elements.forEach((el) => {
-        el.setAttribute("i", String(idCounter++));
-      });
-    });
+        el.setAttribute("i", String(idCounter));
 
-    return await globalPage.evaluate(() => document.body.innerHTML);
+        const style = window.getComputedStyle(el);
+        if (
+          style &&
+          (style.display === "none" ||
+            style.visibility === "hidden" ||
+            style.opacity === "0" ||
+            style.width === "0px" ||
+            style.height === "0px")
+        ) {
+          hiddenElementIds.push(String(idCounter));
+        }
+
+        idCounter++;
+      });
+
+      return hiddenElementIds;
+    });
+    let modifiedHtml = await globalPage.evaluate((hiddenElementIds) => {
+      const clonedBody = document.body.cloneNode(true) as HTMLElement;
+      hiddenElementIds.forEach((id) => {
+        const el = clonedBody.querySelector(`[i="${id}"]`);
+        el?.parentNode?.removeChild(el);
+      });
+      return clonedBody.innerHTML;
+    }, hiddenElementIds);
+
+    return modifiedHtml;
   }
   throw NO_GLOBAL_PAGE_ERROR;
 }
@@ -41,9 +77,54 @@ async function readScreen(rawHtml: string, actionId: string) {
       prevActionId: actionId,
     },
     select: {
+      id: true,
       rawHtml: true,
       simpleHtml: true,
     },
+  });
+}
+
+async function createComponents(
+  rawHtml: string,
+  simpleHtml: string,
+  screenId: string
+) {
+  const promptsMessages = makePromptMessages(findComponentPrompts);
+  const newMessage = new HumanChatMessage(simpleHtml);
+
+  const response = await chat.call([...promptsMessages, newMessage]);
+
+  const dom = new JSDOM(response.text);
+  const components = dom.window.document.querySelectorAll("[i]");
+
+  const rawDom = new JSDOM(rawHtml);
+  const simpleDom = new JSDOM(simpleHtml);
+
+  const data = Array.from(components).map((component) => {
+    const i = component.getAttribute("i") as string;
+
+    const rawComponent = rawDom.window.document.querySelector(`[i="${i}"]`);
+    const rawHtmlForComponent = rawComponent ? rawComponent.innerHTML : "";
+
+    const simpleComponent = simpleDom.window.document.querySelector(
+      `[i="${i}"]`
+    );
+    const simpleHtmlForComponent = simpleComponent
+      ? simpleComponent.innerHTML
+      : "";
+
+    return {
+      name: component.tagName,
+      description: component.textContent?.trim() || "",
+      i,
+      rawHtml: rawHtmlForComponent,
+      simpleHtml: simpleHtmlForComponent,
+      screenId,
+    };
+  });
+
+  await prisma.component.createMany({
+    data,
   });
 }
 
@@ -71,6 +152,12 @@ export async function navigate(input: NavigateInput) {
     const navigateAction = await createAction("GOTO", input.url);
     const rawHtml = await modifyDom();
     const screenResult = await readScreen(rawHtml, navigateAction.id);
+    await createComponents(
+      screenResult.rawHtml,
+      screenResult.simpleHtml,
+      screenResult.id
+    );
+
     return screenResult;
   } catch (error: any) {
     console.error("Failed to navigate to the webpage.", error);
@@ -78,7 +165,7 @@ export async function navigate(input: NavigateInput) {
   }
 }
 
-export async function click(input: clickInput) {
+export async function click(input: ClickInput) {
   try {
     if (globalPage) {
       await globalPage.evaluate((i) => {
@@ -99,7 +186,7 @@ export async function click(input: clickInput) {
   }
 }
 
-export async function inputText(input: textInput) {
+export async function inputText(input: TextInput) {
   const { i, value } = input;
   try {
     if (globalPage) {
@@ -123,7 +210,7 @@ export async function inputText(input: textInput) {
   }
 }
 
-export async function scroll(input: scrollInput) {
+export async function scroll(input: ScrollInput) {
   try {
     if (globalPage) {
       const { x, y, width, height } = await globalPage.evaluate((i) => {
@@ -171,7 +258,7 @@ export async function scroll(input: scrollInput) {
   }
 }
 
-export async function hover(input: hoverInput) {
+export async function hover(input: HoverInput) {
   try {
     if (globalPage) {
       const { x, y, width, height } = await globalPage.evaluate((i) => {

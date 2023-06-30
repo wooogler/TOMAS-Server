@@ -26,7 +26,7 @@ model Screen {
   id           String      @id @default(uuid())
   url          String
   rawHtml      String
-  simpleHtml   String?
+  simpleHtml   String
   components   Component[]
   prevAction   Action?     @relation(fields: [prevActionId], references: [id])
   prevActionId String?     @unique
@@ -34,13 +34,16 @@ model Screen {
 }
 
 model Component {
-  id         String  @id @default(uuid())
-  rawHtml    String
-  simpleHtml String?
-  acreen     Screen? @relation(fields: [screenId], references: [id])
-  screenId   String?
-  onAction   Action? @relation(fields: [onActionId], references: [id])
-  onActionId String? @unique
+  id          String  @id @default(uuid())
+  name        String
+  description String
+  i           String
+  rawHtml     String
+  simpleHtml  String
+  acreen      Screen? @relation(fields: [screenId], references: [id])
+  screenId    String?
+  onAction    Action? @relation(fields: [onActionId], references: [id])
+  onActionId  String? @unique
 }
 
 model Action {

@@ -31,47 +31,16 @@ const Interaction = z.enum([
   "BACK",
 ]);
 
-// const ComponentSchema = z.lazy(() =>
-//   z.object({
-//     id: z.string(),
-//     html: z.string(),
-//     screen: ScreenSchema.optional(),
-//     screenId: z.string().optional(),
-//     onAction: ActionSchema.optional(),
-//     onActionId: z.string().optional(),
-//   })
-// );
-
-// const ActionSchema = z.lazy(() =>
-//   z.object({
-//     id: z.string(),
-//     type: Interaction,
-//     value: z.string(),
-//     nextScreen: ScreenSchema.optional(),
-//     onComponet: ComponentSchema.optional(),
-//   })
-// );
-
-// const ScreenSchema = z.object({
-//   id: z.string(),
-//   url: z.string().url({ message: "Invalid URL" }),
-//   html: z.string(),
-//   simpleHtml: z.string(),
-//   components: z.array(ComponentSchema),
-//   prevAction: ActionSchema.optional(),
-//   prevActionId: z.string().optional(),
-// });
-
 const screenResponseSchema = z.object({
   rawHtml: z.string(),
   simpleHtml: z.string(),
 });
 
 export type NavigateInput = z.infer<typeof navigateSchema>;
-export type clickInput = z.infer<typeof clickSchema>;
-export type textInput = z.infer<typeof inputSchema>;
-export type scrollInput = z.infer<typeof scrollSchema>;
-export type hoverInput = z.infer<typeof hoverSchema>;
+export type ClickInput = z.infer<typeof clickSchema>;
+export type TextInput = z.infer<typeof inputSchema>;
+export type ScrollInput = z.infer<typeof scrollSchema>;
+export type HoverInput = z.infer<typeof hoverSchema>;
 
 export const { schemas: screenSchemas, $ref } = buildJsonSchemas(
   {

@@ -34,17 +34,23 @@ const removeEmptyElements = (element: Element, includeTags: string[]) => {
   }
 };
 
-const removeAttributes = (element: Element, attributesToKeep: string[]) => {
-  const attributes = Array.from(element.attributes);
-  for (const attribute of attributes) {
-    if (!attributesToKeep.includes(attribute.name)) {
-      element.removeAttribute(attribute.name);
+const removeAttributes = (
+  element: Element,
+  attributesToKeep: string[],
+  excludeTags: string[]
+) => {
+  if (!excludeTags.includes(element.tagName.toLowerCase())) {
+    const attributes = Array.from(element.attributes);
+    for (const attribute of attributes) {
+      if (!attributesToKeep.includes(attribute.name)) {
+        element.removeAttribute(attribute.name);
+      }
     }
   }
 
   const children = Array.from(element.children);
   for (const child of children) {
-    removeAttributes(child, attributesToKeep);
+    removeAttributes(child, attributesToKeep, excludeTags);
   }
 };
 
@@ -87,7 +93,7 @@ export const simplifyHtml = (html: string) => {
   const document = dom.window.document;
   const rootElement = document.querySelector("*");
   if (rootElement) {
-    removeAttributes(rootElement, ["type", "href", "i", "aria-label"]);
+    removeAttributes(rootElement, ["href", "i"], ["input", "button"]);
     removeSpecificTags(rootElement, [
       "script",
       "style",
@@ -96,7 +102,7 @@ export const simplifyHtml = (html: string) => {
       "link",
       "meta",
     ]);
-    removeEmptyElements(rootElement, ["input"]);
+    removeEmptyElements(rootElement, ["input", "button"]);
     simplifyNestedStructure(rootElement, ["div", "span"]);
   }
   return dom.serialize().replace(/\s\s+/g, "");
