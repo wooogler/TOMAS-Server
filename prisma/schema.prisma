@@ -34,16 +34,17 @@ model Screen {
 }
 
 model Component {
-  id          String  @id @default(uuid())
+  id          String   @id @default(uuid())
   name        String
   description String
   i           String
   rawHtml     String
   simpleHtml  String
-  acreen      Screen? @relation(fields: [screenId], references: [id])
+  createdAt   DateTime @default(now())
+  acreen      Screen?  @relation(fields: [screenId], references: [id])
   screenId    String?
-  onAction    Action? @relation(fields: [onActionId], references: [id])
-  onActionId  String? @unique
+  onAction    Action?  @relation(fields: [onActionId], references: [id])
+  onActionId  String?  @unique
 }
 
 model Action {

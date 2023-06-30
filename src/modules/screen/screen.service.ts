@@ -94,6 +94,8 @@ async function createComponents(
 
   const response = await chat.call([...promptsMessages, newMessage]);
 
+  console.log(response.text);
+
   const dom = new JSDOM(response.text);
   const components = dom.window.document.querySelectorAll("[i]");
 
