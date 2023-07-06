@@ -22,15 +22,6 @@ const hoverSchema = z.object({
   i: z.string(),
 });
 
-const Interaction = z.enum([
-  "GOTO",
-  "SCROLL",
-  "CLICK",
-  "INPUT",
-  "HOVER",
-  "BACK",
-]);
-
 const screenResponseSchema = z.object({
   rawHtml: z.string(),
   simpleHtml: z.string(),

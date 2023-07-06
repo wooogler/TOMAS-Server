@@ -8,12 +8,18 @@ import {
 } from "./screen.schema";
 import { simplifyHtml } from "../../utils/htmlHandler";
 import prisma from "../../utils/prisma";
-import { Interaction } from "@prisma/client";
+import { Component, Interaction, Prisma } from "@prisma/client";
 import { ChatOpenAI } from "langchain/chat_models/openai";
+import { OpenAIEmbeddings } from "langchain/embeddings/openai";
+import { PrismaVectorStore } from "langchain/vectorstores/prisma";
 import { HumanChatMessage } from "langchain/schema";
+import { minify } from "html-minifier-terser";
 
 import { JSDOM } from "jsdom";
-import { findComponentPrompts, makePromptMessages } from "../../utils/prompts";
+import {
+  describeActionComponentPrompts,
+  makePromptMessages,
+} from "../../utils/prompts";
 
 let globalBrowser: Browser | null = null;
 let globalPage: Page | null = null;
@@ -26,6 +32,19 @@ const chat = new ChatOpenAI({
   temperature: 0,
 });
 
+const vectorStore = PrismaVectorStore.withModel<Component>(prisma).create(
+  new OpenAIEmbeddings(),
+  {
+    prisma: Prisma,
+    tableName: "Component",
+    vectorColumnName: "vector",
+    columns: {
+      id: PrismaVectorStore.IdColumn,
+      description: PrismaVectorStore.ContentColumn,
+    },
+  }
+);
+
 async function modifyDom() {
   if (globalPage) {
     const hiddenElementIds = await globalPage.evaluate(() => {
@@ -36,13 +55,14 @@ async function modifyDom() {
         el.setAttribute("i", String(idCounter));
 
         const style = window.getComputedStyle(el);
+        const widthInPixels = parseInt(style.width);
+        const heightInPixels = parseInt(style.height);
         if (
           style &&
           (style.display === "none" ||
             style.visibility === "hidden" ||
-            style.opacity === "0" ||
-            style.width === "0px" ||
-            style.height === "0px")
+            widthInPixels <= 1 ||
+            heightInPixels <= 1)
         ) {
           hiddenElementIds.push(String(idCounter));
         }
@@ -61,15 +81,44 @@ async function modifyDom() {
       return clonedBody.innerHTML;
     }, hiddenElementIds);
 
+    modifiedHtml = await minify(modifiedHtml, {
+      removeAttributeQuotes: true,
+      collapseWhitespace: true,
+      removeComments: true,
+    });
+
     return modifiedHtml;
   }
   throw NO_GLOBAL_PAGE_ERROR;
 }
 
-async function readScreen(rawHtml: string, actionId: string) {
-  const simpleHtml = simplifyHtml(rawHtml);
+const removeAttributeI = (html: string) => {
+  const dom = new JSDOM(html);
+  const element = dom.window.document.body;
+  element.querySelectorAll("*").forEach((node) => {
+    if (node.hasAttribute("i")) {
+      node.removeAttribute("i");
+    }
+  });
+  return dom.serialize();
+};
 
-  return await prisma.screen.create({
+async function readScreen(rawHtml: string, actionId: string) {
+  const { simpleHtml, actionComponents } = simplifyHtml(rawHtml);
+
+  const actionComponentInfosPromises = actionComponents.map(async (comp) => {
+    const promptsMessages = makePromptMessages(describeActionComponentPrompts);
+    const newMessage = new HumanChatMessage(`Website HTML:
+    ${removeAttributeI(simpleHtml)}
+    
+    The part of the website:
+    ${removeAttributeI(comp.html)}`);
+
+    const response = await chat.call([...promptsMessages, newMessage]);
+    return { ...comp, description: response.text };
+  });
+
+  const screen = await prisma.screen.create({
     data: {
       url: globalPage ? globalPage.url() : "",
       rawHtml,
@@ -78,56 +127,32 @@ async function readScreen(rawHtml: string, actionId: string) {
     },
     select: {
       id: true,
-      rawHtml: true,
-      simpleHtml: true,
     },
   });
-}
 
-async function createComponents(
-  rawHtml: string,
-  simpleHtml: string,
-  screenId: string
-) {
-  const promptsMessages = makePromptMessages(findComponentPrompts);
-  const newMessage = new HumanChatMessage(simpleHtml);
+  Promise.all(actionComponentInfosPromises)
+    .then(async (actionComponentInfos) => {
+      await vectorStore.addModels(
+        await prisma.$transaction(
+          actionComponentInfos.map((info) =>
+            prisma.component.create({
+              data: {
+                type: info.type,
+                description: info.description,
+                i: info.i,
+                html: info.html,
+                screenId: screen.id,
+              },
+            })
+          )
+        )
+      );
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+    });
 
-  const response = await chat.call([...promptsMessages, newMessage]);
-
-  console.log(response.text);
-
-  const dom = new JSDOM(response.text);
-  const components = dom.window.document.querySelectorAll("[i]");
-
-  const rawDom = new JSDOM(rawHtml);
-  const simpleDom = new JSDOM(simpleHtml);
-
-  const data = Array.from(components).map((component) => {
-    const i = component.getAttribute("i") as string;
-
-    const rawComponent = rawDom.window.document.querySelector(`[i="${i}"]`);
-    const rawHtmlForComponent = rawComponent ? rawComponent.innerHTML : "";
-
-    const simpleComponent = simpleDom.window.document.querySelector(
-      `[i="${i}"]`
-    );
-    const simpleHtmlForComponent = simpleComponent
-      ? simpleComponent.innerHTML
-      : "";
-
-    return {
-      name: component.tagName,
-      description: component.textContent?.trim() || "",
-      i,
-      rawHtml: rawHtmlForComponent,
-      simpleHtml: simpleHtmlForComponent,
-      screenId,
-    };
-  });
-
-  await prisma.component.createMany({
-    data,
-  });
+  console.log(await vectorStore.similaritySearch(""));
 }
 
 async function createAction(type: Interaction, value?: string) {
@@ -154,11 +179,11 @@ export async function navigate(input: NavigateInput) {
     const navigateAction = await createAction("GOTO", input.url);
     const rawHtml = await modifyDom();
     const screenResult = await readScreen(rawHtml, navigateAction.id);
-    await createComponents(
-      screenResult.rawHtml,
-      screenResult.simpleHtml,
-      screenResult.id
-    );
+    // await createComponents(
+    //   screenResult.rawHtml,
+    //   screenResult.simpleHtml,
+    //   screenResult.id
+    // );
 
     return screenResult;
   } catch (error: any) {
