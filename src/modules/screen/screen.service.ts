@@ -152,7 +152,7 @@ async function readScreen(rawHtml: string, actionId: string) {
       console.error("Error:", error);
     });
 
-  console.log(await vectorStore.similaritySearch(""));
+  // console.log(await vectorStore.similaritySearch(""));
 }
 
 async function createAction(type: Interaction, value?: string) {

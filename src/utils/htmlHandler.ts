@@ -167,6 +167,7 @@ export const simplifyHtml = (html: string) => {
   //   ),
   //   { depth: null }
   // );
+  console.log(actionComponents.map((comp) => comp.html));
   return {
     simpleHtml: rootElement.innerHTML.replace(/\s\s+/g, ""),
     actionComponents,
