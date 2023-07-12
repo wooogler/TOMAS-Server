@@ -1,4 +1,5 @@
 import { JSDOM } from "jsdom";
+import { Page } from "puppeteer";
 
 const removeSpecificTags = (element: Element, tagNames: string[]) => {
   for (const tagName of tagNames) {
@@ -33,6 +34,17 @@ export const removeAttributes = (
   for (const child of children) {
     removeAttributes(child, attributesToKeep, excludeTags);
   }
+};
+
+export const removeAttributeI = (html: string) => {
+  const dom = new JSDOM(html);
+  const element = dom.window.document.body;
+  element.querySelectorAll("*").forEach((node) => {
+    if (node.hasAttribute("i")) {
+      node.removeAttribute("i");
+    }
+  });
+  return element.innerHTML;
 };
 
 const changeAttributeName = (
@@ -111,10 +123,9 @@ const simplifyNestedStructure = (
   );
 };
 
-export const simplifyHtml = (html: string) => {
+export const simplifyHtml = (html: string, removeI: boolean = true) => {
   const dom = new JSDOM(html);
   const document = dom.window.document;
-  // const rootElement = document.querySelector("*");
   const rootElement = document.body;
   if (rootElement) {
     removeSpecificTags(rootElement, [
@@ -125,52 +136,48 @@ export const simplifyHtml = (html: string) => {
       "link",
       "meta",
     ]);
-    removeAttributes(rootElement, ["i", "href"], ["input", "button", "label"]);
+    removeAttributes(rootElement, removeI ? ["href"] : ["i", "href"], [
+      "input",
+      "button",
+      "label",
+    ]);
     removeAttributes(
       rootElement,
-      [
-        "i",
-        "href",
-        "type",
-        "aria-label",
-        "role",
-        "checked",
-        "value",
-        "aria-expanded",
-        "aria-controls",
-      ],
+      removeI
+        ? [
+            "href",
+            "type",
+            "aria-label",
+            "role",
+            "checked",
+            "value",
+            "aria-expanded",
+            "aria-controls",
+          ]
+        : [
+            "i",
+            "href",
+            "type",
+            "aria-label",
+            "role",
+            "checked",
+            "value",
+            "aria-expanded",
+            "aria-controls",
+          ],
       []
     );
     removeEmptyElements(rootElement, ["input", "button", "label", "a"]);
-    simplifyNestedStructure(rootElement, ["div", "span"], ["a"]);
+    simplifyNestedStructure(
+      rootElement,
+      ["div", "span"],
+      ["button", "input", "a", "select", "textarea"]
+    );
   }
 
-  const actionComponents = extractActionComponents(rootElement);
-  // function printWithoutElement(obj: any): any {
-  //   if (Array.isArray(obj)) {
-  //     return obj.map(printWithoutElement);
-  //   } else if (obj !== null && typeof obj === "object") {
-  //     let newObj: any = {};
-  //     for (let key in obj) {
-  //       if (key !== "element") {
-  //         newObj[key] = printWithoutElement(obj[key]);
-  //       }
-  //     }
-  //     return newObj;
-  //   } else {
-  //     return obj;
-  //   }
-  // }
-  // console.dir(
-  //   printWithoutElement(
-  //     flattenTree(buildComponentTree(rootElement, actionComponents))
-  //   ),
-  //   { depth: null }
-  // );
-  console.log(actionComponents.map((comp) => comp.html));
   return {
-    simpleHtml: rootElement.innerHTML.replace(/\s\s+/g, ""),
-    actionComponents,
+    html: rootElement.innerHTML.replace(/\s\s+/g, ""),
+    element: rootElement,
   };
 };
 
@@ -275,13 +282,17 @@ function getCondition(element: Element): ConditionType | null {
   return null;
 }
 
-interface ActionComponent {
+export interface ActionComponent {
   html: string;
-  type: ConditionType;
+  type: string;
   i: string;
 }
 
-function extractActionComponents(root: Element): ActionComponent[] {
+export function extractActionComponents(html: string): ActionComponent[] {
+  const dom = new JSDOM(html);
+  const document = dom.window.document;
+  const root = document.body;
+
   let components: ActionComponent[] = [];
   let candidateElements: Element[] = querySelectorAllReverseBFS(
     root,

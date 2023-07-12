@@ -32,13 +32,13 @@ export async function createHumanChat(input: CreateHumanChatInput) {
     }
   });
 
-  const response = await chat.call([systemMessage, ...chatMessages]);
-  await prisma.chat.create({
-    data: {
-      role: "AI",
-      content: response.text,
-    },
-  });
+  // const response = await chat.call([systemMessage, ...chatMessages]);
+  // await prisma.chat.create({
+  //   data: {
+  //     role: "AI",
+  //     content: response.text,
+  //   },
+  // });
 }
 
 export function getChats() {

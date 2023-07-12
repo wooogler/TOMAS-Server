@@ -6,31 +6,42 @@ import {
   ScrollInput,
   TextInput,
 } from "./screen.schema";
-import { simplifyHtml } from "../../utils/htmlHandler";
+import {
+  ActionComponent,
+  extractActionComponents,
+  removeAttributeI,
+  simplifyHtml,
+} from "../../utils/htmlHandler";
 import prisma from "../../utils/prisma";
 import { Component, Interaction, Prisma } from "@prisma/client";
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { PrismaVectorStore } from "langchain/vectorstores/prisma";
-import { HumanChatMessage } from "langchain/schema";
 import { minify } from "html-minifier-terser";
 
-import { JSDOM } from "jsdom";
 import {
-  describeActionComponentPrompts,
-  makePromptMessages,
-} from "../../utils/prompts";
+  ComponentInfo,
+  getComponentInfo,
+  getOrderedTasks,
+  getScreenDescription,
+  getUserObjective,
+} from "../../utils/langchainHandler";
+import {
+  detectChangedElements,
+  getContentHTML,
+  getHiddenElementIs,
+} from "../../utils/pageHandler";
+
+declare global {
+  interface Window {
+    onMutation: (mutation: any) => void;
+  }
+}
 
 let globalBrowser: Browser | null = null;
 let globalPage: Page | null = null;
 
 const NO_GLOBAL_PAGE_ERROR = new Error("Cannot find globalPage.");
-
-const chat = new ChatOpenAI({
-  openAIApiKey: process.env.OPENAI_API_KEY,
-  modelName: "gpt-3.5-turbo-16k",
-  temperature: 0,
-});
 
 const vectorStore = PrismaVectorStore.withModel<Component>(prisma).create(
   new OpenAIEmbeddings(),
@@ -45,34 +56,59 @@ const vectorStore = PrismaVectorStore.withModel<Component>(prisma).create(
   }
 );
 
-async function modifyDom() {
+// async function addIAttribute() {
+//   if (globalPage) {
+//     await globalPage.evaluate(() => {
+//       let idCounter = 0;
+//       const elements = document.querySelectorAll("*");
+//       elements.forEach((el) => {
+//         el.setAttribute("i", String(idCounter));
+//         idCounter++;
+//       });
+//     });
+//   } else {
+//     throw NO_GLOBAL_PAGE_ERROR;
+//   }
+// }
+
+async function addUniqueIAttribute() {
   if (globalPage) {
-    const hiddenElementIds = await globalPage.evaluate(() => {
-      let idCounter = 0;
-      const elements = document.querySelectorAll("*");
-      const hiddenElementIds: string[] = [];
-      elements.forEach((el) => {
-        el.setAttribute("i", String(idCounter));
+    await globalPage.evaluate(() => {
+      function closestElementWithId(element: HTMLElement): HTMLElement | null {
+        if (element.id) return element;
+        return element.parentElement
+          ? closestElementWithId(element.parentElement)
+          : null;
+      }
 
-        const style = window.getComputedStyle(el);
-        const widthInPixels = parseInt(style.width);
-        const heightInPixels = parseInt(style.height);
-        if (
-          style &&
-          (style.display === "none" ||
-            style.visibility === "hidden" ||
-            widthInPixels <= 1 ||
-            heightInPixels <= 1)
-        ) {
-          hiddenElementIds.push(String(idCounter));
-        }
+      function generateUniqueIdentifier(
+        element: HTMLElement,
+        closestIdElem: HTMLElement | null
+      ): string {
+        const closestId = closestIdElem ? closestIdElem.id : "";
+        const additionalInfo =
+          element.className || element.innerText.slice(0, 10);
+        return closestId + ">" + element.tagName + ">" + additionalInfo;
+      }
 
-        idCounter++;
+      const allElements = document.querySelectorAll("*");
+      allElements.forEach((el: Element) => {
+        const closestIdElem = closestElementWithId(el as HTMLElement);
+        const uniqueId = generateUniqueIdentifier(
+          el as HTMLElement,
+          closestIdElem
+        );
+        el.setAttribute("i", uniqueId);
       });
-
-      return hiddenElementIds;
     });
-    let modifiedHtml = await globalPage.evaluate((hiddenElementIds) => {
+  } else {
+    throw NO_GLOBAL_PAGE_ERROR;
+  }
+}
+
+export async function getVisibleHtml(hiddenElementIds: string[]) {
+  if (globalPage) {
+    let visibleHtml = await globalPage.evaluate((hiddenElementIds) => {
       const clonedBody = document.body.cloneNode(true) as HTMLElement;
       hiddenElementIds.forEach((id) => {
         const el = clonedBody.querySelector(`[i="${id}"]`);
@@ -81,85 +117,116 @@ async function modifyDom() {
       return clonedBody.innerHTML;
     }, hiddenElementIds);
 
-    modifiedHtml = await minify(modifiedHtml, {
-      removeAttributeQuotes: true,
+    visibleHtml = await minify(visibleHtml, {
       collapseWhitespace: true,
       removeComments: true,
     });
 
-    return modifiedHtml;
+    return visibleHtml;
   }
   throw NO_GLOBAL_PAGE_ERROR;
 }
 
-const removeAttributeI = (html: string) => {
-  const dom = new JSDOM(html);
-  const element = dom.window.document.body;
-  element.querySelectorAll("*").forEach((node) => {
-    if (node.hasAttribute("i")) {
-      node.removeAttribute("i");
-    }
-  });
-  return dom.serialize();
-};
-
 async function readScreen(rawHtml: string, actionId: string) {
-  const { simpleHtml, actionComponents } = simplifyHtml(rawHtml);
+  const { html } = simplifyHtml(rawHtml, true);
 
-  const actionComponentInfosPromises = actionComponents.map(async (comp) => {
-    const promptsMessages = makePromptMessages(describeActionComponentPrompts);
-    const newMessage = new HumanChatMessage(`Website HTML:
-    ${removeAttributeI(simpleHtml)}
-    
-    The part of the website:
-    ${removeAttributeI(comp.html)}`);
-
-    const response = await chat.call([...promptsMessages, newMessage]);
-    return { ...comp, description: response.text };
-  });
+  const screenDescription = await getScreenDescription(html);
 
   const screen = await prisma.screen.create({
     data: {
       url: globalPage ? globalPage.url() : "",
-      rawHtml,
-      simpleHtml,
+      rawHtml: rawHtml,
+      simpleHtml: html,
       prevActionId: actionId,
+      description: screenDescription,
     },
     select: {
       id: true,
     },
   });
 
-  Promise.all(actionComponentInfosPromises)
-    .then(async (actionComponentInfos) => {
-      await vectorStore.addModels(
-        await prisma.$transaction(
-          actionComponentInfos.map((info) =>
-            prisma.component.create({
-              data: {
-                type: info.type,
-                description: info.description,
-                i: info.i,
-                html: info.html,
-                screenId: screen.id,
-              },
-            })
-          )
-        )
-      );
+  const processComponentData = async (
+    components: ActionComponent[]
+  ): Promise<Prisma.ComponentCreateInput[]> => {
+    const componentInfos = await Promise.all(
+      components.map(async (comp) => {
+        const info = await getComponentInfo({
+          componentHtml: comp.html,
+          pageDescription: screenDescription,
+        });
+        return {
+          i: comp.i,
+          html: comp.html,
+          type: comp.type,
+          description: info?.description || "",
+          actionType: info?.action.type || "",
+        };
+      })
+    );
+
+    return componentInfos;
+  };
+  const actionComponents = extractActionComponents(html);
+  const componentData = await processComponentData(actionComponents);
+
+  await prisma.component.createMany({
+    data: componentData,
+  });
+
+  const objective = await getUserObjective(
+    await prisma.chat.findMany({
+      select: {
+        id: true,
+        createdAt: true,
+        role: true,
+        content: true,
+        description: true,
+      },
     })
-    .catch((error) => {
-      console.error("Error:", error);
-    });
+  );
+
+  const orderedTasks = await getOrderedTasks({
+    components: componentData,
+    objective,
+  });
+
+  console.log(orderedTasks);
+
+  // Promise.all(actionComponentInfosPromises)
+  //   .then(async (actionComponentInfos) => {
+  //     await vectorStore.addModels(
+  //       await prisma.$transaction(
+  //         actionComponentInfos.map((info) =>
+  //           prisma.component.create({
+  //             data: {
+  //               type: info.type,
+  //               description: info.description,
+  //               i: info.i,
+  //               html: info.html,
+  //               screenId: screen.id,
+  //             },
+  //           })
+  //         )
+  //       )
+  //     );
+  //   })
+  //   .catch((error) => {
+  //     console.error("Error:", error);
+  //   });
 
   // console.log(await vectorStore.similaritySearch(""));
 }
 
-async function createAction(type: Interaction, value?: string) {
+async function createAction(
+  type: Interaction,
+  value?: string,
+  componentId?: string
+) {
   return await prisma.action.create({
     data: {
       type,
       value,
+      onComponent: componentId ? { connect: { id: componentId } } : undefined,
     },
   });
 }
@@ -176,14 +243,12 @@ export async function navigate(input: NavigateInput) {
       waitUntil: "networkidle0",
     });
 
+    await addUniqueIAttribute();
+
     const navigateAction = await createAction("GOTO", input.url);
-    const rawHtml = await modifyDom();
-    const screenResult = await readScreen(rawHtml, navigateAction.id);
-    // await createComponents(
-    //   screenResult.rawHtml,
-    //   screenResult.simpleHtml,
-    //   screenResult.id
-    // );
+    const hiddenElementIs = await getHiddenElementIs(globalPage);
+    const visibleHtml = await getVisibleHtml(hiddenElementIs);
+    const screenResult = await readScreen(visibleHtml, navigateAction.id);
 
     return screenResult;
   } catch (error: any) {
@@ -194,19 +259,53 @@ export async function navigate(input: NavigateInput) {
 
 export async function click(input: ClickInput) {
   try {
+    const component = await prisma.component.findFirst({
+      where: {
+        i: input.i,
+      },
+    });
+    const clickAction = await createAction("CLICK", "", component?.id);
+
+    await addUniqueIAttribute();
+
+    const preActionHTML = await getContentHTML(globalPage);
+    const preActionURL = globalPage?.url();
+
     if (globalPage) {
+      const navigationPromise = globalPage.waitForNavigation({
+        waitUntil: "networkidle0",
+      });
+
       await globalPage.evaluate((i) => {
-        const element = document.querySelector(`[i="${i}"]`);
+        const element = document.querySelector(`[i="${i}"]`) as HTMLElement;
         if (element) {
           (element as HTMLElement).click();
         }
       }, input.i);
+
+      await navigationPromise;
     }
 
-    const clickAction = await createAction("CLICK", input.i);
-    const rawHtml = await modifyDom();
-    const screenResult = await readScreen(rawHtml, clickAction.id);
-    return screenResult;
+    await addUniqueIAttribute();
+    const postActionHTML = await getContentHTML(globalPage);
+    const postActionURL = globalPage?.url();
+
+    if (preActionURL === postActionURL) {
+      const { appearedElement, vanishedElement } = await detectChangedElements(
+        preActionHTML,
+        postActionHTML,
+        globalPage
+      );
+      if (appearedElement) {
+        readScreen(appearedElement.outerHTML, clickAction.id);
+      } else if (vanishedElement) {
+        readScreen(postActionHTML, clickAction.id);
+      } else {
+        readScreen(postActionHTML, clickAction.id);
+      }
+    } else {
+      readScreen(postActionHTML, clickAction.id);
+    }
   } catch (error: any) {
     console.error("Failed to click on the webpage.", error);
     throw error;
@@ -227,9 +326,6 @@ export async function inputText(input: TextInput) {
         { i, value }
       );
       const inputAction = await createAction("INPUT", `${i}:${value}`);
-      const rawHtml = await modifyDom();
-      const screenResult = await readScreen(rawHtml, inputAction.id);
-      return screenResult;
     }
   } catch (error: any) {
     console.error("Failed to input text on the webpage.", error);
@@ -274,10 +370,6 @@ export async function scroll(input: ScrollInput) {
       }
 
       const scrollAction = await createAction("SCROLL", input.i);
-
-      const rawHtml = await modifyDom();
-      const screenResult = await readScreen(rawHtml, scrollAction.id);
-      return screenResult;
     }
   } catch (error: any) {
     console.error("Failed to scroll the element.", error);
@@ -336,14 +428,6 @@ export async function hover(input: HoverInput) {
       );
 
       const result = await Promise.race([changeDetected, timeout]);
-
-      if (result) {
-        const rawHtml = await modifyDom();
-        const screenResult = await readScreen(rawHtml, hoverAction.id);
-        return screenResult;
-      } else {
-        console.log("No change detected within the time limit.");
-      }
     }
   } catch (error) {
     console.error("Failed to hover the element.", error);
@@ -357,10 +441,6 @@ export async function goBack() {
       await globalPage.goBack();
 
       const backAction = await createAction("BACK");
-
-      const rawHtml = await modifyDom();
-      const screenResult = await readScreen(rawHtml, backAction.id);
-      return screenResult;
     } else {
       throw new Error("Cannot go back, globalPage is not defined");
     }

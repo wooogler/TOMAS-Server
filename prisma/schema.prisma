@@ -13,10 +13,12 @@ datasource db {
 }
 
 model Chat {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  role      Role
-  content   String
+  id          String                 @id @default(uuid())
+  createdAt   DateTime               @default(now())
+  role        Role
+  content     String
+  description String?
+  vector      Unsupported("vector")?
 }
 
 enum Role {
@@ -29,6 +31,7 @@ model Screen {
   url          String
   rawHtml      String
   simpleHtml   String
+  description  String?
   components   Component[]
   prevAction   Action?     @relation(fields: [prevActionId], references: [id])
   prevActionId String?     @unique
@@ -36,17 +39,17 @@ model Screen {
 }
 
 model Component {
-  id          String                 @id @default(uuid())
-  type        ComponentType
-  description String
+  id          String   @id @default(uuid())
+  type        String
   i           String
   html        String
-  createdAt   DateTime               @default(now())
-  vector      Unsupported("vector")?
-  acreen      Screen?                @relation(fields: [screenId], references: [id])
+  description String?
+  actionType  String?
+  createdAt   DateTime @default(now())
+  acreen      Screen?  @relation(fields: [screenId], references: [id])
   screenId    String?
-  onAction    Action?                @relation(fields: [onActionId], references: [id])
-  onActionId  String?                @unique
+  onAction    Action?  @relation(fields: [onActionId], references: [id])
+  onActionId  String?  @unique
 }
 
 model Action {
@@ -65,13 +68,4 @@ enum Interaction {
   INPUT
   HOVER
   BACK
-}
-
-enum ComponentType {
-  button
-  link
-  input_radio
-  input_text
-  input_button
-  list
 }
