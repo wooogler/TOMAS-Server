@@ -22,12 +22,15 @@ import { minify } from "html-minifier-terser";
 import {
   ComponentInfo,
   getComponentInfo,
-  getOrderedTasks,
+  getInteractionOrQuestion,
   getScreenDescription,
+  getTaskOrder,
   getUserObjective,
+  isSuggestedInteraction,
 } from "../../utils/langchainHandler";
 import {
   detectChangedElements,
+  getAllElementIs,
   getContentHTML,
   getHiddenElementIs,
 } from "../../utils/pageHandler";
@@ -86,9 +89,8 @@ async function addUniqueIAttribute() {
         closestIdElem: HTMLElement | null
       ): string {
         const closestId = closestIdElem ? closestIdElem.id : "";
-        const additionalInfo =
-          element.className || element.innerText.slice(0, 10);
-        return closestId + ">" + element.tagName + ">" + additionalInfo;
+        const additionalInfo = element.tagName + ">" + element.className;
+        return closestId + ">" + additionalInfo;
       }
 
       const allElements = document.querySelectorAll("*");
@@ -127,16 +129,20 @@ export async function getVisibleHtml(hiddenElementIds: string[]) {
   throw NO_GLOBAL_PAGE_ERROR;
 }
 
-async function readScreen(rawHtml: string, actionId: string) {
-  const { html } = simplifyHtml(rawHtml, true);
+async function readScreen(rawHtml: string | undefined, actionId: string) {
+  if (!rawHtml) {
+    throw Error("no html on readScreen");
+  }
+  const { html: htmlWithI } = simplifyHtml(rawHtml, false);
+  const { html: htmlWithoutI } = simplifyHtml(rawHtml, true);
 
-  const screenDescription = await getScreenDescription(html);
+  const screenDescription = await getScreenDescription(htmlWithoutI);
 
   const screen = await prisma.screen.create({
     data: {
       url: globalPage ? globalPage.url() : "",
       rawHtml: rawHtml,
-      simpleHtml: html,
+      simpleHtml: htmlWithI,
       prevActionId: actionId,
       description: screenDescription,
     },
@@ -151,7 +157,7 @@ async function readScreen(rawHtml: string, actionId: string) {
     const componentInfos = await Promise.all(
       components.map(async (comp) => {
         const info = await getComponentInfo({
-          componentHtml: comp.html,
+          componentHtml: removeAttributeI(comp.html),
           pageDescription: screenDescription,
         });
         return {
@@ -166,55 +172,48 @@ async function readScreen(rawHtml: string, actionId: string) {
 
     return componentInfos;
   };
-  const actionComponents = extractActionComponents(html);
+  const actionComponents = extractActionComponents(htmlWithI);
   const componentData = await processComponentData(actionComponents);
 
   await prisma.component.createMany({
     data: componentData,
   });
 
-  const objective = await getUserObjective(
-    await prisma.chat.findMany({
-      select: {
-        id: true,
-        createdAt: true,
-        role: true,
-        content: true,
-        description: true,
-      },
-    })
-  );
-
-  const orderedTasks = await getOrderedTasks({
-    components: componentData,
-    objective,
+  const chats = await prisma.chat.findMany({
+    select: {
+      id: true,
+      createdAt: true,
+      role: true,
+      content: true,
+      description: true,
+    },
   });
 
-  console.log(orderedTasks);
+  const objective = await getUserObjective(chats);
 
-  // Promise.all(actionComponentInfosPromises)
-  //   .then(async (actionComponentInfos) => {
-  //     await vectorStore.addModels(
-  //       await prisma.$transaction(
-  //         actionComponentInfos.map((info) =>
-  //           prisma.component.create({
-  //             data: {
-  //               type: info.type,
-  //               description: info.description,
-  //               i: info.i,
-  //               html: info.html,
-  //               screenId: screen.id,
-  //             },
-  //           })
-  //         )
-  //       )
-  //     );
-  //   })
-  //   .catch((error) => {
-  //     console.error("Error:", error);
-  //   });
+  const taskOrder = await getTaskOrder({
+    components: componentData,
+    objective,
+    pageDescription: screenDescription,
+  });
 
-  // console.log(await vectorStore.similaritySearch(""));
+  taskOrder.forEach(async (i) => {
+    const result = await getInteractionOrQuestion({
+      component: componentData[i],
+      chats,
+    });
+    if (isSuggestedInteraction(result)) {
+      if (result.suggestedInteraction.type === "click") {
+        await click({ i: result.suggestedInteraction.elementI });
+      }
+      if (result.suggestedInteraction.type === "input") {
+        await inputText({
+          i: result.suggestedInteraction.elementI,
+          value: result.suggestedInteraction.value,
+        });
+      }
+    }
+  });
 }
 
 async function createAction(
@@ -268,13 +267,17 @@ export async function click(input: ClickInput) {
 
     await addUniqueIAttribute();
 
+    const preActionAllElementIs = await getAllElementIs(globalPage);
+    const preActionHiddenElementIs = await getHiddenElementIs(globalPage);
+
     const preActionHTML = await getContentHTML(globalPage);
     const preActionURL = globalPage?.url();
 
     if (globalPage) {
-      const navigationPromise = globalPage.waitForNavigation({
-        waitUntil: "networkidle0",
-      });
+      // const navigationPromise = globalPage.waitForNavigation({
+      //   timeout: 500,
+      //   waitUntil: "networkidle0",
+      // });
 
       await globalPage.evaluate((i) => {
         const element = document.querySelector(`[i="${i}"]`) as HTMLElement;
@@ -282,11 +285,20 @@ export async function click(input: ClickInput) {
           (element as HTMLElement).click();
         }
       }, input.i);
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
-      await navigationPromise;
+      // try {
+      //   await navigationPromise;
+      // } catch (e) {
+      //   console.log("No navigation");
+
+      // }
     }
 
     await addUniqueIAttribute();
+
+    const postActionAllElementIs = await getAllElementIs(globalPage);
+    const postActionHiddenElementIs = await getHiddenElementIs(globalPage);
     const postActionHTML = await getContentHTML(globalPage);
     const postActionURL = globalPage?.url();
 
@@ -294,8 +306,15 @@ export async function click(input: ClickInput) {
       const { appearedElement, vanishedElement } = await detectChangedElements(
         preActionHTML,
         postActionHTML,
-        globalPage
+        preActionAllElementIs,
+        postActionAllElementIs,
+        preActionHiddenElementIs,
+        postActionHiddenElementIs
       );
+
+      if (appearedElement?.outerHTML) {
+        console.log(simplifyHtml(appearedElement?.outerHTML).html);
+      }
       if (appearedElement) {
         readScreen(appearedElement.outerHTML, clickAction.id);
       } else if (vanishedElement) {
@@ -320,7 +339,7 @@ export async function inputText(input: TextInput) {
         ({ i, value }) => {
           const element = document.querySelector(`[i="${i}"]`);
           if (element && element.tagName.toLowerCase() === "input") {
-            (element as HTMLInputElement).value = value;
+            (element as HTMLInputElement).value = value || "";
           }
         },
         { i, value }

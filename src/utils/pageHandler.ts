@@ -25,17 +25,17 @@ async function getElementsFromIs(
   return elements;
 }
 
-async function getAllElementIs(page: Page | null) {
+export async function getAllElementIs(page: Page | null) {
   if (page) {
     const allElementIds = await page.evaluate(() => {
-      const ids: string[] = [];
+      const elementIs: string[] = [];
       const elements = document.querySelectorAll("*");
       elements.forEach((el) => {
-        const id = el.getAttribute("i");
-        if (id) ids.push(id);
+        const i = el.getAttribute("i");
+        if (i) elementIs.push(i);
       });
 
-      return ids;
+      return elementIs;
     });
 
     return allElementIds;
@@ -90,14 +90,11 @@ function getMostComplexElement(elements: Element[]): Element | null {
 export async function detectChangedElements(
   preActionHTML: string,
   postActionHTML: string,
-  page: Page | null
+  preActionAllElementIs: string[],
+  postActionAllElementIs: string[],
+  preActionHiddenElementIs: string[],
+  postActionHiddenElementIs: string[]
 ) {
-  const preActionAllElementIs = await getAllElementIs(page);
-  const preActionHiddenElementIs = await getHiddenElementIs(page);
-
-  const postActionAllElementIs = await getAllElementIs(page);
-  const postActionHiddenElementIs = await getHiddenElementIs(page);
-
   const addedElementIs = postActionAllElementIs.filter(
     (id) => !preActionAllElementIs.includes(id)
   );

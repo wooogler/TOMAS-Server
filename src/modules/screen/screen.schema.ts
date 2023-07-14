@@ -11,7 +11,7 @@ const clickSchema = z.object({
 
 const inputSchema = z.object({
   i: z.string(),
-  value: z.string(),
+  value: z.string().optional(),
 });
 
 const scrollSchema = z.object({
