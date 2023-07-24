@@ -21,6 +21,7 @@ import { minify } from "html-minifier-terser";
 
 import {
   ComponentInfo,
+  getComponentFeature,
   getComponentInfo,
   getInteractionOrQuestion,
   getScreenDescription,
@@ -35,78 +36,72 @@ import {
   getHiddenElementIs,
 } from "../../utils/pageHandler";
 
-declare global {
-  interface Window {
-    onMutation: (mutation: any) => void;
-  }
-}
-
 let globalBrowser: Browser | null = null;
 let globalPage: Page | null = null;
 
 const NO_GLOBAL_PAGE_ERROR = new Error("Cannot find globalPage.");
 
-const vectorStore = PrismaVectorStore.withModel<Component>(prisma).create(
-  new OpenAIEmbeddings(),
-  {
-    prisma: Prisma,
-    tableName: "Component",
-    vectorColumnName: "vector",
-    columns: {
-      id: PrismaVectorStore.IdColumn,
-      description: PrismaVectorStore.ContentColumn,
-    },
-  }
-);
-
-// async function addIAttribute() {
-//   if (globalPage) {
-//     await globalPage.evaluate(() => {
-//       let idCounter = 0;
-//       const elements = document.querySelectorAll("*");
-//       elements.forEach((el) => {
-//         el.setAttribute("i", String(idCounter));
-//         idCounter++;
-//       });
-//     });
-//   } else {
-//     throw NO_GLOBAL_PAGE_ERROR;
+// const vectorStore = PrismaVectorStore.withModel<Component>(prisma).create(
+//   new OpenAIEmbeddings(),
+//   {
+//     prisma: Prisma,
+//     tableName: "Component",
+//     vectorColumnName: "vector",
+//     columns: {
+//       id: PrismaVectorStore.IdColumn,
+//       description: PrismaVectorStore.ContentColumn,
+//     },
 //   }
-// }
+// );
 
-async function addUniqueIAttribute() {
+async function addIAttribute() {
   if (globalPage) {
     await globalPage.evaluate(() => {
-      function closestElementWithId(element: HTMLElement): HTMLElement | null {
-        if (element.id) return element;
-        return element.parentElement
-          ? closestElementWithId(element.parentElement)
-          : null;
-      }
-
-      function generateUniqueIdentifier(
-        element: HTMLElement,
-        closestIdElem: HTMLElement | null
-      ): string {
-        const closestId = closestIdElem ? closestIdElem.id : "";
-        const additionalInfo = element.tagName + ">" + element.className;
-        return closestId + ">" + additionalInfo;
-      }
-
-      const allElements = document.querySelectorAll("*");
-      allElements.forEach((el: Element) => {
-        const closestIdElem = closestElementWithId(el as HTMLElement);
-        const uniqueId = generateUniqueIdentifier(
-          el as HTMLElement,
-          closestIdElem
-        );
-        el.setAttribute("i", uniqueId);
+      let idCounter = 0;
+      const elements = document.querySelectorAll("*");
+      elements.forEach((el) => {
+        el.setAttribute("i", String(idCounter));
+        idCounter++;
       });
     });
   } else {
     throw NO_GLOBAL_PAGE_ERROR;
   }
 }
+
+// async function addUniqueIAttribute() {
+//   if (globalPage) {
+//     await globalPage.evaluate(() => {
+//       function closestElementWithId(element: HTMLElement): HTMLElement | null {
+//         if (element.id) return element;
+//         return element.parentElement
+//           ? closestElementWithId(element.parentElement)
+//           : null;
+//       }
+
+//       function generateUniqueIdentifier(
+//         element: HTMLElement,
+//         closestIdElem: HTMLElement | null
+//       ): string {
+//         const closestId = closestIdElem ? closestIdElem.id : "";
+//         const additionalInfo = element.tagName + ">" + element.className;
+//         return closestId + ">" + additionalInfo;
+//       }
+
+//       const allElements = document.querySelectorAll("*");
+//       allElements.forEach((el: Element) => {
+//         const closestIdElem = closestElementWithId(el as HTMLElement);
+//         const uniqueId = generateUniqueIdentifier(
+//           el as HTMLElement,
+//           closestIdElem
+//         );
+//         el.setAttribute("i", uniqueId);
+//       });
+//     });
+//   } else {
+//     throw NO_GLOBAL_PAGE_ERROR;
+//   }
+// }
 
 export async function getVisibleHtml(hiddenElementIds: string[]) {
   if (globalPage) {
@@ -129,9 +124,9 @@ export async function getVisibleHtml(hiddenElementIds: string[]) {
   throw NO_GLOBAL_PAGE_ERROR;
 }
 
-async function readScreen(rawHtml: string | undefined, actionId: string) {
+async function parsingAgent(rawHtml: string | undefined, actionId: string) {
   if (!rawHtml) {
-    throw Error("no html on readScreen");
+    throw Error("no html");
   }
   const { html: htmlWithI } = simplifyHtml(rawHtml, false);
   const { html: htmlWithoutI } = simplifyHtml(rawHtml, true);
@@ -151,29 +146,27 @@ async function readScreen(rawHtml: string | undefined, actionId: string) {
     },
   });
 
-  const processComponentData = async (
-    components: FeatureComponent[]
-  ): Promise<Prisma.ComponentCreateInput[]> => {
+  const processComponentData = async (components: FeatureComponent[]) => {
     const componentInfos = await Promise.all(
       components.map(async (comp) => {
-        const info = await getComponentInfo({
-          componentHtml: removeAttributeI(comp.html),
-          pageDescription: screenDescription,
-        });
+        const feature = await getComponentFeature(
+          removeAttributeI(comp.html),
+          screenDescription
+        );
         return {
           i: comp.i,
           html: comp.html,
-          description: info?.description || "",
-          actionType: info?.action.type || "",
+          feature,
         };
       })
     );
 
     return componentInfos;
   };
-  const actionComponents = extractFeatureComponents(htmlWithI);
-  console.log(actionComponents);
-  // const componentData = await processComponentData(actionComponents);
+  const featureComponents = extractFeatureComponents(htmlWithI);
+  const components = await processComponentData(featureComponents);
+
+  return components;
 
   // await prisma.component.createMany({
   //   data: componentData,
@@ -242,12 +235,12 @@ export async function navigate(input: NavigateInput) {
       waitUntil: "networkidle0",
     });
 
-    await addUniqueIAttribute();
+    await addIAttribute();
 
     const navigateAction = await createAction("GOTO", input.url);
     const hiddenElementIs = await getHiddenElementIs(globalPage);
     const visibleHtml = await getVisibleHtml(hiddenElementIs);
-    const screenResult = await readScreen(visibleHtml, navigateAction.id);
+    const screenResult = await parsingAgent(visibleHtml, navigateAction.id);
 
     return screenResult;
   } catch (error: any) {
@@ -256,80 +249,66 @@ export async function navigate(input: NavigateInput) {
   }
 }
 
-export async function click(input: ClickInput) {
-  try {
-    const component = await prisma.component.findFirst({
-      where: {
-        i: input.i,
-      },
-    });
-    const clickAction = await createAction("CLICK", "", component?.id);
+// export async function click(input: ClickInput) {
+//   try {
+//     const component = await prisma.component.findFirst({
+//       where: {
+//         i: input.i,
+//       },
+//     });
+//     const clickAction = await createAction("CLICK", "", component?.id);
 
-    await addUniqueIAttribute();
+//     await addIAttribute();
 
-    const preActionAllElementIs = await getAllElementIs(globalPage);
-    const preActionHiddenElementIs = await getHiddenElementIs(globalPage);
+//     const preActionAllElementIs = await getAllElementIs(globalPage);
+//     const preActionHiddenElementIs = await getHiddenElementIs(globalPage);
 
-    const preActionHTML = await getContentHTML(globalPage);
-    const preActionURL = globalPage?.url();
+//     const preActionHTML = await getContentHTML(globalPage);
+//     const preActionURL = globalPage?.url();
 
-    if (globalPage) {
-      // const navigationPromise = globalPage.waitForNavigation({
-      //   timeout: 500,
-      //   waitUntil: "networkidle0",
-      // });
+//     if (globalPage) {
+//       await globalPage.evaluate((i) => {
+//         const element = document.querySelector(`[i="${i}"]`) as HTMLElement;
+//         if (element) {
+//           (element as HTMLElement).click();
+//         }
+//       }, input.i);
+//       await new Promise((resolve) => setTimeout(resolve, 500));
+//     }
 
-      await globalPage.evaluate((i) => {
-        const element = document.querySelector(`[i="${i}"]`) as HTMLElement;
-        if (element) {
-          (element as HTMLElement).click();
-        }
-      }, input.i);
-      await new Promise((resolve) => setTimeout(resolve, 500));
+//     const postActionAllElementIs = await getAllElementIs(globalPage);
+//     const postActionHiddenElementIs = await getHiddenElementIs(globalPage);
+//     const postActionHTML = await getContentHTML(globalPage);
+//     const postActionURL = globalPage?.url();
 
-      // try {
-      //   await navigationPromise;
-      // } catch (e) {
-      //   console.log("No navigation");
+//     if (preActionURL === postActionURL) {
+//       const { appearedElement, vanishedElement } = await detectChangedElements(
+//         preActionHTML,
+//         postActionHTML,
+//         preActionAllElementIs,
+//         postActionAllElementIs,
+//         preActionHiddenElementIs,
+//         postActionHiddenElementIs
+//       );
 
-      // }
-    }
-
-    await addUniqueIAttribute();
-
-    const postActionAllElementIs = await getAllElementIs(globalPage);
-    const postActionHiddenElementIs = await getHiddenElementIs(globalPage);
-    const postActionHTML = await getContentHTML(globalPage);
-    const postActionURL = globalPage?.url();
-
-    if (preActionURL === postActionURL) {
-      const { appearedElement, vanishedElement } = await detectChangedElements(
-        preActionHTML,
-        postActionHTML,
-        preActionAllElementIs,
-        postActionAllElementIs,
-        preActionHiddenElementIs,
-        postActionHiddenElementIs
-      );
-
-      if (appearedElement?.outerHTML) {
-        console.log(simplifyHtml(appearedElement?.outerHTML).html);
-      }
-      if (appearedElement) {
-        readScreen(appearedElement.outerHTML, clickAction.id);
-      } else if (vanishedElement) {
-        readScreen(postActionHTML, clickAction.id);
-      } else {
-        readScreen(postActionHTML, clickAction.id);
-      }
-    } else {
-      readScreen(postActionHTML, clickAction.id);
-    }
-  } catch (error: any) {
-    console.error("Failed to click on the webpage.", error);
-    throw error;
-  }
-}
+//       if (appearedElement?.outerHTML) {
+//         console.log(simplifyHtml(appearedElement?.outerHTML).html);
+//       }
+//       if (appearedElement) {
+//         readScreen(appearedElement.outerHTML, clickAction.id);
+//       } else if (vanishedElement) {
+//         readScreen(postActionHTML, clickAction.id);
+//       } else {
+//         readScreen(postActionHTML, clickAction.id);
+//       }
+//     } else {
+//       readScreen(postActionHTML, clickAction.id);
+//     }
+//   } catch (error: any) {
+//     console.error("Failed to click on the webpage.", error);
+//     throw error;
+//   }
+// }
 
 export async function inputText(input: TextInput) {
   const { i, value } = input;
