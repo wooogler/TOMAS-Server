@@ -80,13 +80,6 @@ export const analyzeActionComponentPrompts: Prompt[] = [
   },
 ];
 
-export const describeActionComponentPrompts: Prompt[] = [
-  {
-    role: "SYSTEM",
-    content: `You are a web developer who explains why people should use the given part of the website. Output the purpose using "To ~" without providing additional context.`,
-  },
-];
-
 export const getScreenDescription = async (screenHtml: string) => {
   const describeScreenSystemPrompt: Prompt = {
     role: "SYSTEM",
@@ -99,6 +92,28 @@ export const getScreenDescription = async (screenHtml: string) => {
   };
 
   return getAiResponse([describeScreenSystemPrompt, htmlPrompt]);
+};
+
+export const getComponentFeature = async (
+  componentHtml: string,
+  screenDescription: string
+) => {
+  const describeComponentFeaturePrompts: Prompt[] = [
+    {
+      role: "SYSTEM",
+      content: `
+      You are a web developer who explains why people should use the given part of the website. 
+      Output the purpose using "To ~" without providing additional context.
+      Consider the description of the webpage where this element is located: ${screenDescription}`,
+    },
+  ];
+
+  const htmlPrompt: Prompt = {
+    role: "HUMAN",
+    content: componentHtml,
+  };
+
+  return getAiResponse([...describeComponentFeaturePrompts, htmlPrompt]);
 };
 
 export const makeChatsPrompt = (chats: Chat[]): Prompt => ({
