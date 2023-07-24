@@ -50,6 +50,9 @@ dependencies:
   langchain:
     specifier: ^0.0.96
     version: 0.0.96(puppeteer@19.7.2)
+  openai:
+    specifier: ^3.3.0
+    version: 3.3.0
   pgvector:
     specifier: ^0.1.4
     version: 0.1.4

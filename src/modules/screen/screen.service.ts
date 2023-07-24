@@ -7,8 +7,8 @@ import {
   TextInput,
 } from "./screen.schema";
 import {
-  ActionComponent,
-  extractActionComponents,
+  FeatureComponent,
+  extractFeatureComponents,
   removeAttributeI,
   simplifyHtml,
 } from "../../utils/htmlHandler";
@@ -152,7 +152,7 @@ async function readScreen(rawHtml: string | undefined, actionId: string) {
   });
 
   const processComponentData = async (
-    components: ActionComponent[]
+    components: FeatureComponent[]
   ): Promise<Prisma.ComponentCreateInput[]> => {
     const componentInfos = await Promise.all(
       components.map(async (comp) => {
@@ -163,7 +163,6 @@ async function readScreen(rawHtml: string | undefined, actionId: string) {
         return {
           i: comp.i,
           html: comp.html,
-          type: comp.type,
           description: info?.description || "",
           actionType: info?.action.type || "",
         };
@@ -172,48 +171,49 @@ async function readScreen(rawHtml: string | undefined, actionId: string) {
 
     return componentInfos;
   };
-  const actionComponents = extractActionComponents(htmlWithI);
-  const componentData = await processComponentData(actionComponents);
+  const actionComponents = extractFeatureComponents(htmlWithI);
+  console.log(actionComponents);
+  // const componentData = await processComponentData(actionComponents);
 
-  await prisma.component.createMany({
-    data: componentData,
-  });
+  // await prisma.component.createMany({
+  //   data: componentData,
+  // });
 
-  const chats = await prisma.chat.findMany({
-    select: {
-      id: true,
-      createdAt: true,
-      role: true,
-      content: true,
-      description: true,
-    },
-  });
+  // const chats = await prisma.chat.findMany({
+  //   select: {
+  //     id: true,
+  //     createdAt: true,
+  //     role: true,
+  //     content: true,
+  //     description: true,
+  //   },
+  // });
 
-  const objective = await getUserObjective(chats);
+  // const objective = await getUserObjective(chats);
 
-  const taskOrder = await getTaskOrder({
-    components: componentData,
-    objective,
-    pageDescription: screenDescription,
-  });
+  // const taskOrder = await getTaskOrder({
+  //   components: componentData,
+  //   objective,
+  //   pageDescription: screenDescription,
+  // });
 
-  taskOrder.forEach(async (i) => {
-    const result = await getInteractionOrQuestion({
-      component: componentData[i],
-      chats,
-    });
-    if (isSuggestedInteraction(result)) {
-      if (result.suggestedInteraction.type === "click") {
-        await click({ i: result.suggestedInteraction.elementI });
-      }
-      if (result.suggestedInteraction.type === "input") {
-        await inputText({
-          i: result.suggestedInteraction.elementI,
-          value: result.suggestedInteraction.value,
-        });
-      }
-    }
-  });
+  // taskOrder.forEach(async (i) => {
+  //   const result = await getInteractionOrQuestion({
+  //     component: componentData[i],
+  //     chats,
+  //   });
+  //   if (isSuggestedInteraction(result)) {
+  //     if (result.suggestedInteraction.type === "click") {
+  //       await click({ i: result.suggestedInteraction.elementI });
+  //     }
+  //     if (result.suggestedInteraction.type === "input") {
+  //       await inputText({
+  //         i: result.suggestedInteraction.elementI,
+  //         value: result.suggestedInteraction.value,
+  //       });
+  //     }
+  //   }
+  // });
 }
 
 async function createAction(
