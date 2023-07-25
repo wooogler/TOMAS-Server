@@ -158,3 +158,33 @@ export async function getContentHTML(page: Page | null) {
   }
   throw NO_PAGE_ERROR;
 }
+
+export async function getHighestZIndexElement(page: Page) {
+  return await page.evaluate(() => {
+    const elements = Array.from(document.querySelectorAll("*"));
+    let highestZIndex = -Infinity;
+    let highestZIndexElement = null;
+    let highestZIndexElementI = null;
+
+    for (const element of elements) {
+      const style = window.getComputedStyle(element);
+      const zIndex = style.getPropertyValue("z-index");
+
+      const zIndexNumber = Number(zIndex);
+      if (!Number.isNaN(zIndexNumber)) {
+        if (zIndexNumber > highestZIndex) {
+          highestZIndex = zIndexNumber;
+          highestZIndexElement = element;
+          highestZIndexElementI = element.getAttribute("i");
+        }
+      }
+    }
+
+    return {
+      highestZIndex,
+      highestZIndexElementI,
+      highestZIndexElement,
+      highestZIndexElementHtml: highestZIndexElement?.outerHTML,
+    };
+  });
+}

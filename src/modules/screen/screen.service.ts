@@ -69,40 +69,6 @@ async function addIAttribute() {
   }
 }
 
-// async function addUniqueIAttribute() {
-//   if (globalPage) {
-//     await globalPage.evaluate(() => {
-//       function closestElementWithId(element: HTMLElement): HTMLElement | null {
-//         if (element.id) return element;
-//         return element.parentElement
-//           ? closestElementWithId(element.parentElement)
-//           : null;
-//       }
-
-//       function generateUniqueIdentifier(
-//         element: HTMLElement,
-//         closestIdElem: HTMLElement | null
-//       ): string {
-//         const closestId = closestIdElem ? closestIdElem.id : "";
-//         const additionalInfo = element.tagName + ">" + element.className;
-//         return closestId + ">" + additionalInfo;
-//       }
-
-//       const allElements = document.querySelectorAll("*");
-//       allElements.forEach((el: Element) => {
-//         const closestIdElem = closestElementWithId(el as HTMLElement);
-//         const uniqueId = generateUniqueIdentifier(
-//           el as HTMLElement,
-//           closestIdElem
-//         );
-//         el.setAttribute("i", uniqueId);
-//       });
-//     });
-//   } else {
-//     throw NO_GLOBAL_PAGE_ERROR;
-//   }
-// }
-
 export async function getVisibleHtml(hiddenElementIds: string[]) {
   if (globalPage) {
     let visibleHtml = await globalPage.evaluate((hiddenElementIds) => {
@@ -167,46 +133,6 @@ async function parsingAgent(rawHtml: string | undefined, actionId: string) {
   const components = await processComponentData(featureComponents);
 
   return components;
-
-  // await prisma.component.createMany({
-  //   data: componentData,
-  // });
-
-  // const chats = await prisma.chat.findMany({
-  //   select: {
-  //     id: true,
-  //     createdAt: true,
-  //     role: true,
-  //     content: true,
-  //     description: true,
-  //   },
-  // });
-
-  // const objective = await getUserObjective(chats);
-
-  // const taskOrder = await getTaskOrder({
-  //   components: componentData,
-  //   objective,
-  //   pageDescription: screenDescription,
-  // });
-
-  // taskOrder.forEach(async (i) => {
-  //   const result = await getInteractionOrQuestion({
-  //     component: componentData[i],
-  //     chats,
-  //   });
-  //   if (isSuggestedInteraction(result)) {
-  //     if (result.suggestedInteraction.type === "click") {
-  //       await click({ i: result.suggestedInteraction.elementI });
-  //     }
-  //     if (result.suggestedInteraction.type === "input") {
-  //       await inputText({
-  //         i: result.suggestedInteraction.elementI,
-  //         value: result.suggestedInteraction.value,
-  //       });
-  //     }
-  //   }
-  // });
 }
 
 async function createAction(
