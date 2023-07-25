@@ -10,24 +10,27 @@ describe("pageHandler", () => {
 
   beforeEach(async () => {
     globalBrowser = await puppeteer.launch({ headless: false });
-    globalPage = await globalBrowser.newPage();
+    const context = await globalBrowser.createIncognitoBrowserContext(); // Create new incognito context
+    globalPage = await context.newPage();
+
     await globalPage.setUserAgent(
       "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1"
     );
     await globalPage.setViewport({ width: 390, height: 844 });
-    await globalPage.goto("http://www.greyhound.com", {
+    await globalPage.goto("http://www.amazon.com", {
       waitUntil: "networkidle0",
     });
     await addIAttribute(globalPage);
   }, 100000);
 
-  it("should find the elements without i", async () => {
-    await globalPage.click("#searchInputMobile-from");
-    const afterClickResult = await findNewElementHtml(globalPage);
-    console.log("Result after clicking the button:", afterClickResult);
-  }, 10000);
+  it("should find the modal elements after the action", async () => {
+    const longestHTML: string = await findNewElementHtml(
+      globalPage,
+      async () => {
+        await globalPage.click("#glow-ingress-single-line");
+      }
+    );
 
-  afterAll(async () => {
-    await globalPage.browser().close();
-  });
+    console.log(longestHTML);
+  }, 10000);
 });

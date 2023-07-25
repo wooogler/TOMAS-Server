@@ -3,46 +3,6 @@ import { JSDOM } from "jsdom";
 
 const NO_PAGE_ERROR = new Error("Cannot find a page.");
 
-async function getElementsFromIs(
-  html: string,
-  is: string[]
-): Promise<Element[]> {
-  const dom = new JSDOM(html);
-  const document = dom.window.document;
-
-  const elements: Element[] = [];
-
-  is.forEach((i) => {
-    const element = document.querySelector(`[i="${i}"]`);
-    if (element) {
-      // Only add the element if it's not a descendant of any previously found elements
-      if (!elements.some((foundElement) => foundElement.contains(element))) {
-        elements.push(element);
-      }
-    }
-  });
-
-  return elements;
-}
-
-export async function getAllElementIs(page: Page | null) {
-  if (page) {
-    const allElementIds = await page.evaluate(() => {
-      const elementIs: string[] = [];
-      const elements = document.querySelectorAll("*");
-      elements.forEach((el) => {
-        const i = el.getAttribute("i");
-        if (i) elementIs.push(i);
-      });
-
-      return elementIs;
-    });
-
-    return allElementIds;
-  }
-  throw NO_PAGE_ERROR;
-}
-
 export async function getHiddenElementIs(page: Page | null) {
   if (page) {
     const hiddenElementIs = await page.evaluate(() => {
@@ -72,71 +32,6 @@ export async function getHiddenElementIs(page: Page | null) {
   throw NO_PAGE_ERROR;
 }
 
-function getMostComplexElement(elements: Element[]): Element | null {
-  let mostComplexElement: Element | null = null;
-  let maxChildCount = 0;
-
-  elements.forEach((currentElement) => {
-    const currentChildCount = currentElement.querySelectorAll("*").length;
-    if (currentChildCount > maxChildCount) {
-      maxChildCount = currentChildCount;
-      mostComplexElement = currentElement;
-    }
-  });
-
-  return mostComplexElement;
-}
-
-export async function detectChangedElements(
-  preActionHTML: string,
-  postActionHTML: string,
-  preActionAllElementIs: string[],
-  postActionAllElementIs: string[],
-  preActionHiddenElementIs: string[],
-  postActionHiddenElementIs: string[]
-) {
-  const addedElementIs = postActionAllElementIs.filter(
-    (id) => !preActionAllElementIs.includes(id)
-  );
-  const removedElementIs = preActionAllElementIs.filter(
-    (id) => !postActionAllElementIs.includes(id)
-  );
-  const newHiddenElementIs = postActionHiddenElementIs.filter(
-    (id) => !preActionHiddenElementIs.includes(id)
-  );
-  const newVisibleElementIs = preActionHiddenElementIs.filter(
-    (id) => !postActionHiddenElementIs.includes(id)
-  );
-
-  const addedElements = await getElementsFromIs(postActionHTML, addedElementIs);
-
-  const removedElements = await getElementsFromIs(
-    preActionHTML,
-    removedElementIs
-  );
-
-  const newHiddenElements = await getElementsFromIs(
-    preActionHTML,
-    newHiddenElementIs
-  );
-
-  const newVisibleElements = await getElementsFromIs(
-    postActionHTML,
-    newVisibleElementIs
-  );
-
-  const appearedElements = [...addedElements, ...newVisibleElements];
-  const vanishedElements = [...removedElements, ...newHiddenElements];
-
-  const appearedElement = getMostComplexElement(appearedElements);
-  const vanishedElement = getMostComplexElement(vanishedElements);
-
-  return {
-    appearedElement,
-    vanishedElement,
-  };
-}
-
 export async function getContentHTML(page: Page | null) {
   if (page) {
     let content = await page.content();
@@ -159,36 +54,6 @@ export async function getContentHTML(page: Page | null) {
   throw NO_PAGE_ERROR;
 }
 
-export async function getHighestZIndexElement(page: Page) {
-  return await page.evaluate(() => {
-    const elements = Array.from(document.querySelectorAll("*"));
-    let highestZIndex = -Infinity;
-    let highestZIndexElement = null;
-    let highestZIndexElementI = null;
-
-    for (const element of elements) {
-      const style = window.getComputedStyle(element);
-      const zIndex = style.getPropertyValue("z-index");
-
-      const zIndexNumber = Number(zIndex);
-      if (!Number.isNaN(zIndexNumber)) {
-        if (zIndexNumber > highestZIndex) {
-          highestZIndex = zIndexNumber;
-          highestZIndexElement = element;
-          highestZIndexElementI = element.getAttribute("i");
-        }
-      }
-    }
-
-    return {
-      highestZIndex,
-      highestZIndexElementI,
-      highestZIndexElement,
-      highestZIndexElementHtml: highestZIndexElement?.outerHTML,
-    };
-  });
-}
-
 export async function addIAttribute(page: Page): Promise<void> {
   if (page) {
     await page.evaluate(() => {
@@ -204,39 +69,49 @@ export async function addIAttribute(page: Page): Promise<void> {
   }
 }
 
-export async function findNewElementHtml(page: Page | null) {
+export async function findNewElementHtml(
+  page: Page | null,
+  action: () => Promise<void>
+): Promise<string> {
   if (page) {
-    const newElements = await page.evaluate(() => {
-      const newElements: string[] = [];
+    // Get initial hidden elements
+    const initialHiddenElementIs = await getHiddenElementIs(page);
 
-      const traverseAndCollectNewElements = (
-        node: Node,
-        newElements: string[]
-      ) => {
-        // check if the node is an Element
-        if (node.nodeType === Node.ELEMENT_NODE) {
-          const elementNode = node as Element;
-          if (!elementNode.hasAttribute("i")) {
-            newElements.push(elementNode.outerHTML);
-          } else {
-            // if the node has "i" attribute, we check its children
-            for (let i = 0; i < elementNode.children.length; i++) {
-              traverseAndCollectNewElements(
-                elementNode.children[i],
-                newElements
-              );
-            }
-          }
+    // Perform action
+    await action();
+    await new Promise((r) => setTimeout(r, 1000));
+
+    // Get hidden elements and elements without 'i' attribute after action
+    const finalHiddenElementIs = await getHiddenElementIs(page);
+    const elementsWithoutI = await page.evaluate(() => {
+      const elements = Array.from(document.querySelectorAll("*"));
+      const elementsWithoutI: string[] = [];
+
+      elements.forEach((el) => {
+        if (!el.hasAttribute("i")) {
+          elementsWithoutI.push(el.outerHTML);
         }
-      };
+      });
 
-      traverseAndCollectNewElements(document.body, newElements);
-      return newElements;
+      return elementsWithoutI;
     });
 
-    if (newElements.length > 0) {
+    // Find the elements that were hidden and are now shown
+    const shownElementsIs = initialHiddenElementIs.filter(
+      (i) => !finalHiddenElementIs.includes(i)
+    );
+    const shownElements = await page.evaluate((shownElementsIs) => {
+      return shownElementsIs.map(
+        (i) => document.querySelector(`[i="${i}"]`)?.outerHTML || ""
+      );
+    }, shownElementsIs);
+
+    // Combine newly added and shown elements
+    const newAndShownElements = [...elementsWithoutI, ...shownElements];
+
+    if (newAndShownElements.length > 0) {
       // Find the longest HTML string
-      const longestHTML = newElements.reduce((a, b) =>
+      const longestHTML = newAndShownElements.reduce((a, b) =>
         a.length > b.length ? a : b
       );
       return longestHTML;
