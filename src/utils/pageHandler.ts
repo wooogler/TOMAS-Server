@@ -188,3 +188,62 @@ export async function getHighestZIndexElement(page: Page) {
     };
   });
 }
+
+export async function addIAttribute(page: Page): Promise<void> {
+  if (page) {
+    await page.evaluate(() => {
+      let idCounter = 0;
+      const elements = document.querySelectorAll("*");
+      elements.forEach((el: Element) => {
+        el.setAttribute("i", String(idCounter));
+        idCounter++;
+      });
+    });
+  } else {
+    throw NO_PAGE_ERROR;
+  }
+}
+
+export async function findNewElementHtml(page: Page | null) {
+  if (page) {
+    const newElements = await page.evaluate(() => {
+      const newElements: string[] = [];
+
+      const traverseAndCollectNewElements = (
+        node: Node,
+        newElements: string[]
+      ) => {
+        // check if the node is an Element
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          const elementNode = node as Element;
+          if (!elementNode.hasAttribute("i")) {
+            newElements.push(elementNode.outerHTML);
+          } else {
+            // if the node has "i" attribute, we check its children
+            for (let i = 0; i < elementNode.children.length; i++) {
+              traverseAndCollectNewElements(
+                elementNode.children[i],
+                newElements
+              );
+            }
+          }
+        }
+      };
+
+      traverseAndCollectNewElements(document.body, newElements);
+      return newElements;
+    });
+
+    if (newElements.length > 0) {
+      // Find the longest HTML string
+      const longestHTML = newElements.reduce((a, b) =>
+        a.length > b.length ? a : b
+      );
+      return longestHTML;
+    } else {
+      return "";
+    }
+  } else {
+    throw NO_PAGE_ERROR;
+  }
+}

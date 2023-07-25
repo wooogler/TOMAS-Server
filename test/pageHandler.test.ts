@@ -1,28 +1,12 @@
 import puppeteer, { Browser, Page } from "puppeteer";
-import { getHighestZIndexElement } from "../src/utils/pageHandler";
+import { addIAttribute, findNewElementHtml } from "../src/utils/pageHandler";
 import { getVisibleHtml } from "../src/modules/screen/screen.service";
 
 describe("pageHandler", () => {
   let globalBrowser: Browser;
   let globalPage: Page;
-  let visiblePage: Page;
 
   const NO_GLOBAL_PAGE_ERROR = new Error("Cannot find globalPage.");
-
-  async function addIAttribute() {
-    if (globalPage) {
-      await globalPage.evaluate(() => {
-        let idCounter = 0;
-        const elements = document.querySelectorAll("*");
-        elements.forEach((el) => {
-          el.setAttribute("i", String(idCounter));
-          idCounter++;
-        });
-      });
-    } else {
-      throw NO_GLOBAL_PAGE_ERROR;
-    }
-  }
 
   beforeEach(async () => {
     globalBrowser = await puppeteer.launch({ headless: false });
@@ -34,20 +18,16 @@ describe("pageHandler", () => {
     await globalPage.goto("http://www.greyhound.com", {
       waitUntil: "networkidle0",
     });
-    await addIAttribute();
+    await addIAttribute(globalPage);
   }, 100000);
 
-  it("should return the element with the highest z-index", async () => {
-    const initialResult = await getHighestZIndexElement(globalPage);
-    console.log("Initial result:", initialResult);
-
+  it("should find the elements without i", async () => {
     await globalPage.click("#searchInputMobile-from");
-
-    const afterClickResult = await getHighestZIndexElement(globalPage);
+    const afterClickResult = await findNewElementHtml(globalPage);
     console.log("Result after clicking the button:", afterClickResult);
   }, 10000);
 
-  // afterAll(async () => {
-  //   await globalPage.browser().close();
-  // });
+  afterAll(async () => {
+    await globalPage.browser().close();
+  });
 });
