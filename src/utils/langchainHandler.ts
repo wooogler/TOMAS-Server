@@ -328,3 +328,35 @@ export function isInteractionQuestion(
 ): obj is { question: InteractionQuestion } {
   return (obj as { question: InteractionQuestion }).question !== undefined;
 }
+
+export const getPossibleInteractionDescription = async (
+    rawHtml: string,
+    screenDescription: string,
+    possibleInteractionsInString: string
+  ) => {
+    const parsingPossibleInteractionPrompts: Prompt[] = [
+      {
+        role: "SYSTEM",
+        content: `You are a web developer. You will have the whole html and a list of action elements with actionType and i attribute. You need to take the html into consideration, and describe what user can get after interacting with each element in list.
+        Consider the description of the webpage where this element is located: ${screenDescription}` + `
+        Output following JSON format in plain text. Never provide additional context.
+        
+        [
+         {
+           element: <"i" attribute of that element>
+            actionType: <action type>
+            description: <prediction of the result of that action for user>
+          },
+         ...
+        ]`,
+      },
+    ];
+  
+    const htmlPrompt: Prompt = {
+      role: "HUMAN",
+      content: `html is ${rawHtml} \n actions elements include: ${possibleInteractionsInString}`,
+    };
+  
+    return getAiResponse([...parsingPossibleInteractionPrompts, htmlPrompt]);
+  };
+  
