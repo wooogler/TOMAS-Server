@@ -304,3 +304,89 @@ export function extractFeatureComponents(html: string): FeatureComponent[] {
 
   return components;
 }
+
+export interface PossibleInteractions {
+    actionType: string;
+    i: string;
+  }
+export function parsingPossibleInteraction(html: string): PossibleInteractions[] {
+    const dom = new JSDOM(html);
+    const tmpRoot = dom.window.document.body.cloneNode(true) as Element;
+    const iAttrSet = new Set<string>();
+  
+    const listElements = Array.from(tmpRoot.querySelectorAll("ul, ol"));
+    gatherIAttrsFromElements(listElements, iAttrSet);
+  
+    const tableElements = Array.from(tmpRoot.querySelectorAll("table"));
+    gatherIAttrsFromElements(tableElements, iAttrSet);
+  
+    const fieldsetElements = Array.from(tmpRoot.querySelectorAll("fieldset"));
+    gatherIAttrsFromElements(fieldsetElements, iAttrSet);
+
+    let interactiveElements = filterInteractiveElements(
+        Array.from(tmpRoot.querySelectorAll("input, button, a, select, textarea")),
+        iAttrSet
+      );
+    
+    interactiveElements.push(
+    ...listElements,
+    ...tableElements,
+    ...fieldsetElements,
+    );
+    
+    const possibleInteractions: PossibleInteractions[] = [];
+
+    interactiveElements.forEach(interactiveElement => {
+        let actionType = "";
+        switch(interactiveElement.tagName.toLowerCase()) {
+            case "input":
+                if (interactiveElement.hasAttribute("type") == false) {
+                    actionType = "inputText";
+                }
+                else if (interactiveElement.getAttribute("type") === "text") {
+                    actionType = "inputText";
+                }
+                else if (interactiveElement.getAttribute("type") === "checkbox") {
+                    actionType = "click";
+                }
+                else if (interactiveElement.getAttribute("type") === "radio") {
+                    actionType = "click";
+                }
+                else if (interactiveElement.getAttribute("type") === "button") {
+                    actionType = "click";
+                }
+                break;
+            case "button":
+                actionType = "click";
+                break;
+            case "a":
+                actionType = "click";
+                break;
+            case "select":
+                actionType = "select";
+                break;
+            case "textarea":
+                actionType = "inputText";
+                break;
+            case "ul":
+                actionType = "select";
+                break;
+            case "ol":
+                actionType = "select";
+                break;
+            case "table":
+                actionType = "select";
+                break;
+            case "fieldset":
+                actionType = "select";
+                break;
+        }
+        possibleInteractions.push({
+            actionType: actionType,
+            i: interactiveElement.getAttribute("i")!
+        })
+    }) 
+        
+
+    return possibleInteractions;
+}
