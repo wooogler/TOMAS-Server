@@ -18,7 +18,10 @@ import { ChatOpenAI } from "langchain/chat_models/openai";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { PrismaVectorStore } from "langchain/vectorstores/prisma";
 import { minify } from "html-minifier-terser";
-
+import { JSDOM } from "jsdom";
+import {
+    getPossibleInteractionDescription
+} from "../../utils/langchainHandler";
 import {
   ComponentInfo,
   getComponentFeature,
@@ -70,27 +73,33 @@ export async function getVisibleHtml(hiddenElementIds: string[]) {
   throw NO_GLOBAL_PAGE_ERROR;
 }
 
-async function parsingAgent(rawHtml: string | undefined, actionId: string) {
-  if (!rawHtml) {
-    throw Error("no html");
-  }
-  const { html: htmlWithI } = simplifyHtml(rawHtml, false);
-  const { html: htmlWithoutI } = simplifyHtml(rawHtml, true);
+export interface parsingResult{
+    i: string;
+    action: string;
+    description: string;
+    html: string;
+}
 
-  const screenDescription = await getScreenDescription(htmlWithoutI);
-
-  const screen = await prisma.screen.create({
-    data: {
-      url: globalPage ? globalPage.url() : "",
-      rawHtml: rawHtml,
-      simpleHtml: htmlWithI,
-      prevActionId: actionId,
-      description: screenDescription,
-    },
-    select: {
-      id: true,
-    },
-  });
+export async function parsingAgent(rawHtml: string | undefined, screenDescription: string) : Promise<parsingResult[]>{
+    if (!rawHtml) {
+      throw Error("no html");
+    }
+    const possibleInteractions = parsingPossibleInteraction(rawHtml);
+    const possibleInteractionsInString = JSON.stringify(possibleInteractions, null, 0);
+    const res = await getPossibleInteractionDescription(rawHtml, possibleInteractionsInString, screenDescription);
+    const actionComponentsList = JSON.parse(res);
+    const dom = new JSDOM(rawHtml);
+    const body = dom.window.document.body;
+    const actionComponents = actionComponentsList.map((actionComponent: any) => {
+        return {
+            i: actionComponent.element,
+            action: actionComponent.actionType,
+            description: actionComponent.description,
+            html: body.querySelector(`[i="${actionComponent.element}"]`)?.outerHTML
+        }
+    })
+    return actionComponents;
+}
 
   const processComponentData = async (components: FeatureComponent[]) => {
     const componentInfos = await Promise.all(
