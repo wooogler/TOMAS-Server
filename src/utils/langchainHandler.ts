@@ -217,7 +217,9 @@ The description of the webpage: ${pageDescription}
 
 You need to plan the sequence of following possible actions on a single webpage.
 Possible Actions:
-${components.map((comp, i) => `- ${comp.description} (i=${i})`).join("\n")}
+${components
+  .map((comp, tmpIndex) => `- ${comp.description} (i=${tmpIndex})`)
+  .join("\n")}
 
 Consider the user's objective: ${objective}
 
