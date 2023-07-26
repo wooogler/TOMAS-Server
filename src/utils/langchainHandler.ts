@@ -120,8 +120,7 @@ export const makeChatsPrompt = (chats: Chat[]): Prompt => ({
   role: "HUMAN",
   content: chats
     .map(
-      (chat) =>
-        `${chat.role === "HUMAN" ? "User" : "Assistant"}: ${chat.content}`
+      (chat) => `${chat.role === "HUMAN" ? "User" : "System"}: ${chat.content}`
     )
     .join("\n"),
 });
@@ -330,15 +329,17 @@ export function isInteractionQuestion(
 }
 
 export const getPossibleInteractionDescription = async (
-    rawHtml: string,
-    screenDescription: string,
-    possibleInteractionsInString: string
-  ) => {
-    const parsingPossibleInteractionPrompts: Prompt[] = [
-      {
-        role: "SYSTEM",
-        content: `You are a web developer. You will have the whole html and a list of action elements with actionType and i attribute. You need to take the html into consideration, and describe what user can get after interacting with each element in list.
-        Consider the description of the webpage where this element is located: ${screenDescription}` + `
+  rawHtml: string,
+  screenDescription: string,
+  possibleInteractionsInString: string
+) => {
+  const parsingPossibleInteractionPrompts: Prompt[] = [
+    {
+      role: "SYSTEM",
+      content:
+        `You are a web developer. You will have the whole html and a list of action elements with actionType and i attribute. You need to take the html into consideration, and describe what user can get after interacting with each element in list.
+        Consider the description of the webpage where this element is located: ${screenDescription}` +
+        `
         Output following JSON format in plain text. Never provide additional context.
         
         [
@@ -349,14 +350,13 @@ export const getPossibleInteractionDescription = async (
           },
          ...
         ]`,
-      },
-    ];
-  
-    const htmlPrompt: Prompt = {
-      role: "HUMAN",
-      content: `html is ${rawHtml} \n actions elements include: ${possibleInteractionsInString}`,
-    };
-  
-    return getAiResponse([...parsingPossibleInteractionPrompts, htmlPrompt]);
+    },
+  ];
+
+  const htmlPrompt: Prompt = {
+    role: "HUMAN",
+    content: `html is ${rawHtml} \n actions elements include: ${possibleInteractionsInString}`,
   };
-  
+
+  return getAiResponse([...parsingPossibleInteractionPrompts, htmlPrompt]);
+};

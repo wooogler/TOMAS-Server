@@ -9,6 +9,7 @@ import {
 import {
   FeatureComponent,
   extractFeatureComponents,
+  parsingPossibleInteraction,
   removeAttributeI,
   simplifyHtml,
 } from "../../utils/htmlHandler";
@@ -19,9 +20,7 @@ import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { PrismaVectorStore } from "langchain/vectorstores/prisma";
 import { minify } from "html-minifier-terser";
 import { JSDOM } from "jsdom";
-import {
-    getPossibleInteractionDescription
-} from "../../utils/langchainHandler";
+import { getPossibleInteractionDescription } from "../../utils/langchainHandler";
 import {
   ComponentInfo,
   getComponentFeature,
@@ -73,55 +72,43 @@ export async function getVisibleHtml(hiddenElementIds: string[]) {
   throw NO_GLOBAL_PAGE_ERROR;
 }
 
-export interface parsingResult{
-    i: string;
-    action: string;
-    description: string;
-    html: string;
+export interface parsingResult {
+  i: string;
+  action: string;
+  description: string;
+  html: string;
 }
 
-export async function parsingAgent(rawHtml: string | undefined, screenDescription: string) : Promise<parsingResult[]>{
-    if (!rawHtml) {
-      throw Error("no html");
-    }
-    const possibleInteractions = parsingPossibleInteraction(rawHtml);
-    const possibleInteractionsInString = JSON.stringify(possibleInteractions, null, 0);
-    const res = await getPossibleInteractionDescription(rawHtml, possibleInteractionsInString, screenDescription);
-    const actionComponentsList = JSON.parse(res);
-    const dom = new JSDOM(rawHtml);
-    const body = dom.window.document.body;
-    const actionComponents = actionComponentsList.map((actionComponent: any) => {
-        return {
-            i: actionComponent.element,
-            action: actionComponent.actionType,
-            description: actionComponent.description,
-            html: body.querySelector(`[i="${actionComponent.element}"]`)?.outerHTML
-        }
-    })
-    return actionComponents;
-}
-
-  const processComponentData = async (components: FeatureComponent[]) => {
-    const componentInfos = await Promise.all(
-      components.map(async (comp) => {
-        const feature = await getComponentFeature(
-          removeAttributeI(comp.html),
-          screenDescription
-        );
-        return {
-          i: comp.i,
-          html: comp.html,
-          feature,
-        };
-      })
-    );
-
-    return componentInfos;
-  };
-  const featureComponents = extractFeatureComponents(htmlWithI);
-  const components = await processComponentData(featureComponents);
-
-  return components;
+export async function parsingAgent(
+  rawHtml: string | undefined,
+  screenDescription: string
+): Promise<parsingResult[]> {
+  if (!rawHtml) {
+    throw Error("no html");
+  }
+  const possibleInteractions = parsingPossibleInteraction(rawHtml);
+  const possibleInteractionsInString = JSON.stringify(
+    possibleInteractions,
+    null,
+    0
+  );
+  const res = await getPossibleInteractionDescription(
+    rawHtml,
+    possibleInteractionsInString,
+    screenDescription
+  );
+  const actionComponentsList = JSON.parse(res);
+  const dom = new JSDOM(rawHtml);
+  const body = dom.window.document.body;
+  const actionComponents = actionComponentsList.map((actionComponent: any) => {
+    return {
+      i: actionComponent.element,
+      action: actionComponent.actionType,
+      description: actionComponent.description,
+      html: body.querySelector(`[i="${actionComponent.element}"]`)?.outerHTML,
+    };
+  });
+  return actionComponents;
 }
 
 async function createAction(
