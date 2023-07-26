@@ -1,5 +1,10 @@
 import { Chat } from "@prisma/client";
-import { Prompt, getGpt4Response } from "../utils/langchainHandler";
+import {
+  Prompt,
+  getAiResponse,
+  getGpt4Response,
+  makeChatsPrompt,
+} from "../utils/langchainHandler";
 
 interface ComponentInfo {
   i: string;
@@ -69,6 +74,69 @@ Planning Agent:
   }
 }
 
-async function executionAgent (component: ComponentInfo, chats: Chat[]) {
-  if component
+async function executionAgent(
+  component: ComponentInfo,
+  chats: Chat[],
+  pageDescription: string
+) {
+  console.log(`
+---------------
+Execution Agent:
+---------------
+`);
+
+  const makeQuestionPrompt: Prompt = {
+    role: "SYSTEM",
+    content: `
+You are looking at a webpage.
+The description of the webpage: ${pageDescription}
+
+You need to create a natural language question to ask the user to achieve a given action.
+Action:
+${component.description}
+`,
+  };
+  const question = await getAiResponse([makeQuestionPrompt]);
+
+  const findUserContextPrompt: Prompt = {
+    role: "SYSTEM",
+    content: `
+Based on the conversation between the system and the user, describe the user's context.
+
+Conversation:
+${makeChatsPrompt(chats)}
+  `,
+  };
+  const userContext = await getAiResponse([findUserContextPrompt]);
+
+  const clickComponentPrompt: Prompt = {
+    role: "SYSTEM",
+    content: `
+You are the AI assistant who sees the user's web page. Based on the user's context, you have to decide what to click on in the given HTML on the web page. If you cannot decide what to click according to the context, please explain why you can't. Don't assume general context; only refer to the given user's context.
+
+Description of the web page:
+${pageDescription}
+
+HTML:
+${component.html}
+
+User's context:
+${userContext}
+
+Output needs to follow one of the JSON formats in plain text. Never provide additional context. 
+{
+  reason: <the reason why you cannot decide what to click>,
+  element: null
+}
+OR
+{
+  reason: <the reason why you need to click the element>,
+  element: {
+    description: <description of the element to click>,
+    html: <HTML of the element to click>,
+    i_attribute: <the value of i attribute of the element to click>
+  }
+}
+    `,
+  };
 }
