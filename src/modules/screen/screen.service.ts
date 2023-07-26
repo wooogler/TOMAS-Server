@@ -29,12 +29,7 @@ import {
   getUserObjective,
   isSuggestedInteraction,
 } from "../../utils/langchainHandler";
-import {
-  detectChangedElements,
-  getAllElementIs,
-  getContentHTML,
-  getHiddenElementIs,
-} from "../../utils/pageHandler";
+import { addIAttribute, getHiddenElementIs } from "../../utils/pageHandler";
 
 let globalBrowser: Browser | null = null;
 let globalPage: Page | null = null;
@@ -53,21 +48,6 @@ const NO_GLOBAL_PAGE_ERROR = new Error("Cannot find globalPage.");
 //     },
 //   }
 // );
-
-async function addIAttribute() {
-  if (globalPage) {
-    await globalPage.evaluate(() => {
-      let idCounter = 0;
-      const elements = document.querySelectorAll("*");
-      elements.forEach((el) => {
-        el.setAttribute("i", String(idCounter));
-        idCounter++;
-      });
-    });
-  } else {
-    throw NO_GLOBAL_PAGE_ERROR;
-  }
-}
 
 export async function getVisibleHtml(hiddenElementIds: string[]) {
   if (globalPage) {
@@ -161,7 +141,7 @@ export async function navigate(input: NavigateInput) {
       waitUntil: "networkidle0",
     });
 
-    await addIAttribute();
+    await addIAttribute(globalPage);
 
     const navigateAction = await createAction("GOTO", input.url);
     const hiddenElementIs = await getHiddenElementIs(globalPage);
@@ -172,204 +152,5 @@ export async function navigate(input: NavigateInput) {
   } catch (error: any) {
     console.error("Failed to navigate to the webpage.", error);
     throw error;
-  }
-}
-
-// export async function click(input: ClickInput) {
-//   try {
-//     const component = await prisma.component.findFirst({
-//       where: {
-//         i: input.i,
-//       },
-//     });
-//     const clickAction = await createAction("CLICK", "", component?.id);
-
-//     await addIAttribute();
-
-//     const preActionAllElementIs = await getAllElementIs(globalPage);
-//     const preActionHiddenElementIs = await getHiddenElementIs(globalPage);
-
-//     const preActionHTML = await getContentHTML(globalPage);
-//     const preActionURL = globalPage?.url();
-
-//     if (globalPage) {
-//       await globalPage.evaluate((i) => {
-//         const element = document.querySelector(`[i="${i}"]`) as HTMLElement;
-//         if (element) {
-//           (element as HTMLElement).click();
-//         }
-//       }, input.i);
-//       await new Promise((resolve) => setTimeout(resolve, 500));
-//     }
-
-//     const postActionAllElementIs = await getAllElementIs(globalPage);
-//     const postActionHiddenElementIs = await getHiddenElementIs(globalPage);
-//     const postActionHTML = await getContentHTML(globalPage);
-//     const postActionURL = globalPage?.url();
-
-//     if (preActionURL === postActionURL) {
-//       const { appearedElement, vanishedElement } = await detectChangedElements(
-//         preActionHTML,
-//         postActionHTML,
-//         preActionAllElementIs,
-//         postActionAllElementIs,
-//         preActionHiddenElementIs,
-//         postActionHiddenElementIs
-//       );
-
-//       if (appearedElement?.outerHTML) {
-//         console.log(simplifyHtml(appearedElement?.outerHTML).html);
-//       }
-//       if (appearedElement) {
-//         readScreen(appearedElement.outerHTML, clickAction.id);
-//       } else if (vanishedElement) {
-//         readScreen(postActionHTML, clickAction.id);
-//       } else {
-//         readScreen(postActionHTML, clickAction.id);
-//       }
-//     } else {
-//       readScreen(postActionHTML, clickAction.id);
-//     }
-//   } catch (error: any) {
-//     console.error("Failed to click on the webpage.", error);
-//     throw error;
-//   }
-// }
-
-export async function inputText(input: TextInput) {
-  const { i, value } = input;
-  try {
-    if (globalPage) {
-      await globalPage.evaluate(
-        ({ i, value }) => {
-          const element = document.querySelector(`[i="${i}"]`);
-          if (element && element.tagName.toLowerCase() === "input") {
-            (element as HTMLInputElement).value = value || "";
-          }
-        },
-        { i, value }
-      );
-      const inputAction = await createAction("INPUT", `${i}:${value}`);
-    }
-  } catch (error: any) {
-    console.error("Failed to input text on the webpage.", error);
-    throw error;
-  }
-}
-
-export async function scroll(input: ScrollInput) {
-  try {
-    if (globalPage) {
-      const { x, y, width, height } = await globalPage.evaluate((i) => {
-        const rect = document
-          .querySelector(`[i="${i}"]`)
-          ?.getBoundingClientRect();
-        if (rect) {
-          return {
-            x: rect.x,
-            y: rect.y,
-            width: rect.width,
-            height: rect.height,
-          };
-        } else {
-          throw Error("Cannot find rect for scrolling");
-        }
-      }, input.i);
-
-      await globalPage.mouse.move(x + width / 2, y + height / 2);
-
-      let previousInnerHtml;
-      let newInnerHtml = await globalPage.evaluate(
-        (i) => document.querySelector(`[i="${i}"]`)?.innerHTML,
-        input.i
-      );
-
-      while (previousInnerHtml !== newInnerHtml) {
-        await globalPage.mouse.wheel({ deltaY: 100 });
-        previousInnerHtml = newInnerHtml;
-        newInnerHtml = await globalPage.evaluate(
-          (i) => document.querySelector(`[i="${i}"]`)?.innerHTML,
-          input.i
-        );
-      }
-
-      const scrollAction = await createAction("SCROLL", input.i);
-    }
-  } catch (error: any) {
-    console.error("Failed to scroll the element.", error);
-    return error;
-  }
-}
-
-export async function hover(input: HoverInput) {
-  try {
-    if (globalPage) {
-      const { x, y, width, height } = await globalPage.evaluate((i) => {
-        const rect = document
-          .querySelector(`[i="${i}"]`)
-          ?.getBoundingClientRect();
-        if (rect) {
-          return {
-            x: rect.x,
-            y: rect.y,
-            width: rect.width,
-            height: rect.height,
-          };
-        } else {
-          throw Error("Cannot find rect for scrolling");
-        }
-      }, input.i);
-
-      // Move mouse to the center of the element
-      await globalPage.mouse.move(x + width / 2, y + height / 2);
-
-      const hoverAction = await createAction("HOVER", input.i);
-
-      // Set maximum wait time to 2 seconds
-      const maxWaitTime = 2000;
-      let newInnerHTML;
-      let previousInnerHTML = await globalPage.evaluate(
-        (i) => document.querySelector(`[i="${i}"]`)?.innerHTML,
-        input.i
-      );
-
-      // Wait for change in innerHTML or timeout
-      const changeDetected = new Promise((resolve) => {
-        const checkInterval = setInterval(async () => {
-          newInnerHTML = await globalPage!.evaluate(
-            (i) => document.querySelector(`[i="${i}"]`)?.innerHTML,
-            input.i
-          );
-          if (newInnerHTML !== previousInnerHTML) {
-            clearInterval(checkInterval);
-            resolve(true);
-          }
-        }, 500);
-      });
-
-      const timeout = new Promise((resolve) =>
-        setTimeout(() => resolve(false), maxWaitTime)
-      );
-
-      const result = await Promise.race([changeDetected, timeout]);
-    }
-  } catch (error) {
-    console.error("Failed to hover the element.", error);
-    return error;
-  }
-}
-
-export async function goBack() {
-  try {
-    if (globalPage) {
-      await globalPage.goBack();
-
-      const backAction = await createAction("BACK");
-    } else {
-      throw new Error("Cannot go back, globalPage is not defined");
-    }
-  } catch (error) {
-    console.error("Failed to go back.", error);
-    return error;
   }
 }
