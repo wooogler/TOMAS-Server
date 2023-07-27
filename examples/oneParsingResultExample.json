@@ -1,0 +1,242 @@
+[
+  {
+    "i": "79",
+    "action": "click",
+    "description": "User can skip to main content.",
+    "html": "<a href=\"#search-mask-component\" i=\"79\">\n    Skip to main content\n   </a>"
+  },
+  {
+    "i": "81",
+    "action": "click",
+    "description": "User can go to the homepage.",
+    "html": "<a href=\"/\" i=\"81\">\n   </a>"
+  },
+  {
+    "i": "161",
+    "action": "click",
+    "description": "User can open the main site navigation.",
+    "html": "<button aria-controls=\"menu-panel\" aria-expanded=\"false\" aria-label=\"Open main site navigation\" i=\"161\" type=\"button\">\n   </button>"
+  },
+  {
+    "i": "330",
+    "action": "click",
+    "description": "User can select the departing location as Los Angeles, CA.",
+    "html": "<input aria-label=\"Departing from Los Angeles, CA\" i=\"330\" role=\"button\" type=\"button\" value=\"Los Angeles, CA\">"
+  },
+  {
+    "i": "345",
+    "action": "click",
+    "description": "User can swap the departure and arrival locations.",
+    "html": "<button aria-label=\"Swap departure and arrival location\" i=\"345\" type=\"button\">\n        </button>"
+  },
+  {
+    "i": "357",
+    "action": "click",
+    "description": "User can select the arriving location as Las Vegas, NV.",
+    "html": "<input aria-label=\"Arriving at Las Vegas, NV\" i=\"357\" role=\"button\" type=\"button\" value=\"Las Vegas, NV\">"
+  },
+  {
+    "i": "463",
+    "action": "click",
+    "description": "User can change the departure date.",
+    "html": "<button aria-controls=\"dialog-date-from\" aria-expanded=\"false\" aria-label=\"Change departure date Mon, Jul 24\" i=\"463\" type=\"button\">\n            Mon, Jul 24\n           </button>"
+  },
+  {
+    "i": "472",
+    "action": "inputText",
+    "description": "User can input the departure date.",
+    "html": "<input i=\"472\" type=\"text\" value=\"Mon, Jul 24\">"
+  },
+  {
+    "i": "480",
+    "action": "click",
+    "description": "User can select the number of adult passengers.",
+    "html": "<button aria-controls=\"dialog-products\" aria-expanded=\"false\" aria-label=\"1 Adult, Add passengers\" i=\"480\" type=\"button\">\n           1 Adult\n          </button>"
+  },
+  {
+    "i": "486",
+    "action": "inputText",
+    "description": "User can input the number of adult passengers.",
+    "html": "<input i=\"486\" type=\"text\" value=\"1 Adult\">"
+  },
+  {
+    "i": "494",
+    "action": "click",
+    "description": "User can search for trips.",
+    "html": "<button aria-label=\"Search trips\" i=\"494\" type=\"button\">\n         Search\n        </button>"
+  },
+  {
+    "i": "500",
+    "action": "click",
+    "description": "User can close the 'To' dialog.",
+    "html": "<button aria-label=\"Close\" i=\"500\" type=\"button\">\n          </button>"
+  },
+  {
+    "i": "506",
+    "action": "inputText",
+    "description": "User can input the arriving location.",
+    "html": "<input aria-controls=\"hcr-autocomplete-1690224036135-listbox\" aria-expanded=\"true\" aria-label=\"Arriving at Las Vegas, NV\" i=\"506\" role=\"combobox\" type=\"text\" value=\"AS\">"
+  },
+  {
+    "i": "619",
+    "action": "click",
+    "description": "User can manage their booking.",
+    "html": "<a href=\"/manage-my-booking\" i=\"619\">\n      <span i=\"622\">\n       Manage My Booking\n      </span>\n     </a>"
+  },
+  {
+    "i": "624",
+    "action": "click",
+    "description": "User can track their bus.",
+    "html": "<a href=\"/track\" i=\"624\">\n      <span i=\"627\">\n       Bus Tracker\n      </span>\n     </a>"
+  },
+  {
+    "i": "629",
+    "action": "click",
+    "description": "User can access help and information.",
+    "html": "<a href=\"/help-and-info\" i=\"629\">\n      <span i=\"632\">\n       Help\n      </span>\n     </a>"
+  },
+  {
+    "i": "645",
+    "action": "click",
+    "description": "User can explore more travel options.",
+    "html": "<a href=\"/new\" i=\"645\">\n        <span i=\"646\">\n         Explore now\n        </span>\n        <flix-icon i=\"647\" role=\"img\">\n        </flix-icon>\n       </a>"
+  },
+  {
+    "i": "655",
+    "action": "click",
+    "description": "User can find out what onboard entertainment is available.",
+    "html": "<a href=\"/travel-info/onboard-entertainment\" i=\"655\">\n        <span i=\"656\">\n         Find out what’s playing\n        </span>\n        <flix-icon i=\"657\" role=\"img\">\n        </flix-icon>\n       </a>"
+  },
+  {
+    "i": "665",
+    "action": "click",
+    "description": "User can reserve a seat.",
+    "html": "<a href=\"/travel-info/seat-reservations\" i=\"665\">\n        <span i=\"666\">\n         Window or Aisle?\n        </span>\n        <flix-icon i=\"667\" role=\"img\">\n        </flix-icon>\n       </a>"
+  },
+  {
+    "i": "675",
+    "action": "click",
+    "description": "User can make changes to their booking.",
+    "html": "<a href=\"/manage-my-booking\" i=\"675\">\n        <span i=\"676\">\n         Discover all your options\n        </span>\n        <flix-icon i=\"677\" role=\"img\">\n        </flix-icon>\n       </a>"
+  },
+  {
+    "i": "681",
+    "action": "click",
+    "description": "User can discover all the places they can go.",
+    "html": "<a href=\"https://www.greyhound.com/bus-routes\" i=\"681\">\n     <div i=\"683\">\n      <h2 i=\"684\">\n       Discover all the places you can go\n      </h2>\n      <p i=\"685\">\n       Choose from almost 2,300 destinations with Greyhound, FlixBus and our connecting partners!\n      </p>\n      <button i=\"686\" type=\"button\">\n       Explore the map\n       <flix-icon i=\"687\" role=\"img\">\n       </flix-icon>\n      </button>\n     </div>\n    </a>"
+  },
+  {
+    "i": "686",
+    "action": "click",
+    "description": "User can explore the map.",
+    "html": "<button i=\"686\" type=\"button\">\n       Explore the map\n       <flix-icon i=\"687\" role=\"img\">\n       </flix-icon>\n      </button>"
+  },
+  {
+    "i": "697",
+    "action": "click",
+    "description": "User can find bus routes from New York.",
+    "html": "<a href=\"https://www.greyhound.com/en-us/bus-to-new-york\" i=\"697\">\n        New York\n       </a>"
+  },
+  {
+    "i": "698",
+    "action": "click",
+    "description": "User can find bus routes from Chicago.",
+    "html": "<a href=\"https://www.greyhound.com/en-us/bus-to-chicago\" i=\"698\">\n        Chicago\n       </a>"
+  },
+  {
+    "i": "699",
+    "action": "click",
+    "description": "User can find bus routes from Atlanta.",
+    "html": "<a href=\"https://www.greyhound.com/en-us/bus-to-atlanta\" i=\"699\">\n        Atlanta\n       </a>"
+  },
+  {
+    "i": "701",
+    "action": "click",
+    "description": "User can find bus routes from Omaha.",
+    "html": "<a href=\"https://www.greyhound.com/en-us/bus-to-omaha\" i=\"701\">\n        Omaha\n       </a>"
+  },
+  {
+    "i": "702",
+    "action": "click",
+    "description": "User can find bus routes from El Paso.",
+    "html": "<a href=\"https://www.greyhound.com/en-us/bus-to-el-paso\" i=\"702\">\n        El Paso\n       </a>"
+  },
+  {
+    "i": "703",
+    "action": "click",
+    "description": "User can find bus routes from Albany.",
+    "html": "<a href=\"https://www.greyhound.com/en-us/bus-to-albany-3\" i=\"703\">\n        Albany\n       </a>"
+  },
+  {
+    "i": "705",
+    "action": "click",
+    "description": "User can find bus routes from Los Angeles.",
+    "html": "<a href=\"/mobile-app\" i=\"705\">\n       Greyhound app\n      </a>"
+  },
+  {
+    "i": "708",
+    "action": "click",
+    "description": "User can find bus routes from New York.",
+    "html": "<a href=\"/track\" i=\"708\">\n       Track My Bus\n      </a>"
+  },
+  {
+    "i": "711",
+    "action": "click",
+    "description": "User can find bus routes from Houston.",
+    "html": "<a href=\"/travel-info/onboard-entertainment\" i=\"711\">\n        onboard entertainment\n       </a>"
+  },
+  {
+    "i": "767",
+    "action": "click",
+    "description": "User can expand the 'Bus Travel' section in the footer.",
+    "html": "<button aria-expanded=\"false\" i=\"767\" type=\"button\">\n        Bus Travel\n       </button>"
+  },
+  {
+    "i": "782",
+    "action": "click",
+    "description": "User can expand the 'Discover' section in the footer.",
+    "html": "<button aria-expanded=\"false\" i=\"782\" type=\"button\">\n        Discover\n       </button>"
+  },
+  {
+    "i": "799",
+    "action": "click",
+    "description": "User can expand the 'Greyhound' section in the footer.",
+    "html": "<button aria-expanded=\"false\" i=\"799\" type=\"button\">\n        Greyhound\n       </button>"
+  },
+  {
+    "i": "820",
+    "action": "click",
+    "description": "User can expand the 'Customer Service' section in the footer.",
+    "html": "<button aria-expanded=\"false\" i=\"820\" type=\"button\">\n        Customer Service\n       </button>"
+  },
+  {
+    "i": "840",
+    "action": "select",
+    "description": "User can select the Greyhound app.",
+    "html": "<a href=\"https://app.adjust.com/xe5q0k0_xc9xl7j?campaign=Footer&amp;adgroup=US-GH&amp;creative=gh-us-comPage&amp;fallback=https://www.greyhound.com/mobile-app\" i=\"840\">\n      </a>"
+  },
+  {
+    "i": "871",
+    "action": "click",
+    "description": "User can access the legal information.",
+    "html": "<a href=\"/legal\" i=\"871\">\n        Legal\n       </a>"
+  },
+  {
+    "i": "872",
+    "action": "click",
+    "description": "User can access the privacy policy.",
+    "html": "<a href=\"https://www.greyhound.com/privacy-policy\" i=\"872\">\n        Privacy Policy\n       </a>"
+  },
+  {
+    "i": "873",
+    "action": "click",
+    "description": "User can access the copyright information.",
+    "html": "<a href=\"/copyright\" i=\"873\">\n        Copyright\n       </a>"
+  },
+  {
+    "i": "874",
+    "action": "click",
+    "description": "User can access their privacy choices.",
+    "html": "<a i=\"874\">\n        Your Privacy Choices\n       </a>"
+  }
+]
