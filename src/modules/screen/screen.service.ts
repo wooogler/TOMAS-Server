@@ -31,7 +31,11 @@ import {
   getUserObjective,
   isSuggestedInteraction,
 } from "../../utils/langchainHandler";
-import { addIAttribute, getHiddenElementIs } from "../../utils/pageHandler";
+import {
+  addIAttribute,
+  getHiddenElementIs,
+  getUpdatedHtml,
+} from "../../utils/pageHandler";
 
 let globalBrowser: Browser | null = null;
 let globalPage: Page | null = null;
@@ -133,18 +137,23 @@ export async function navigate(input: NavigateInput) {
       "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1"
     );
     await globalPage.setViewport({ width: 390, height: 844 });
-    await globalPage.goto(input.url, {
-      waitUntil: "networkidle0",
-    });
 
     await addIAttribute(globalPage);
 
-    const navigateAction = await createAction("GOTO", input.url);
-    const hiddenElementIs = await getHiddenElementIs(globalPage);
-    const visibleHtml = await getVisibleHtml(hiddenElementIs);
-    const screenResult = await parsingAgent(visibleHtml, navigateAction.id);
+    const rawHtml = await getUpdatedHtml(globalPage, async () => {
+      await globalPage?.goto(input.url, {
+        waitUntil: "networkidle0",
+      });
+    });
 
-    return screenResult;
+    const navigateAction = await createAction("GOTO", input.url);
+    const simpleHtml = await simplifyHtml(rawHtml);
+    const screenDescription = await getScreenDescription(simpleHtml);
+
+    const screenResult = await parsingAgent(simpleHtml, screenDescription);
+    console.log(screenResult);
+
+    // return screenResult;
   } catch (error: any) {
     console.error("Failed to navigate to the webpage.", error);
     throw error;
