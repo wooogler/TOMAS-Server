@@ -147,7 +147,7 @@ export async function navigate(input: NavigateInput) {
     });
 
     const navigateAction = await createAction("GOTO", input.url);
-    const simpleHtml = await simplifyHtml(rawHtml);
+    const simpleHtml = await simplifyHtml(rawHtml, false);
     const screenDescription = await getScreenDescription(simpleHtml);
 
     const screenResult = await parsingAgent(simpleHtml, screenDescription);

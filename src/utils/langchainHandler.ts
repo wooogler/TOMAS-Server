@@ -14,7 +14,8 @@ export type Prompt = {
 
 const chat = new ChatOpenAI({
   openAIApiKey: process.env.OPENAI_API_KEY,
-  modelName: "gpt-3.5-turbo",
+  modelName: "gpt-3.5-turbo-16k",
+  maxTokens: -1,
   temperature: 0,
 });
 

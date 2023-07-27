@@ -126,7 +126,10 @@ export async function getUpdatedHtml(
 
     // If the highest z-index has changed, return the longest new or shown element
     let result;
-    if (initialHighestZIndex !== finalHighestZIndex) {
+    if (
+      initialHighestZIndex !== finalHighestZIndex &&
+      initialHighestZIndex !== 0
+    ) {
       const newElements = await page.evaluate(() => {
         const elements = Array.from(document.body.querySelectorAll("*"));
         const newElements: string[] = [];
@@ -163,7 +166,14 @@ export async function getUpdatedHtml(
         result = "";
       }
     } else {
-      result = await page.evaluate(() => document.body.innerHTML);
+      result = await page.evaluate((hiddenElementIds) => {
+        const clonedBody = document.body.cloneNode(true) as HTMLElement;
+        hiddenElementIds.forEach((id) => {
+          const el = clonedBody.querySelector(`[i="${id}"]`);
+          el?.parentNode?.removeChild(el);
+        });
+        return clonedBody.innerHTML;
+      }, finalHiddenElementIs);
     }
 
     // Remove 'temp' attribute after it's done being used
