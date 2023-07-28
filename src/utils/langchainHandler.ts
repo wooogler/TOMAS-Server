@@ -329,45 +329,9 @@ export function isInteractionQuestion(
   return (obj as { question: InteractionQuestion }).question !== undefined;
 }
 
+
+
 export const getPossibleInteractionDescription = async (
-  rawHtml: string,
-  possibleInteractionsInString: string,
-  screenDescription: string,
-  lastTimeResponse: string = ""
-) => {
-  const parsingPossibleInteractionPrompts: Prompt[] = [
-    {
-      role: "SYSTEM",
-      content:
-        `You are a web developer. You will have the whole html and a list of action elements with actionType and i attribute. You need to take the html into consideration, and describe what user can get after interacting with each element in list. Make sure that all elements in the list are included in your description, and your answer should only include elements in the list.
-        Consider the description of the webpage where these elements are located: ${screenDescription}` +
-        `
-        Output following JSON format in plain text. Never provide additional context.
-        
-        [
-         {
-           element: <"i" attribute of that element>
-            actionType: <action type>
-            description: <prediction of the result of that action for user>
-          },
-         ...
-        ]`,
-    },
-  ];
-
-  const htmlPrompt: Prompt = {
-    role: "HUMAN",
-    content:
-      `html is ${rawHtml} \n actions elements include: ${possibleInteractionsInString}` +
-      (lastTimeResponse == ""
-        ? `Your last time response is wrong due to the lack of some elements in the list: ${lastTimeResponse}. Please regenerate your answer and make sure that all elements in the list are included in your description, and no other elements are included.`
-        : ""),
-  };
-
-  return getAiResponse([...parsingPossibleInteractionPrompts, htmlPrompt]);
-};
-
-export const getPossibleInteractionDescriptionOneByOne = async (
   rawHtml: string,
   onePossibleInteractionsInString: string,
   screenDescription: string
