@@ -38,6 +38,10 @@ export async function addIAttribute(page: Page): Promise<void> {
       let idCounter = 0;
       const elements = Array.from(document.body.querySelectorAll("*"));
 
+      // Add 'i' attribute to the body element
+      document.body.setAttribute("i", String(idCounter));
+      idCounter++;
+
       // Check existing 'i' attribute values and set the start value
       elements.forEach((el: Element) => {
         if (el.hasAttribute("i")) {
@@ -64,34 +68,54 @@ export async function addIAttribute(page: Page): Promise<void> {
   }
 }
 
-export async function findHighestZIndex(page: Page): Promise<number> {
-  // Get the identifiers of all hidden elements
-  const hiddenElementIs = await getHiddenElementIs(page);
-
-  const highestZIndex = await page.evaluate((hiddenElementIs) => {
-    const elements = Array.from(document.body.querySelectorAll("*")).filter(
-      (element) => {
-        // Exclude elements that are hidden
-        const elementId = element.getAttribute("i");
-        return elementId ? !hiddenElementIs.includes(elementId) : true;
-      }
-    );
-
-    let highest = 0;
+export async function getHighestZIndexElementI(
+  page: Page,
+  hiddenElementIs: string[]
+): Promise<string | null> {
+  const highestZIndexElementI = await page.evaluate((hiddenElementIs) => {
+    const elements = Array.from(document.querySelectorAll("*"));
+    let highestZIndexElementI = "0";
+    let highestZIndexValue = 0;
+    let highestArea = 0;
 
     elements.forEach((element) => {
+      const elementI = element.getAttribute("i");
+
+      if (elementI && hiddenElementIs.includes(elementI)) {
+        return; // Skip the current iteration if the element is in the hiddenElementIs list
+      }
+
+      // Check if the element is a child of an element in the hiddenElementIs list
+      let parent = element.parentElement;
+      while (parent) {
+        const parentI = parent.getAttribute("i");
+        if (parentI && hiddenElementIs.includes(parentI)) {
+          return; // Skip the current iteration if the parent element is in the hiddenElementIs list
+        }
+        parent = parent.parentElement;
+      }
+
       const style = window.getComputedStyle(element);
       const zIndex = parseInt(style.zIndex, 10);
 
-      if (!isNaN(zIndex) && zIndex > highest) {
-        highest = zIndex;
+      if (!isNaN(zIndex) && elementI) {
+        const htmlElement = element as HTMLElement;
+        const area = htmlElement.offsetWidth * htmlElement.offsetHeight;
+        if (
+          zIndex > highestZIndexValue ||
+          (zIndex === highestZIndexValue && area > highestArea)
+        ) {
+          highestZIndexValue = zIndex;
+          highestZIndexElementI = elementI;
+          highestArea = area;
+        }
       }
     });
 
-    return highest;
+    return highestZIndexElementI;
   }, hiddenElementIs);
 
-  return highestZIndex;
+  return highestZIndexElementI;
 }
 
 export async function getUpdatedHtml(
@@ -99,9 +123,29 @@ export async function getUpdatedHtml(
   action: () => Promise<void>
 ) {
   if (page) {
-    // Get initial hidden elements
+    const getElementHtmlWithoutTemp = async (elementI: string | null) => {
+      if (!elementI) return "";
+      return await page.evaluate((i) => {
+        const element = document.querySelector(`[i="${i}"]`);
+        if (!element) return "";
+
+        const elementClone = element.cloneNode(true) as HTMLElement;
+        const elementsWithTemp = Array.from(
+          elementClone.querySelectorAll("[temp]")
+        );
+        elementsWithTemp.forEach((el) => {
+          el.removeAttribute("temp");
+        });
+
+        return elementClone.outerHTML;
+      }, elementI);
+    };
+    // Get initial highest z-index element's i attribute
     const initialHiddenElementIs = await getHiddenElementIs(page);
-    const initialHighestZIndex = await findHighestZIndex(page);
+    const initialHighestZIndexElementI = await getHighestZIndexElementI(
+      page,
+      initialHiddenElementIs
+    );
 
     // Perform action
     await action();
@@ -120,71 +164,44 @@ export async function getUpdatedHtml(
     // Add 'i' attribute to newly added elements
     await addIAttribute(page);
 
-    // Get hidden elements and elements without 'i' attribute after action
+    // Get highest z-index element's i attribute after action
     const finalHiddenElementIs = await getHiddenElementIs(page);
-    const finalHighestZIndex = await findHighestZIndex(page);
+    console.log("finalHiddenElementIs: ", finalHiddenElementIs);
+    const finalHighestZIndexElementI = await getHighestZIndexElementI(
+      page,
+      finalHiddenElementIs
+    );
 
-    // If the highest z-index has changed, return the longest new or shown element
-    let result;
+    const newVisibleElementIs = initialHiddenElementIs.filter(
+      (i) => !finalHiddenElementIs.includes(i)
+    );
+
+    // If the highest z-index element changed or new elements became visible, return the HTML of the new elements
     if (
-      initialHighestZIndex !== finalHighestZIndex &&
-      initialHighestZIndex !== 0
+      initialHighestZIndexElementI !== finalHighestZIndexElementI ||
+      newVisibleElementIs.length > 0
     ) {
-      const newElements = await page.evaluate(() => {
-        const elements = Array.from(document.body.querySelectorAll("*"));
-        const newElements: string[] = [];
-
-        elements.forEach((el) => {
-          if (el.hasAttribute("temp")) {
-            const tempAttrRegex = new RegExp(`\\s*temp="[^"]*"`, "g");
-            newElements.push(el.outerHTML.replace(tempAttrRegex, ""));
-          }
-        });
-
-        return newElements;
-      });
-
-      // Find the elements that were hidden and are now shown
-      const shownElementsIs = initialHiddenElementIs.filter(
-        (i) => !finalHiddenElementIs.includes(i)
+      console.log("newVisibleElementIs: ", newVisibleElementIs);
+      console.log(
+        "initialHighestZIndexElementI: ",
+        initialHighestZIndexElementI
       );
-      const shownElements = await page.evaluate((shownElementsIs) => {
-        return shownElementsIs.map(
-          (i) => document.querySelector(`[i="${i}"]`)?.outerHTML || ""
-        );
-      }, shownElementsIs);
+      console.log("finalHighestZIndexElementI: ", finalHighestZIndexElementI);
+      const elementHtmls = await Promise.all(
+        [finalHighestZIndexElementI, ...newVisibleElementIs].map(
+          getElementHtmlWithoutTemp
+        )
+      );
 
-      // Combine newly added and shown elements
-      const newAndShownElements = [...newElements, ...shownElements];
-
-      if (newAndShownElements.length > 0) {
-        // Find the longest HTML string
-        result = newAndShownElements.reduce((a, b) =>
-          a.length > b.length ? a : b
-        );
-      } else {
-        result = "";
-      }
+      // Select the longest HTML from the array
+      const longestHtml = elementHtmls.reduce((a, b) =>
+        a.length > b.length ? a : b
+      );
+      return longestHtml;
     } else {
-      result = await page.evaluate((hiddenElementIds) => {
-        const clonedBody = document.body.cloneNode(true) as HTMLElement;
-        hiddenElementIds.forEach((id) => {
-          const el = clonedBody.querySelector(`[i="${id}"]`);
-          el?.parentNode?.removeChild(el);
-        });
-        return clonedBody.innerHTML;
-      }, finalHiddenElementIs);
+      // If the highest z-index element did not change, return the updated HTML of the highest z-index element
+      return await getElementHtmlWithoutTemp(initialHighestZIndexElementI);
     }
-
-    // Remove 'temp' attribute after it's done being used
-    await page.evaluate(() => {
-      const elements = Array.from(document.body.querySelectorAll("[temp]"));
-      elements.forEach((el) => {
-        el.removeAttribute("temp");
-      });
-    });
-
-    return result;
   } else {
     throw NO_PAGE_ERROR;
   }

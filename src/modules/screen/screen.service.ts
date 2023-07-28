@@ -21,7 +21,10 @@ import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { PrismaVectorStore } from "langchain/vectorstores/prisma";
 import { minify } from "html-minifier-terser";
 import { JSDOM } from "jsdom";
-import { getPossibleInteractionDescription } from "../../utils/langchainHandler";
+import {
+  getPageName,
+  getPossibleInteractionDescription,
+} from "../../utils/langchainHandler";
 import {
   ComponentInfo,
   getComponentFeature,
@@ -186,9 +189,10 @@ export async function navigate(input: NavigateInput) {
     const navigateAction = await createAction("GOTO", input.url);
     const simpleHtml = await simplifyHtml(rawHtml, false);
     const screenDescription = await getScreenDescription(simpleHtml);
+    const pageName = await getPageName(removeAttributeI(simpleHtml));
 
     const parsingResult = await parsingAgent(simpleHtml, screenDescription);
-    await planningAgent(parsingResult, "");
+    await planningAgent(parsingResult, "", "");
 
     // return screenResult;
   } catch (error: any) {

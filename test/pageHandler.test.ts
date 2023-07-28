@@ -17,17 +17,32 @@ describe("pageHandler", () => {
       "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1"
     );
     await globalPage.setViewport({ width: 390, height: 844 });
-    await globalPage.goto("http://www.greyhound.com", {
-      waitUntil: "networkidle0",
-    });
     await addIAttribute(globalPage);
   }, 100000);
 
-  it("should find the modal elements after the action", async () => {
-    const longestHTML: string = await getUpdatedHtml(globalPage, async () => {
-      await globalPage.click("#search-mask-trip-mode-roundtrip-toggle");
+  it("should find the new elements after the action", async () => {
+    const navigatedHtml: string = await getUpdatedHtml(globalPage, async () => {
+      await globalPage.goto("http://www.greyhound.com", {
+        waitUntil: "networkidle0",
+      });
     });
 
-    console.log(longestHTML);
+    // console.log("after navigation", navigatedHtml);
+
+    const dialogHtml: string = await getUpdatedHtml(globalPage, async () => {
+      await globalPage.click("#open-burger-menu-button");
+    });
+
+    // console.log("after click dialog", dialogHtml);
+
+    // const openHtml: string = await getUpdatedHtml(globalPage, async () => {
+    //   await globalPage.click(".flix-header-burger-menu__link");
+    // });
+
+    // console.log("after menu button", openHtml);
   }, 10000);
+
+  // afterEach(async () => {
+  //   await globalBrowser.close();
+  // });
 });
