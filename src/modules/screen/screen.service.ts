@@ -119,7 +119,7 @@ export async function parsingAgent(
   }[] = possibleInteractions.map((interaction) => ({
     i: interaction.i,
     action: interaction.actionType,
-    description: getPossibleInteractionDescriptionOneByOne(
+    description: getPossibleInteractionDescription(
       rawHtml,
       JSON.stringify([interaction]),
       screenDescription
