@@ -8,6 +8,7 @@ import {
 } from "./screen.schema";
 import {
   FeatureComponent,
+  PossibleInteractions,
   extractFeatureComponents,
   parsingPossibleInteraction,
   removeAttributeI,
