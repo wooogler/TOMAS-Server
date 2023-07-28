@@ -90,18 +90,41 @@ export async function parsingAgent(
   if (!rawHtml) {
     throw Error("no html");
   }
-  const possibleInteractions = parsingPossibleInteraction(rawHtml);
+  const possibleInteractions = parsingPossibleInteraction(rawHtml).sort(
+    comparePossibleInteractions
+  );
+
   const possibleInteractionsInString = JSON.stringify(
     possibleInteractions,
     null,
     0
   );
-  const res = await getPossibleInteractionDescription(
+  //   console.log(possibleInteractionsInString);
+  let res = await getPossibleInteractionDescription(
     rawHtml,
     possibleInteractionsInString,
-    screenDescription
+    screenDescription,
+    ""
   );
-  const actionComponentsList = JSON.parse(res);
+  let actionComponentsList = JSON.parse(res);
+
+  while (
+    !(
+      possibleInteractions.length === actionComponentsList.length &&
+      possibleInteractions.every(
+        (possibleInteraction, index) =>
+          possibleInteraction.i === actionComponentsList[index].element
+      )
+    )
+  ) {
+    res = await getPossibleInteractionDescription(
+      rawHtml,
+      possibleInteractionsInString,
+      screenDescription,
+      res
+    );
+    actionComponentsList = JSON.parse(res);
+  }
   const dom = new JSDOM(rawHtml);
   const body = dom.window.document.body;
   const actionComponents = actionComponentsList.map((actionComponent: any) => {
@@ -114,7 +137,6 @@ export async function parsingAgent(
   });
   return actionComponents;
 }
-
 async function createAction(
   type: Interaction,
   value?: string,
