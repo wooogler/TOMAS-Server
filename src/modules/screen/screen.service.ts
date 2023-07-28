@@ -36,6 +36,7 @@ import {
   getHiddenElementIs,
   getUpdatedHtml,
 } from "../../utils/pageHandler";
+import { planningAgent } from "../agents";
 
 let globalBrowser: Browser | null = null;
 let globalPage: Page | null = null;
@@ -76,7 +77,7 @@ export async function getVisibleHtml(hiddenElementIds: string[]) {
   throw NO_GLOBAL_PAGE_ERROR;
 }
 
-export interface parsingResult {
+export interface ParsingResult {
   i: string;
   action: string;
   description: string;
@@ -86,7 +87,7 @@ export interface parsingResult {
 export async function parsingAgent(
   rawHtml: string | undefined,
   screenDescription: string
-): Promise<parsingResult[]> {
+): Promise<ParsingResult[]> {
   if (!rawHtml) {
     throw Error("no html");
   }
@@ -150,8 +151,8 @@ export async function navigate(input: NavigateInput) {
     const simpleHtml = await simplifyHtml(rawHtml, false);
     const screenDescription = await getScreenDescription(simpleHtml);
 
-    const screenResult = await parsingAgent(simpleHtml, screenDescription);
-    console.log(screenResult);
+    const parsingResult = await parsingAgent(simpleHtml, screenDescription);
+    await planningAgent(parsingResult, "");
 
     // return screenResult;
   } catch (error: any) {
