@@ -21,7 +21,7 @@ import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { PrismaVectorStore } from "langchain/vectorstores/prisma";
 import { minify } from "html-minifier-terser";
 import { JSDOM } from "jsdom";
-import { getPossibleInteractionDescription,getPossibleInteractionDescriptionOneByOne } from "../../utils/langchainHandler";
+import { getPossibleInteractionDescription } from "../../utils/langchainHandler";
 import {
   ComponentInfo,
   getComponentFeature,
@@ -97,76 +97,7 @@ function comparePossibleInteractions(
   }
   return 0;
 }
-
 export async function parsingAgent(
-  rawHtml: string | undefined,
-  screenDescription: string
-): Promise<ParsingResult[]> {
-  if (!rawHtml) {
-    throw Error("no html");
-  }
-  const possibleInteractions = parsingPossibleInteraction(rawHtml).sort(
-    comparePossibleInteractions
-  );
-
-  const possibleInteractionsInString = JSON.stringify(
-    possibleInteractions,
-    null,
-    0
-  );
-  //   console.log(possibleInteractionsInString);
-  let res = await getPossibleInteractionDescription(
-    rawHtml,
-    possibleInteractionsInString,
-    screenDescription,
-    ""
-  );
-  let actionComponentsList = JSON.parse(res);
-
-  while (
-    !(
-      possibleInteractions.length === actionComponentsList.length &&
-      possibleInteractions.every(
-        (possibleInteraction, index) =>
-          possibleInteraction.i === actionComponentsList[index].element
-      )
-    )
-  ) {
-    res = await getPossibleInteractionDescription(
-      rawHtml,
-      possibleInteractionsInString,
-      screenDescription,
-      res
-    );
-    actionComponentsList = JSON.parse(res);
-  }
-  const dom = new JSDOM(rawHtml);
-  const body = dom.window.document.body;
-  const actionComponents = actionComponentsList.map((actionComponent: any) => {
-    return {
-      i: actionComponent.element,
-      action: actionComponent.actionType,
-      description: actionComponent.description,
-      html: body.querySelector(`[i="${actionComponent.element}"]`)?.outerHTML,
-    };
-  });
-  return actionComponents;
-}
-async function createAction(
-  type: Interaction,
-  value?: string,
-  componentId?: string
-) {
-  return await prisma.action.create({
-    data: {
-      type,
-      value,
-      onComponent: componentId ? { connect: { id: componentId } } : undefined,
-    },
-  });
-}
-
-export async function parsingAgentOneByOne(
   rawHtml: string | undefined,
   screenDescription: string
 ): Promise<parsingResult[]> {
@@ -207,6 +138,21 @@ export async function parsingAgentOneByOne(
   }
   return results;
 }
+
+async function createAction(
+  type: Interaction,
+  value?: string,
+  componentId?: string
+) {
+  return await prisma.action.create({
+    data: {
+      type,
+      value,
+      onComponent: componentId ? { connect: { id: componentId } } : undefined,
+    },
+  });
+}
+
 
 
 
