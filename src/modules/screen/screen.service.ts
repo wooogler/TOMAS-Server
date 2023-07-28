@@ -21,7 +21,7 @@ import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { PrismaVectorStore } from "langchain/vectorstores/prisma";
 import { minify } from "html-minifier-terser";
 import { JSDOM } from "jsdom";
-import { getPossibleInteractionDescription } from "../../utils/langchainHandler";
+import { getPossibleInteractionDescription,getPossibleInteractionDescriptionOneByOne } from "../../utils/langchainHandler";
 import {
   ComponentInfo,
   getComponentFeature,
@@ -166,6 +166,51 @@ async function createAction(
   });
 }
 
+export async function parsingAgentOneByOne(
+  rawHtml: string | undefined,
+  screenDescription: string
+): Promise<parsingResult[]> {
+  if (!rawHtml) {
+    throw Error("no html");
+  }
+  const possibleInteractions = parsingPossibleInteraction(rawHtml).sort(
+    comparePossibleInteractions
+  );
+
+  const dom = new JSDOM(rawHtml);
+  const body = dom.window.document.body;
+
+  const actionComponents: {
+    i: string;
+    action: string;
+    description: Promise<string>;
+    html: string | undefined;
+  }[] = possibleInteractions.map((interaction) => ({
+    i: interaction.i,
+    action: interaction.actionType,
+    description: getPossibleInteractionDescriptionOneByOne(
+      rawHtml,
+      JSON.stringify([interaction]),
+      screenDescription
+    ),
+    html: body.querySelector(`[i="${interaction.i}"]`)?.outerHTML,
+  }));
+  const results: parsingResult[] = [];
+  for (const item of actionComponents) {
+    const description: string = await item.description; // 等待 Promise 结果
+    results.push({
+      i: item.i,
+      action: item.action,
+      description,
+      html: item.html!,
+    });
+  }
+  return results;
+}
+
+
+
+
 export async function navigate(input: NavigateInput) {
   try {
     globalBrowser = await puppeteer.launch({ headless: false });
@@ -196,3 +241,6 @@ export async function navigate(input: NavigateInput) {
     throw error;
   }
 }
+
+
+
