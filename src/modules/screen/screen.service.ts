@@ -84,6 +84,19 @@ export interface ParsingResult {
   html: string;
 }
 
+function comparePossibleInteractions(
+  a: PossibleInteractions,
+  b: PossibleInteractions
+) {
+  if (parseInt(a.i) < parseInt(b.i)) {
+    return -1;
+  }
+  if (parseInt(a.i) > parseInt(b.i)) {
+    return 1;
+  }
+  return 0;
+}
+
 export async function parsingAgent(
   rawHtml: string | undefined,
   screenDescription: string
