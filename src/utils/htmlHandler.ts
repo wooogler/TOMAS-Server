@@ -149,9 +149,10 @@ export const simplifyHtml = (html: string, removeI: boolean = true) => {
             "aria-label",
             "role",
             "checked",
-            "value",
             "aria-expanded",
             "aria-controls",
+            "readonly",
+            "role",
           ]
         : [
             "i",
@@ -160,9 +161,10 @@ export const simplifyHtml = (html: string, removeI: boolean = true) => {
             "aria-label",
             "role",
             "checked",
-            "value",
             "aria-expanded",
             "aria-controls",
+            "readonly",
+            "role",
           ],
       []
     );
@@ -376,10 +378,18 @@ export function parsingPossibleInteraction(
         actionType = "select";
         break;
     }
-    possibleInteractions.push({
-      actionType: actionType,
-      i: interactiveElement.getAttribute("i")!,
-    });
+    // filter out readonly text input
+    if (
+      !(
+        interactiveElement.hasAttribute("readonly") &&
+        interactiveElement.getAttribute("type") === "text"
+      )
+    ) {
+      possibleInteractions.push({
+        actionType: actionType,
+        i: interactiveElement.getAttribute("i")!,
+      });
+    }
   });
 
   return possibleInteractions;
