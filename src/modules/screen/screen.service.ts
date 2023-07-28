@@ -100,7 +100,7 @@ function comparePossibleInteractions(
 export async function parsingAgent(
   rawHtml: string | undefined,
   screenDescription: string
-): Promise<parsingResult[]> {
+): Promise<ParsingResult[]> {
   if (!rawHtml) {
     throw Error("no html");
   }
@@ -126,7 +126,7 @@ export async function parsingAgent(
     ),
     html: body.querySelector(`[i="${interaction.i}"]`)?.outerHTML,
   }));
-  const results: parsingResult[] = [];
+  const results: ParsingResult[] = [];
   for (const item of actionComponents) {
     const description: string = await item.description; // 等待 Promise 结果
     results.push({
