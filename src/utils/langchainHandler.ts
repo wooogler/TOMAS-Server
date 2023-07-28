@@ -367,3 +367,25 @@ export const getPossibleInteractionDescription = async (
   return getAiResponse([...parsingPossibleInteractionPrompts, htmlPrompt]);
 };
 
+export const getPossibleInteractionDescriptionOneByOne = async (
+  rawHtml: string,
+  onePossibleInteractionsInString: string,
+  screenDescription: string
+) => {
+  const parsingPossibleInteractionPrompts: Prompt[] = [
+    {
+      role: "SYSTEM",
+      content:
+        `You are a web developer. You will have the whole html and an action element with actionType and i attribute. You need to take the html into consideration, and describe what user can get after interacting with that element.
+        Consider the description of the webpage where these elements are located:  ${screenDescription}` +
+        `Output the purpose using "To ~" without providing additional context.`,
+    },
+  ];
+
+  const htmlPrompt: Prompt = {
+    role: "HUMAN",
+    content: `html is ${rawHtml} \n actions elements include: ${onePossibleInteractionsInString}`,
+  };
+
+  return getAiResponse([...parsingPossibleInteractionPrompts, htmlPrompt]);
+};
