@@ -9,18 +9,18 @@ export async function getHiddenElementIs(page: Page | null) {
       const hiddenElementIs: string[] = [];
       const elements = document.body.querySelectorAll("*");
       elements.forEach((el) => {
-        const style = window.getComputedStyle(el);
-        const widthInPixels = parseInt(style.width);
-        const heightInPixels = parseInt(style.height);
+        const rect = el.getBoundingClientRect();
         if (
-          style &&
-          (style.display === "none" ||
-            style.visibility === "hidden" ||
-            widthInPixels <= 1 ||
-            heightInPixels <= 1)
+          rect.width === 0 ||
+          rect.height === 0 ||
+          rect.bottom < 0 ||
+          rect.top > window.innerHeight ||
+          rect.left > window.innerWidth ||
+          rect.right < 0
         ) {
           const i = el.getAttribute("i");
           if (i) hiddenElementIs.push(i);
+          return;
         }
       });
 
@@ -76,42 +76,51 @@ export async function getHighestZIndexElementI(
     const elements = Array.from(document.querySelectorAll("*"));
     let highestZIndexElementI = "0";
     let highestZIndexValue = 0;
-    let highestArea = 0;
+    let longestHtmlLength = 0; // HTML 내용의 길이를 추적하는 변수
 
     elements.forEach((element) => {
       const elementI = element.getAttribute("i");
+      const style = window.getComputedStyle(element);
+      const position = style.position;
+      const zIndex = parseInt(style.zIndex, 10);
+
+      console.log(
+        `Element i: ${elementI}, zIndex: ${zIndex}, position: ${position}`
+      );
 
       if (elementI && hiddenElementIs.includes(elementI)) {
-        return; // Skip the current iteration if the element is in the hiddenElementIs list
+        console.log(`Skipping element with i: ${elementI} (hidden)`);
+        return;
       }
 
-      // Check if the element is a child of an element in the hiddenElementIs list
-      let parent = element.parentElement;
-      while (parent) {
-        const parentI = parent.getAttribute("i");
-        if (parentI && hiddenElementIs.includes(parentI)) {
-          return; // Skip the current iteration if the parent element is in the hiddenElementIs list
-        }
-        parent = parent.parentElement;
+      if (position === "static") {
+        console.log(`Skipping element with i: ${elementI} (position static)`);
+        return;
       }
-
-      const style = window.getComputedStyle(element);
-      const zIndex = parseInt(style.zIndex, 10);
 
       if (!isNaN(zIndex) && elementI) {
         const htmlElement = element as HTMLElement;
-        const area = htmlElement.offsetWidth * htmlElement.offsetHeight;
+        const htmlLength = htmlElement.outerHTML.length; // 요소의 전체 HTML 길이를 구함
+        console.log(
+          `HTML length for element with i: ${elementI} is ${htmlLength}`
+        );
         if (
           zIndex > highestZIndexValue ||
-          (zIndex === highestZIndexValue && area > highestArea)
+          (zIndex === highestZIndexValue && htmlLength > longestHtmlLength) // 길이 비교
         ) {
           highestZIndexValue = zIndex;
           highestZIndexElementI = elementI;
-          highestArea = area;
+          longestHtmlLength = htmlLength; // 길이 업데이트
+          console.log(
+            `New highest zIndex element found: i: ${elementI}, zIndex: ${zIndex}, HTML length: ${htmlLength}`
+          );
         }
       }
     });
 
+    console.log(
+      `Final highest zIndex element: i: ${highestZIndexElementI}, zIndex: ${highestZIndexValue}`
+    );
     return highestZIndexElementI;
   }, hiddenElementIs);
 
