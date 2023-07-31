@@ -18,20 +18,20 @@ describe("pageHandler", () => {
     );
     await globalPage.setViewport({ width: 390, height: 844 });
     await addIAttribute(globalPage);
-  }, 100000);
+  }, 10000);
 
   it("should find the new elements after the action", async () => {
     const navigatedHtml: string = await getUpdatedHtml(globalPage, async () => {
-      await globalPage.goto("http://www.greyhound.com", {
+      await globalPage.goto("http://www.amtrak.com", {
         waitUntil: "networkidle0",
       });
     });
 
-    // console.log("after navigation", navigatedHtml);
+    console.log("after navigation", navigatedHtml);
 
-    const dialogHtml: string = await getUpdatedHtml(globalPage, async () => {
-      await globalPage.click("#open-burger-menu-button");
-    });
+    // const dialogHtml: string = await getUpdatedHtml(globalPage, async () => {
+    //   await globalPage.click("#mat-input-0");
+    // });
 
     // console.log("after click dialog", dialogHtml);
 
@@ -40,7 +40,7 @@ describe("pageHandler", () => {
     // });
 
     // console.log("after menu button", openHtml);
-  }, 10000);
+  }, 20000);
 
   // afterEach(async () => {
   //   await globalBrowser.close();
