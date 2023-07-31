@@ -1,5 +1,5 @@
 import puppeteer, { Browser, Page } from "puppeteer";
-import { addIAttribute, getUpdatedHtml } from "../src/utils/pageHandler";
+import { addIAttribute, trackModalChanges } from "../src/utils/pageHandler";
 import { getVisibleHtml } from "../src/modules/screen/screen.service";
 
 describe("pageHandler", () => {
@@ -21,14 +21,37 @@ describe("pageHandler", () => {
 
   it("should find the new elements after the action", async () => {
     // await getUpdatedHtml(globalPage, async () => {
-    await globalPage.goto("http://www.amtrak.com", {
-      waitUntil: "networkidle0",
+    await trackModalChanges(globalPage, async () => {
+      await globalPage.goto("http://www.greyhound.com", {
+        waitUntil: "networkidle0",
+      });
     });
     await addIAttribute(globalPage);
     // });
 
-    await getUpdatedHtml(globalPage, async () => {
-      await globalPage.click("#onetrust-accept-btn-handler");
+    await trackModalChanges(globalPage, async () => {
+      await globalPage.click("#open-burger-menu-button");
+    });
+
+    await trackModalChanges(globalPage, async () => {
+      await globalPage.click(".flix-header-burger-menu__link");
+    });
+    await trackModalChanges(globalPage, async () => {
+      await globalPage.click(
+        'button.flix-header-burger-menu__link[data-popup="language-selection-popup"]'
+      );
+    });
+
+    await trackModalChanges(globalPage, async () => {
+      await globalPage.click("#close-button");
+    });
+
+    await trackModalChanges(globalPage, async () => {
+      await globalPage.click("#close-burger-menu-button");
+    });
+
+    await trackModalChanges(globalPage, async () => {
+      await globalPage.click(".hcr-input__field-7-6-0");
     });
   }, 20000);
 
