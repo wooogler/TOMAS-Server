@@ -1,5 +1,4 @@
 import { Page } from "puppeteer";
-import { JSDOM } from "jsdom";
 
 const NO_PAGE_ERROR = new Error("Cannot find a page.");
 
