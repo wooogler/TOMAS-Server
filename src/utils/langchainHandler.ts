@@ -372,21 +372,3 @@ export const getPossibleInteractionDescription = async (
 
   return getAiResponse([...parsingPossibleInteractionPrompts, htmlPrompt]);
 };
-
-export const getPageName = async (screenHtml: string) => {
-  const makePageNamePrompt: Prompt = {
-    role: "SYSTEM",
-    content: `You are a web developer. and you read the body HTML of a given webpage and name the webpage. Output a webpage name as ~ Page`,
-  };
-
-  const htmlPrompt: Prompt = {
-    role: "HUMAN",
-    content: screenHtml,
-  };
-  console.log(screenHtml);
-
-  const pageName = await getAiResponse([makePageNamePrompt, htmlPrompt]);
-  console.log("Page Name: ", pageName);
-
-  return pageName;
-};
