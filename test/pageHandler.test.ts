@@ -1,33 +1,20 @@
-import puppeteer, { Browser, Page } from "puppeteer";
-import { addIAttribute, getUpdatedHtml } from "../src/utils/pageHandler";
-import { getVisibleHtml } from "../src/modules/screen/screen.service";
+import { PageHandler } from "../src/utils/pageHandler";
 
 describe("pageHandler", () => {
-  let globalBrowser: Browser;
-  let globalPage: Page;
+  const pageHandler = new PageHandler();
 
-  const NO_GLOBAL_PAGE_ERROR = new Error("Cannot find globalPage.");
-
-  beforeEach(async () => {
-    globalBrowser = await puppeteer.launch({ headless: false });
-    const context = await globalBrowser.createIncognitoBrowserContext(); // Create new incognito context
-    globalPage = await context.newPage();
-
-    await globalPage.setUserAgent(
-      "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1"
-    );
-    await globalPage.setViewport({ width: 390, height: 844 });
-    await globalPage.goto("http://www.greyhound.com", {
-      waitUntil: "networkidle0",
-    });
-    await addIAttribute(globalPage);
-  }, 100000);
-
-  it("should find the modal elements after the action", async () => {
-    const longestHTML: string = await getUpdatedHtml(globalPage, async () => {
-      await globalPage.click("#search-mask-trip-mode-roundtrip-toggle");
-    });
-
-    console.log(longestHTML);
+  beforeAll(async () => {
+    await pageHandler.initialize();
   }, 10000);
+
+  test("navigate and interact with page", async () => {
+    await pageHandler.navigate("https://www.greyhound.com");
+    await pageHandler.click('button[aria-label="Search trips"]');
+  }, 50000);
+
+  // Other tests if needed...
+
+  // afterAll(async () => {
+  //   await pageHandler.close();
+  // });
 });

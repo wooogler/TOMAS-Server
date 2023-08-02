@@ -9,22 +9,27 @@ import { ParsingResult } from "./screen/screen.service";
 
 export async function planningAgent(
   components: ParsingResult[],
-  userContext: string
+  userContext: string,
+  systemContext: string
 ) {
   const planningActionPrompt: Prompt = {
     role: "SYSTEM",
     content: `
-You are the AI that creates a plan to interact with the web page based on the user's context.
+You are the AI that creates a plan to interact with the main web page based on the user's and system's contexts.
 
-You need to plan the action sequence using following possible actions on the webpage.
+You need to plan the action sequence using the following possible actions on the webpage.
 Possible actions:
 ${components
   .map((comp, tmpIndex) => `- ${comp.description} (i=${tmpIndex})`)
   .join("\n")}
 
-Actions should be selected in order to achieve what the user wants: The user wants to travel from South Bend to LA by bus.
+Actions should be selected in order to achieve what the user wants: The user wants to travel from South Bend to LA by bus. ${userContext}
 
-Return the plan as the list of actions as a numbered list in the format:
+Actions should reflect the results of the interactions the system has executed before: ${systemContext}
+
+First, describe the most effective interaction plan in natural language by referring to the user's and system's contexts.
+
+Then, return the plan as the list of actions as a numbered list in the format:
 
 #. <First action> (i=<i>)
 #. <Second action> (i=<i>)
