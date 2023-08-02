@@ -1,6 +1,71 @@
-import { Page } from "puppeteer";
+import puppeteer, { Browser, Page } from "puppeteer";
 
 const NO_PAGE_ERROR = new Error("Cannot find a page.");
+
+export class PageHandler {
+  private browser: Browser | null = null;
+  private page: Page | null = null;
+
+  async initialize() {
+    this.browser = await puppeteer.launch({ headless: false });
+    const context = await this.browser?.createIncognitoBrowserContext();
+    this.page = await context.newPage();
+    await this.page.setUserAgent(
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1"
+    );
+    await this.page.setViewport({ width: 390, height: 844 });
+  }
+
+  private async getPage() {
+    if (!this.page) {
+      throw new Error("Page is not initialized. Please call initialize first.");
+    }
+    return this.page;
+  }
+
+  private async getElement(selector: string) {
+    const page = await this.getPage();
+    const element = await page.$(selector);
+    if (!element) {
+      throw new Error(`Element with selector ${selector} not found.`);
+    }
+    return element;
+  }
+
+  async navigate(url: string) {
+    const page = await this.getPage();
+    return await trackModalChanges(page, async () => {
+      await page.goto(url, {
+        waitUntil: "networkidle0",
+      });
+    });
+  }
+
+  async click(selector: string) {
+    const page = await this.getPage();
+    const element = await this.getElement(selector);
+    return await trackModalChanges(page, async () => {
+      await element.click();
+    });
+  }
+
+  async inputText(selector: string, text: string) {
+    const page = await this.getPage();
+    const element = await this.getElement(selector);
+    return await trackModalChanges(page, async () => {
+      await element.type(text);
+    });
+  }
+
+  async close() {
+    if (this.page) {
+      await this.page.close();
+    }
+    if (this.browser) {
+      await this.browser.close();
+    }
+  }
+}
 
 export async function getHiddenElementIs(page: Page | null) {
   if (page) {
@@ -73,6 +138,50 @@ export async function addIAttribute(page: Page): Promise<void> {
   } else {
     throw NO_PAGE_ERROR;
   }
+}
+
+import { JSDOM } from "jsdom";
+
+function findRepeatingComponents(html: string) {
+  const dom = new JSDOM(html);
+  const body = dom.window.document.body;
+
+  function createFrequencyMap(element: Element): Map<string, number> {
+    const frequencyMap: Map<string, number> = new Map();
+
+    element.childNodes.forEach((child) => {
+      if (child.nodeType === 1) {
+        const childElement = child as Element;
+
+        Array.from(childElement.classList).forEach((className) => {
+          frequencyMap.set(className, (frequencyMap.get(className) || 0) + 1);
+        });
+
+        Array.from(childElement.attributes).forEach((attr) => {
+          const attrKey = `${attr.name}=${attr.value}`;
+          frequencyMap.set(attrKey, (frequencyMap.get(attrKey) || 0) + 1);
+        });
+      }
+    });
+    return frequencyMap;
+  }
+
+  function traverseAndFind(element: Element): Element | null {
+    const frequencyMap = createFrequencyMap(element);
+
+    for (const frequency of frequencyMap.values()) {
+      if (frequency >= 3) return element;
+    }
+
+    for (const child of Array.from(element.children)) {
+      const result = traverseAndFind(child as Element);
+      if (result) return result;
+    }
+
+    return null;
+  }
+
+  return traverseAndFind(body);
 }
 
 async function findModals(
@@ -149,14 +258,25 @@ function getTopmostModal(
 export async function trackModalChanges(
   page: Page,
   action: () => Promise<void>
-): Promise<{ modalI: string | null; html: string }> {
+): Promise<{
+  modalI: string | null;
+  html: string;
+}> {
   // Initial check for modals
   const initialHiddenElementIs = await getHiddenElementIs(page);
   const initialModals = await findModals(page, initialHiddenElementIs);
+  const initialUrl = page.url();
 
   // Perform the given action
+  const navigationPromise = page.waitForNavigation({
+    waitUntil: "networkidle0",
+  });
   await action();
-  await new Promise((r) => setTimeout(r, 500));
+  if (page.url() !== initialUrl) {
+    await navigationPromise;
+  } else {
+    await new Promise((r) => setTimeout(r, 2000));
+  }
 
   await addIAttribute(page);
 
@@ -165,27 +285,49 @@ export async function trackModalChanges(
   const finalModals = await findModals(page, finalHiddenElementIs);
   const topmostModal = getTopmostModal(finalModals);
 
-  console.log(topmostModal ? topmostModal.i : "original");
+  const getFilteredHtml = async (
+    html: string,
+    hiddenElementIs: string[]
+  ): Promise<string> => {
+    return await page.evaluate(
+      (html, hiddenElementIs) => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, "text/html");
+        hiddenElementIs.forEach((hiddenI) => {
+          const hiddenEl = doc.querySelector(`[i="${hiddenI}"]`);
+          if (hiddenEl) hiddenEl.remove();
+        });
+        return doc.body.innerHTML; // <body> 태그 내부의 HTML만 반환
+      },
+      html,
+      hiddenElementIs
+    );
+  };
+
+  const html = await page.content();
+  const filteredHtml = topmostModal
+    ? topmostModal.html
+    : await getFilteredHtml(html, finalHiddenElementIs);
+  const potentialComponents = findRepeatingComponents(filteredHtml);
+  console.log(potentialComponents?.outerHTML);
 
   // Compare initial and final modals to determine changes
   if (initialModals.length === 0 && finalModals.length === 0) {
-    const html = await page.content();
-    return { modalI: null, html };
+    return { modalI: null, html: filteredHtml };
   } else if (initialModals.length === 0 && finalModals.length > 0) {
     // New modal appeared
     return {
       modalI: topmostModal?.i || null,
-      html: topmostModal?.html || "",
+      html: filteredHtml,
     };
   } else if (initialModals.length > 0 && finalModals.length === 0) {
     // Modal disappeared
-    const html = await page.content();
-    return { modalI: null, html };
+    return { modalI: null, html: filteredHtml };
   } else {
     // Modal changed or stayed the same
     return {
       modalI: topmostModal?.i || null,
-      html: topmostModal?.html || "",
+      html: filteredHtml,
     };
   }
 }
