@@ -1,5 +1,4 @@
 import { Chat, Prisma } from "@prisma/client";
-import { FewShotPromptTemplate } from "langchain";
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import {
   AIChatMessage,
@@ -335,8 +334,6 @@ export function isInteractionQuestion(
   return (obj as { question: InteractionQuestion }).question !== undefined;
 }
 
-
-
 export const getPossibleInteractionDescription = async (
   rawHtml: string,
   onePossibleInteractionsInString: string,
@@ -359,3 +356,17 @@ export const getPossibleInteractionDescription = async (
 
   return getAiResponse([...parsingPossibleInteractionPrompts, htmlPrompt]);
 };
+
+export async function getUserContext(chats: Chat[]) {
+  const findUserContextPrompt: Prompt = {
+    role: "SYSTEM",
+    content: `
+      Based on the conversation between the system and the user, describe the user's context.
+      
+      Conversation:
+      ${makeChatsPrompt(chats)}
+        `,
+  };
+  const userContext = await getAiResponse([findUserContextPrompt]);
+  return userContext;
+}

@@ -2,13 +2,17 @@ import { Chat } from "@prisma/client";
 import {
   Prompt,
   getAiResponse,
-  getGpt4Response,
-  makeChatsPrompt,
+  getUserContext,
 } from "../utils/langchainHandler";
 import { ParsingResult } from "./screen/screen.service";
+export interface taskList {
+  i: string;
+  description: string;
+}
 
 export async function planningAgent(
   components: ParsingResult[],
+  userObjective: string,
   userContext: string,
   systemContext: string
 ) {
@@ -23,7 +27,7 @@ ${components
   .map((comp, tmpIndex) => `- ${comp.description} (i=${tmpIndex})`)
   .join("\n")}
 
-Actions should be selected in order to achieve what the user wants: The user wants to travel from South Bend to LA by bus. ${userContext}
+Actions should be selected in order to achieve what the user wants: ${userObjective}. ${userContext}
 
 Actions should reflect the results of the interactions the system has executed before: ${systemContext}
 
@@ -35,7 +39,7 @@ Then, return the plan as the list of actions as a numbered list in the format:
 #. <Second action> (i=<i>)
 
 The entries must be consecutively numbered, starting with 1. The number of each entry must be followed by a period.
-Do not include any headers before your list or follow your list with any other output.
+Do not include any headers before your list or follow your list with any other output. No other information should be included in the output.
     `,
   };
   console.log(`
@@ -44,8 +48,8 @@ Planning Agent:
 ---------------
 `);
   console.log(planningActionPrompt.content);
-
-  const response = await getGpt4Response([planningActionPrompt]);
+  const response = await getAiResponse([planningActionPrompt]);
+  //   const response = await getGpt4Response([planningActionPrompt]);
   // const extractFirstItemIValue = (input: string): number | null => {
   //   const lines = input.split("\n");
   //   const firstLine = lines[0];
@@ -53,13 +57,32 @@ Planning Agent:
   //   return match ? parseInt(match[1], 10) : null;
   // };
 
-  console.log(response);
+  //   console.log(response);
+  // Here we assume the response is in the format:
+  // 1. <First action> (i=<i>)
+  // 2. <Second action> (i=<i>)
+  // ...
+  const filter: RegExp = /^\d+\./;
+  const tasks = response.split("\n").filter((line) => filter.test(line));
+  console.log(tasks);
+  const taskList: taskList[] = [];
+  for (const task of tasks) {
+    const match = task.match(/(\d+)\. (.*) \(i=(\d+)\)/);
+    if (match) {
+      const i = match[3];
+      const description = match[2];
+      taskList.push({ i, description });
+    }
+  }
+
   // const firstItemI = extractFirstItemIValue(response);
   // if (firstItemI) {
   //   return components[firstItemI];
   // } else {
   //   throw new Error("No plans");
   // }
+
+  return taskList;
 }
 
 async function executionAgent(
@@ -85,17 +108,18 @@ ${component.description}
 `,
   };
   const question = await getAiResponse([makeQuestionPrompt]);
+  const userContext = await getUserContext(chats);
 
-  const findUserContextPrompt: Prompt = {
-    role: "SYSTEM",
-    content: `
-Based on the conversation between the system and the user, describe the user's context.
+  //   const findUserContextPrompt: Prompt = {
+  //     role: "SYSTEM",
+  //     content: `
+  // Based on the conversation between the system and the user, describe the user's context.
 
-Conversation:
-${makeChatsPrompt(chats)}
-  `,
-  };
-  const userContext = await getAiResponse([findUserContextPrompt]);
+  // Conversation:
+  // ${makeChatsPrompt(chats)}
+  //   `,
+  //   };
+  //   const userContext = await getAiResponse([findUserContextPrompt]);
 
   const clickComponentPrompt: Prompt = {
     role: "SYSTEM",

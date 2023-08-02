@@ -8,13 +8,15 @@
       "type": "node",
       "request": "launch",
       "name": "Launch Program",
-      "skipFiles": [
-        "<node_internals>/**"
-      ],
-      "program": "${workspaceFolder}/src/utils/pageHandler.ts",
-      "outFiles": [
-        "${workspaceFolder}/**/*.js"
-      ]
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "args": ["${workspaceFolder}/src/app.ts"]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "test",
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "args": ["${workspaceFolder}/src/test.ts"]
     }
   ]
 }
