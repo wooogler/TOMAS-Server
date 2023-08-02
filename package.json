@@ -39,6 +39,7 @@
     "langchain": "^0.0.96",
     "openai": "^3.3.0",
     "pgvector": "^0.1.4",
+    "pnpm": "^8.6.11",
     "prisma": "^5.0.0",
     "puppeteer": "^19.7.2",
     "zod": "^3.21.4",
