@@ -1,45 +1,23 @@
-import puppeteer, { Browser, Page } from "puppeteer";
-import {
-  NavigateInput,
-  ClickInput,
-  HoverInput,
-  ScrollInput,
-  TextInput,
-} from "./screen.schema";
-import {
-  FeatureComponent,
-  PossibleInteractions,
-  extractFeatureComponents,
-  parsingPossibleInteraction,
-  removeAttributeI,
-  simplifyHtml,
-} from "../../utils/htmlHandler";
-import prisma from "../../utils/prisma";
-import { Component, Interaction, Prisma } from "@prisma/client";
-import { ChatOpenAI } from "langchain/chat_models/openai";
-import { OpenAIEmbeddings } from "langchain/embeddings/openai";
-import { PrismaVectorStore } from "langchain/vectorstores/prisma";
+import { Interaction } from "@prisma/client";
 import { minify } from "html-minifier-terser";
 import { JSDOM } from "jsdom";
-import { getPossibleInteractionDescription } from "../../utils/langchainHandler";
+import { Browser, Page } from "puppeteer";
 import {
-  ComponentInfo,
-  getComponentFeature,
-  getComponentInfo,
-  getInteractionOrQuestion,
+  PossibleInteractions,
+  parsingPossibleInteraction,
+  simplifyHtml,
+} from "../../utils/htmlHandler";
+import {
+  getPossibleInteractionDescription,
   getScreenDescription,
-  getTaskOrder,
-  getUserObjective,
-  isSuggestedInteraction,
   getUserContext,
+  getUserObjective,
 } from "../../utils/langchainHandler";
-import {
-  addIAttribute,
-  getHiddenElementIs,
-  PageHandler,
-} from "../../utils/pageHandler";
+import { PageHandler } from "../../utils/pageHandler";
+import prisma from "../../utils/prisma";
+import { executionAgent, planningAgent } from "../agents";
 import { getChats } from "../chat/chat.service";
-import { planningAgent } from "../agents";
+import { NavigateInput } from "./screen.schema";
 
 let globalBrowser: Browser | null = null;
 let globalPage: Page | null = null;
@@ -187,6 +165,13 @@ export async function navigate(input: NavigateInput) {
       // Get first task
       const task = taskList[0];
       if (task) {
+        await executionAgent(
+          page,
+          parsingResult.find((item) => item.i === task.i)!,
+          screenDescription
+        );
+      } else {
+        break;
       }
     }
 
