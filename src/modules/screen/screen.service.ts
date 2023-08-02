@@ -100,7 +100,6 @@ function comparePossibleInteractions(
   }
   return 0;
 }
-
 export async function parsingAgent(
   rawHtml: string | undefined,
   screenDescription: string
@@ -112,49 +111,37 @@ export async function parsingAgent(
     comparePossibleInteractions
   );
 
-  const possibleInteractionsInString = JSON.stringify(
-    possibleInteractions,
-    null,
-    0
-  );
-  //   console.log(possibleInteractionsInString);
-  let res = await getPossibleInteractionDescription(
-    rawHtml,
-    possibleInteractionsInString,
-    screenDescription,
-    ""
-  );
-  let actionComponentsList = JSON.parse(res);
-
-  while (
-    !(
-      possibleInteractions.length === actionComponentsList.length &&
-      possibleInteractions.every(
-        (possibleInteraction, index) =>
-          possibleInteraction.i === actionComponentsList[index].element
-      )
-    )
-  ) {
-    res = await getPossibleInteractionDescription(
-      rawHtml,
-      possibleInteractionsInString,
-      screenDescription,
-      res
-    );
-    actionComponentsList = JSON.parse(res);
-  }
   const dom = new JSDOM(rawHtml);
   const body = dom.window.document.body;
-  const actionComponents = actionComponentsList.map((actionComponent: any) => {
-    return {
-      i: actionComponent.element,
-      action: actionComponent.actionType,
-      description: actionComponent.description,
-      html: body.querySelector(`[i="${actionComponent.element}"]`)?.outerHTML,
-    };
-  });
-  return actionComponents;
+
+  const actionComponents: {
+    i: string;
+    action: string;
+    description: Promise<string>;
+    html: string | undefined;
+  }[] = possibleInteractions.map((interaction) => ({
+    i: interaction.i,
+    action: interaction.actionType,
+    description: getPossibleInteractionDescription(
+      rawHtml,
+      JSON.stringify([interaction]),
+      screenDescription
+    ),
+    html: body.querySelector(`[i="${interaction.i}"]`)?.outerHTML,
+  }));
+  const results: ParsingResult[] = [];
+  for (const item of actionComponents) {
+    const description: string = await item.description; // 等待 Promise 结果
+    results.push({
+      i: item.i,
+      action: item.action,
+      description,
+      html: item.html!,
+    });
+  }
+  return results;
 }
+
 async function createAction(
   type: Interaction,
   value?: string,
@@ -168,6 +155,10 @@ async function createAction(
     },
   });
 }
+
+
+
+
 
 export async function navigate(input: NavigateInput) {
   try {
@@ -200,3 +191,6 @@ export async function navigate(input: NavigateInput) {
     throw error;
   }
 }
+
+
+
