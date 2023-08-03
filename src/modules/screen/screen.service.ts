@@ -1,46 +1,23 @@
-import puppeteer, { Browser, Page } from "puppeteer";
-import {
-  NavigateInput,
-  ClickInput,
-  HoverInput,
-  ScrollInput,
-  TextInput,
-} from "./screen.schema";
-import {
-  FeatureComponent,
-  PossibleInteractions,
-  extractFeatureComponents,
-  parsingPossibleInteraction,
-  removeAttributeI,
-  simplifyHtml,
-} from "../../utils/htmlHandler";
-import prisma from "../../utils/prisma";
-import { Component, Interaction, Prisma } from "@prisma/client";
-import { ChatOpenAI } from "langchain/chat_models/openai";
-import { OpenAIEmbeddings } from "langchain/embeddings/openai";
-import { PrismaVectorStore } from "langchain/vectorstores/prisma";
+import { Interaction } from "@prisma/client";
 import { minify } from "html-minifier-terser";
 import { JSDOM } from "jsdom";
+import { Browser, Page } from "puppeteer";
 import {
-  getPageName,
+  PossibleInteractions,
+  parsingPossibleInteraction,
+  simplifyHtml,
+} from "../../utils/htmlHandler";
+import {
   getPossibleInteractionDescription,
-} from "../../utils/langchainHandler";
-import {
-  ComponentInfo,
-  getComponentFeature,
-  getComponentInfo,
-  getInteractionOrQuestion,
   getScreenDescription,
-  getTaskOrder,
+  getUserContext,
   getUserObjective,
-  isSuggestedInteraction,
 } from "../../utils/langchainHandler";
-import {
-  addIAttribute,
-  getHiddenElementIs,
-  getUpdatedHtml,
-} from "../../utils/pageHandler";
-import { planningAgent } from "../agents";
+import { PageHandler } from "../../utils/pageHandler";
+import prisma from "../../utils/prisma";
+import { executionAgent, planningAgent } from "../agents";
+import { getChats } from "../chat/chat.service";
+import { NavigateInput } from "./screen.schema";
 
 let globalBrowser: Browser | null = null;
 let globalPage: Page | null = null;
@@ -156,34 +133,49 @@ async function createAction(
   });
 }
 
-
-
-
-
 export async function navigate(input: NavigateInput) {
   try {
-    globalBrowser = await puppeteer.launch({ headless: false });
-    globalPage = await globalBrowser.newPage();
-    await globalPage.setUserAgent(
-      "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1"
-    );
-    await globalPage.setViewport({ width: 390, height: 844 });
+    let page = await new PageHandler();
+    await page.initialize();
 
-    await addIAttribute(globalPage);
+    const prevAction = await createAction("GOTO", input.url);
+    let navigateResult = await page.navigate(input.url);
 
-    const rawHtml = await getUpdatedHtml(globalPage, async () => {
-      await globalPage?.goto(input.url, {
-        waitUntil: "networkidle0",
-      });
-    });
+    while (true) {
+      const simpleHtml = await simplifyHtml(navigateResult.html, false);
+      const screenDescription = await getScreenDescription(simpleHtml);
+      const parsingResult = await parsingAgent(simpleHtml, screenDescription);
+      const chats = await getChats();
+      const [userObjective, userContext] = await Promise.all([
+        getUserObjective(chats),
+        getUserContext(chats),
+      ]);
 
-    const navigateAction = await createAction("GOTO", input.url);
-    const simpleHtml = await simplifyHtml(rawHtml, false);
-    const screenDescription = await getScreenDescription(simpleHtml);
-    const pageName = await getPageName(removeAttributeI(simpleHtml));
+      //   const systemContext = await getSystemContext(); // TODO: get system context
+      //   await planningAgent(parsingResult, userObjective, userContext, systemContext);
 
-    const parsingResult = await parsingAgent(simpleHtml, screenDescription);
-    await planningAgent(parsingResult, "", "");
+      // Get task list
+      const taskList = await planningAgent(
+        parsingResult,
+        userObjective,
+        userContext,
+        ""
+      );
+
+      // Get first task
+      const task = taskList[0];
+      if (task) {
+        await executionAgent(
+          page,
+          parsingResult.find((item) => item.i === task.i)!,
+          screenDescription
+        );
+      } else {
+        break;
+      }
+    }
+
+    // const pageName = await getPageName(removeAttributeI(simpleHtml));
 
     // return screenResult;
   } catch (error: any) {
@@ -191,6 +183,3 @@ export async function navigate(input: NavigateInput) {
     throw error;
   }
 }
-
-
-

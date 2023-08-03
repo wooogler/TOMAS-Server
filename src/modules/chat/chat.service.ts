@@ -21,7 +21,7 @@ export async function createHumanChat(input: CreateHumanChatInput) {
     },
   });
 
-  const screen;
+  //   const screen;
   const systemMessage = new SystemChatMessage("You are a helpful assistant.");
 
   const chats = await prisma.chat.findMany();
