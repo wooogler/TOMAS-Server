@@ -1,5 +1,4 @@
 import { JSDOM } from "jsdom";
-import { getComponentInfo, getSelectInfo } from "./langchainHandler";
 
 const removeSpecificTags = (element: Element, tagNames: string[]) => {
   for (const tagName of tagNames) {
@@ -137,8 +136,6 @@ export const simplifyHtml = (html: string, removeI: boolean = true) => {
             "aria-controls",
             "readonly",
             "role",
-            "class",
-            "alt",
           ]
         : [
             "i",
@@ -151,8 +148,6 @@ export const simplifyHtml = (html: string, removeI: boolean = true) => {
             "aria-controls",
             "readonly",
             "role",
-            "class",
-            "alt",
           ],
       []
     );
@@ -182,9 +177,7 @@ export function findRepeatingComponents(html: string) {
         const childElement = child as Element;
 
         Array.from(childElement.classList).forEach((className) => {
-          if (!className.includes("mask")) {
-            frequencyMap.set(className, (frequencyMap.get(className) || 0) + 1);
-          }
+          frequencyMap.set(className, (frequencyMap.get(className) || 0) + 1);
         });
 
         Array.from(childElement.attributes).forEach((attr) => {
@@ -233,76 +226,207 @@ export function findRepeatingComponents(html: string) {
   });
 }
 
-function createActionType(interactiveElement: Element): string {
-  switch (interactiveElement.tagName.toLowerCase()) {
-    case "input":
-      const type = interactiveElement.getAttribute("type");
-      if (!type || type === "text") return "inputText";
-      if (["checkbox", "radio", "button"].includes(type)) return "click";
-      break;
-    case "button":
-    case "a":
-      return "click";
-    case "select":
-    case "ul":
-    case "ol":
-    case "table":
-    case "fieldset":
-      return "select";
-    case "textarea":
-      return "inputText";
+function gatherIAttrFromElement(element: Element, iAttrSet: Set<string>): void {
+  const iAttr = element.getAttribute("i");
+  if (iAttr !== null) {
+    iAttrSet.add(iAttr);
+  } else {
+    return;
   }
-  return "select";
+  for (const child of element.children) {
+    gatherIAttrFromElement(child, iAttrSet);
+  }
+}
+
+const threshold = 10;
+function searchComponentsInElement(
+  element: Element,
+  componentElements: Element[],
+  actionComponents: Set<string>
+): void {
+  const iAttr = element.getAttribute("i");
+  if (iAttr !== null) {
+    const temporarySet = new Set<string>();
+    gatherIAttrFromElement(element, temporarySet);
+    const intersectionSet = new Set(
+      [...temporarySet].filter((x) => actionComponents.has(x))
+    );
+    if (intersectionSet.size === 0) {
+      return;
+    }
+    if (intersectionSet.size <= threshold) {
+      componentElements.push(element);
+      return;
+    }
+  }
+
+  for (const child of element.children) {
+    searchComponentsInElement(child, componentElements, actionComponents);
+  }
+}
+
+export interface FeatureComponent {
+  html: string;
+  i: string;
+}
+
+function gatherIAttrsFromElements(
+  elements: Element[],
+  iAttrSet: Set<string>
+): void {
+  elements.forEach((element) => gatherIAttrFromElement(element, iAttrSet));
+}
+
+function filterInteractiveElements(
+  elements: Element[],
+  iAttrSet: Set<string>
+): Element[] {
+  return elements.filter(
+    (element) =>
+      !(element.getAttribute("i") && iAttrSet.has(element.getAttribute("i")!))
+  );
+}
+
+function extractIAttributes(elements: Element[]): Set<string> {
+  return new Set(
+    elements
+      .map((el) => el.getAttribute("i"))
+      .filter((x) => x !== null) as string[]
+  );
+}
+
+export function extractFeatureComponents(html: string): FeatureComponent[] {
+  const dom = new JSDOM(html);
+  const tmpRoot = dom.window.document.body.cloneNode(true) as Element;
+  const iAttrSet = new Set<string>();
+
+  const listElements = Array.from(tmpRoot.querySelectorAll("ul, ol"));
+  gatherIAttrsFromElements(listElements, iAttrSet);
+
+  const tableElements = Array.from(tmpRoot.querySelectorAll("table"));
+  gatherIAttrsFromElements(tableElements, iAttrSet);
+
+  const fieldsetElements = Array.from(tmpRoot.querySelectorAll("fieldset"));
+  gatherIAttrsFromElements(fieldsetElements, iAttrSet);
+
+  const paragraphElements = Array.from(tmpRoot.querySelectorAll("p")).filter(
+    (paragraphElement) => {
+      const hasActiveElements =
+        paragraphElement.querySelectorAll("input, button, a, select, textarea")
+          .length > 0;
+      return (
+        hasActiveElements && !iAttrSet.has(paragraphElement.getAttribute("i")!)
+      );
+    }
+  );
+  gatherIAttrsFromElements(paragraphElements, iAttrSet);
+
+  let interactiveElements = filterInteractiveElements(
+    Array.from(tmpRoot.querySelectorAll("input, button, a, select, textarea")),
+    iAttrSet
+  );
+
+  interactiveElements.push(
+    ...listElements,
+    ...tableElements,
+    ...fieldsetElements,
+    ...paragraphElements
+  );
+
+  const mergedComponents: Element[] = [];
+  searchComponentsInElement(
+    tmpRoot,
+    mergedComponents,
+    extractIAttributes(interactiveElements)
+  );
+
+  const components: FeatureComponent[] = [];
+  mergedComponents.forEach((mergedComponent) => {
+    components.push({
+      html: mergedComponent.outerHTML,
+      i: mergedComponent.getAttribute("i")!,
+    });
+  });
+
+  return components;
 }
 
 export interface PossibleInteractions {
   actionType: string;
   i: string;
 }
-
 export function parsingPossibleInteractions(
   html: string
 ): PossibleInteractions[] {
   const dom = new JSDOM(html);
-  const body = dom.window.document.body;
+  const tmpRoot = dom.window.document.body.cloneNode(true) as Element;
   const iAttrSet = new Set<string>();
 
-  // Gather I attributes from specified elements
-  let specifiedElements = Array.from(
-    body.querySelectorAll("ul, ol, table, fieldset")
-  );
-  const repeatingComponents = findRepeatingComponents(html);
-  repeatingComponents.forEach((element) => {
-    const iAttr = element.getAttribute("i");
-    if (iAttr && !iAttrSet.has(iAttr)) {
-      specifiedElements.push(element);
-      iAttrSet.add(iAttr);
-    }
-  });
+  const listElements = Array.from(tmpRoot.querySelectorAll("ul, ol"));
+  gatherIAttrsFromElements(listElements, iAttrSet);
 
-  specifiedElements.forEach((element) => {
-    Array.from(element.querySelectorAll("[i]")).forEach((el) =>
-      iAttrSet.add(el.getAttribute("i")!)
-    );
-  });
+  const tableElements = Array.from(tmpRoot.querySelectorAll("table"));
+  gatherIAttrsFromElements(tableElements, iAttrSet);
 
-  // Filter interactive elements
-  let interactiveElements = Array.from(
-    body.querySelectorAll("input, button, a, select, textarea")
-  ).filter(
-    (element) =>
-      !(element.getAttribute("i") && iAttrSet.has(element.getAttribute("i")!))
+  const fieldsetElements = Array.from(tmpRoot.querySelectorAll("fieldset"));
+  gatherIAttrsFromElements(fieldsetElements, iAttrSet);
+
+  let interactiveElements = filterInteractiveElements(
+    Array.from(tmpRoot.querySelectorAll("input, button, a, select, textarea")),
+    iAttrSet
   );
-  interactiveElements.push(...specifiedElements);
+
+  interactiveElements.push(
+    ...listElements,
+    ...tableElements,
+    ...fieldsetElements
+  );
 
   const possibleInteractions: PossibleInteractions[] = [];
 
-  // Determine action type and gather possible interactions
   interactiveElements.forEach((interactiveElement) => {
-    const actionType = createActionType(interactiveElement);
-
+    let actionType = "";
+    switch (interactiveElement.tagName.toLowerCase()) {
+      case "input":
+        if (interactiveElement.hasAttribute("type") == false) {
+          actionType = "inputText";
+        } else if (interactiveElement.getAttribute("type") === "text") {
+          actionType = "inputText";
+        } else if (interactiveElement.getAttribute("type") === "checkbox") {
+          actionType = "click";
+        } else if (interactiveElement.getAttribute("type") === "radio") {
+          actionType = "click";
+        } else if (interactiveElement.getAttribute("type") === "button") {
+          actionType = "click";
+        }
+        break;
+      case "button":
+        actionType = "click";
+        break;
+      case "a":
+        actionType = "click";
+        break;
+      case "select":
+        actionType = "select";
+        break;
+      case "textarea":
+        actionType = "inputText";
+        break;
+      case "ul":
+        actionType = "select";
+        break;
+      case "ol":
+        actionType = "select";
+        break;
+      case "table":
+        actionType = "select";
+        break;
+      case "fieldset":
+        actionType = "select";
+        break;
+    }
+    // filter out readonly text input
     if (
-      actionType &&
       !(
         interactiveElement.hasAttribute("readonly") &&
         interactiveElement.getAttribute("type") === "text"
@@ -318,73 +442,22 @@ export function parsingPossibleInteractions(
   return possibleInteractions;
 }
 
-function comparePossibleInteractions(
-  a: PossibleInteractions,
-  b: PossibleInteractions
-) {
-  if (parseInt(a.i) < parseInt(b.i)) {
-    return -1;
-  }
-  if (parseInt(a.i) > parseInt(b.i)) {
-    return 1;
-  }
-  return 0;
-}
-
-export interface ParsingResult {
-  i: string;
-  action: string;
-  description: string;
-  html: string;
-}
-
-export async function parsingAgent({
+export function parsingAgent({
+  modalI,
   html,
-  screenDescription,
 }: {
+  modalI: string | null;
   html: string;
-  screenDescription: string;
 }) {
-  const possibleInteractions = parsingPossibleInteractions(html).sort(
-    comparePossibleInteractions
-  );
+  const repeatingComponents = findRepeatingComponents(html);
+  const repeatingComponentInteractions: PossibleInteractions[] =
+    repeatingComponents.map((component) => ({
+      actionType: "select",
+      i: component.getAttribute("i")!,
+    }));
 
-  const dom = new JSDOM(html);
-  const body = dom.window.document.body;
+  let possibleInteractions = parsingPossibleInteractions(html);
 
-  const actionComponentsPromises = possibleInteractions.map(
-    async (interaction) => {
-      const iAttr = interaction.i;
-      const actionType = interaction.actionType;
-      const componentHtml =
-        body.querySelector(`[i="${iAttr}"]`)?.outerHTML || "";
-      const componentInfo =
-        actionType === "select"
-          ? await getSelectInfo({
-              componentHtml: simplifyHtml(componentHtml, false) || "",
-              screenDescription,
-              actionType: interaction.actionType,
-            })
-          : await getComponentInfo({
-              componentHtml: simplifyHtml(componentHtml, false) || "",
-              screenDescription,
-              actionType: interaction.actionType,
-            });
-
-      return {
-        i: iAttr,
-        action: interaction.actionType,
-        description: componentInfo?.description,
-        html: componentHtml,
-      };
-    }
-  );
-
-  const actionComponents = await Promise.all(actionComponentsPromises);
-  console.log(
-    actionComponents
-      .map((comp) => `- ${comp.description} (i=${comp.i})`)
-      .join("\n")
-  );
-  return actionComponents;
+  const interactions = parsingPossibleInteractions(html);
+  console.log(interactions);
 }

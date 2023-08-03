@@ -1,4 +1,11 @@
 import puppeteer, { Browser, Page } from "puppeteer";
+import { JSDOM } from "jsdom";
+import {
+  getModalDescription,
+  getPageDescription,
+  getPartDescription,
+} from "./langchainHandler";
+import { parsingAgent, simplifyHtml } from "./htmlHandler";
 
 const NO_PAGE_ERROR = new Error("Cannot find a page.");
 
@@ -34,27 +41,144 @@ export class PageHandler {
 
   async navigate(url: string) {
     const page = await this.getPage();
-    return await trackModalChanges(page, async () => {
+    const screen = await trackModalChanges(page, async () => {
       await page.goto(url, {
         waitUntil: "networkidle0",
       });
     });
+
+    const pageSimpleHtml = simplifyHtml(await page.content(), true);
+    const pageDescription = await getPageDescription(pageSimpleHtml);
+    const screenSimpleHtml = simplifyHtml(screen.html, true);
+    if (screen.modalI) {
+      // if screen is a modal
+      const modalDescription = await getModalDescription(
+        screenSimpleHtml,
+        pageDescription
+      );
+      const actionComponents = await parsingAgent({
+        html: screen.html,
+        screenDescription: modalDescription,
+      });
+      return {
+        type: "modal",
+        screenDescription: modalDescription,
+        actionComponents,
+      };
+    } else {
+      const actionComponents = await parsingAgent({
+        html: screen.html,
+        screenDescription: pageDescription,
+      });
+
+      return {
+        type: "page",
+        screenDescription: pageDescription,
+        actionComponents,
+      };
+    }
   }
 
   async click(selector: string) {
     const page = await this.getPage();
     const element = await this.getElement(selector);
-    return await trackModalChanges(page, async () => {
+    const screen = await trackModalChanges(page, async () => {
       await element.click();
     });
+
+    const pageSimpleHtml = simplifyHtml(await page.content(), true);
+    const pageDescription = await getPageDescription(pageSimpleHtml);
+    const screenSimpleHtml = simplifyHtml(screen.html, true);
+    if (screen.modalI) {
+      // if screen is a modal
+      const modalDescription = await getModalDescription(
+        screenSimpleHtml,
+        pageDescription
+      );
+      const actionComponents = await parsingAgent({
+        html: screen.html,
+        screenDescription: modalDescription,
+      });
+      return {
+        type: "modal",
+        screenDescription: modalDescription,
+        actionComponents,
+      };
+    } else {
+      const actionComponents = await parsingAgent({
+        html: screen.html,
+        screenDescription: pageDescription,
+      });
+
+      return {
+        type: "page",
+        screenDescription: pageDescription,
+        actionComponents,
+      };
+    }
   }
 
   async inputText(selector: string, text: string) {
     const page = await this.getPage();
     const element = await this.getElement(selector);
-    return await trackModalChanges(page, async () => {
+    const screen = await trackModalChanges(page, async () => {
       await element.type(text);
     });
+
+    const pageSimpleHtml = simplifyHtml(await page.content(), true);
+    const pageDescription = await getPageDescription(pageSimpleHtml);
+    const screenSimpleHtml = simplifyHtml(screen.html, true);
+    if (screen.modalI) {
+      // if screen is a modal
+      const modalDescription = await getModalDescription(
+        screenSimpleHtml,
+        pageDescription
+      );
+      const actionComponents = await parsingAgent({
+        html: screen.html,
+        screenDescription: modalDescription,
+      });
+      return {
+        type: "modal",
+        screenDescription: modalDescription,
+        actionComponents,
+      };
+    } else {
+      const actionComponents = await parsingAgent({
+        html: screen.html,
+        screenDescription: pageDescription,
+      });
+
+      return {
+        type: "page",
+        screenDescription: pageDescription,
+        actionComponents,
+      };
+    }
+  }
+
+  async select(selector: string) {
+    const page = await this.getPage();
+    const screen = await trackModalChanges(page, async () => {});
+    const dom = new JSDOM(screen.html);
+    const element = dom.window.document.querySelector(selector);
+    const elementSimpleHtml = simplifyHtml(element?.innerHTML || "", true);
+
+    const pageSimpleHtml = simplifyHtml(await page.content(), true);
+    const pageDescription = await getPageDescription(pageSimpleHtml);
+    const partDescription = await getPartDescription(
+      elementSimpleHtml,
+      pageDescription
+    );
+    const actionComponents = await parsingAgent({
+      html: element?.innerHTML || "",
+      screenDescription: partDescription,
+    });
+    return {
+      type: "part",
+      screenDescription: partDescription,
+      actionComponents,
+    };
   }
 
   async close() {
@@ -81,10 +205,6 @@ export async function getHiddenElementIs(page: Page | null) {
         if (
           rect.width === 0 ||
           rect.height === 0 ||
-          rect.bottom < 0 ||
-          rect.top > window.innerHeight ||
-          rect.left > window.innerWidth ||
-          rect.right < 0 ||
           style.visibility === "hidden" ||
           style.display === "none" ||
           isHiddenByClip ||
@@ -138,50 +258,6 @@ export async function addIAttribute(page: Page): Promise<void> {
   } else {
     throw NO_PAGE_ERROR;
   }
-}
-
-import { JSDOM } from "jsdom";
-
-function findRepeatingComponents(html: string) {
-  const dom = new JSDOM(html);
-  const body = dom.window.document.body;
-
-  function createFrequencyMap(element: Element): Map<string, number> {
-    const frequencyMap: Map<string, number> = new Map();
-
-    element.childNodes.forEach((child) => {
-      if (child.nodeType === 1) {
-        const childElement = child as Element;
-
-        Array.from(childElement.classList).forEach((className) => {
-          frequencyMap.set(className, (frequencyMap.get(className) || 0) + 1);
-        });
-
-        Array.from(childElement.attributes).forEach((attr) => {
-          const attrKey = `${attr.name}=${attr.value}`;
-          frequencyMap.set(attrKey, (frequencyMap.get(attrKey) || 0) + 1);
-        });
-      }
-    });
-    return frequencyMap;
-  }
-
-  function traverseAndFind(element: Element): Element | null {
-    const frequencyMap = createFrequencyMap(element);
-
-    for (const frequency of frequencyMap.values()) {
-      if (frequency >= 3) return element;
-    }
-
-    for (const child of Array.from(element.children)) {
-      const result = traverseAndFind(child as Element);
-      if (result) return result;
-    }
-
-    return null;
-  }
-
-  return traverseAndFind(body);
 }
 
 async function findModals(
@@ -274,8 +350,9 @@ export async function trackModalChanges(
   await action();
   if (page.url() !== initialUrl) {
     await navigationPromise;
+    await new Promise((r) => setTimeout(r, 3000));
   } else {
-    await new Promise((r) => setTimeout(r, 2000));
+    await new Promise((r) => setTimeout(r, 3000));
   }
 
   await addIAttribute(page);
@@ -308,8 +385,6 @@ export async function trackModalChanges(
   const filteredHtml = topmostModal
     ? topmostModal.html
     : await getFilteredHtml(html, finalHiddenElementIs);
-  const potentialComponents = findRepeatingComponents(filteredHtml);
-  console.log(potentialComponents?.outerHTML);
 
   // Compare initial and final modals to determine changes
   if (initialModals.length === 0 && finalModals.length === 0) {

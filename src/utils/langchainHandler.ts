@@ -81,24 +81,74 @@ export const analyzeActionComponentPrompts: Prompt[] = [
   },
 ];
 
-export const getScreenDescription = async (screenHtml: string) => {
-  const describeScreenSystemPrompt: Prompt = {
+export const getPageDescription = async (html: string) => {
+  const describePageSystemPrompt: Prompt = {
     role: "SYSTEM",
-    content: `You are a web developer, and you need to read the body HTML of a given webpage and describe its purpose in a single sentence.`,
+    content: `You are a web developer, and you need to read the HTML of a given webpage and describe its purpose in a single sentence.`,
   };
 
   const htmlPrompt: Prompt = {
     role: "HUMAN",
-    content: screenHtml,
+    content: html,
+  };
+
+  const pageDescription = await getAiResponse([
+    describePageSystemPrompt,
+    htmlPrompt,
+  ]);
+  console.log("page description: ", pageDescription);
+
+  return pageDescription;
+};
+
+export const getModalDescription = async (
+  html: string,
+  pageDescription: string
+) => {
+  const describeModalSystemPrompt: Prompt = {
+    role: "SYSTEM",
+    content: `You are a web developer, and you need to read the HTML of a given modal and describe its purpose in a single sentence. 
+    
+    Consider the description on the webpage where the modal is located: ${pageDescription}`,
+  };
+
+  const htmlPrompt: Prompt = {
+    role: "HUMAN",
+    content: html,
   };
 
   const screenDescription = await getAiResponse([
-    describeScreenSystemPrompt,
+    describeModalSystemPrompt,
     htmlPrompt,
   ]);
-  console.log("screen description: ", screenDescription);
+  console.log("modal description: ", screenDescription);
 
   return screenDescription;
+};
+
+export const getPartDescription = async (
+  html: string,
+  pageDescription: string
+) => {
+  const describePartSystemPrompt: Prompt = {
+    role: "SYSTEM",
+    content: `You are a web developer, and you need to read the HTML of a given partial element and describe its purpose in a single sentence. 
+    
+    Consider the description on the webpage where the modal is located: ${pageDescription}`,
+  };
+
+  const htmlPrompt: Prompt = {
+    role: "HUMAN",
+    content: html,
+  };
+
+  const partDescription = await getAiResponse([
+    describePartSystemPrompt,
+    htmlPrompt,
+  ]);
+  console.log("part description: ", partDescription);
+
+  return partDescription;
 };
 
 export const getComponentFeature = async (
@@ -154,26 +204,74 @@ export interface ComponentInfo {
 
 export const getComponentInfo = async ({
   componentHtml,
-  pageDescription,
+  screenDescription,
+  actionType,
 }: {
   componentHtml: string;
-  pageDescription: string;
+  screenDescription: string;
+  actionType: string;
 }) => {
   const extractComponentSystemPrompt: Prompt = {
     role: "SYSTEM",
     content: `You are a web developer. You need to explain the context when the user interacts with a given HTML element and the action for the user to interact with the element.
 
-Consider the description of the webpage where this element is located: ${pageDescription}
+Consider the description about where this element is located: ${screenDescription}
 
 Output following JSON format in plain text. Never provide additional context.
 
 {
-  context : <context of the element>,
+  context : <the context when the user interacts with the element>,
   action: {
-    type: <click or input or scroll>
+    type: ${actionType},
     description: <description of the action>
   },
-  description: <describe the context and action in one sentence>
+  description: <describe the action based on the context starting with '${actionType} '>
+}`,
+  };
+
+  const componentHtmlPrompt: Prompt = {
+    role: "HUMAN",
+    content: componentHtml,
+  };
+
+  try {
+    const componentJson = await getAiResponse([
+      extractComponentSystemPrompt,
+      componentHtmlPrompt,
+    ]);
+    const componentObj = JSON.parse(componentJson);
+    return componentObj as ComponentInfo;
+  } catch (error) {
+    console.error("Error parsing JSON:", error);
+  }
+};
+
+export const getSelectInfo = async ({
+  componentHtml,
+  screenDescription,
+  actionType,
+}: {
+  componentHtml: string;
+  screenDescription: string;
+  actionType: string;
+}) => {
+  const extractComponentSystemPrompt: Prompt = {
+    role: "SYSTEM",
+    content: `You are a web developer. You need to explain the context when the user see a given HTML element
+    
+The action of user is selecting one of the components in the given HTML element.
+
+Consider the description about where this element is located: ${screenDescription}
+
+Output following JSON format in plain text. Never provide additional context.
+
+{
+  context : <the context when the user interacts with the element>,
+  action: {
+    type: ${actionType},
+    description: <description of the action>
+  },
+  description: <describe the action based on the context starting with '${actionType} one'>
 }`,
   };
 
@@ -334,8 +432,6 @@ export function isInteractionQuestion(
 ): obj is { question: InteractionQuestion } {
   return (obj as { question: InteractionQuestion }).question !== undefined;
 }
-
-
 
 export const getPossibleInteractionDescription = async (
   rawHtml: string,
