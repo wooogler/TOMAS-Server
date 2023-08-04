@@ -181,8 +181,30 @@ export class PageHandler {
       itemComponents,
     };
   }
+  async focus(selector: string) {
+    const page = await this.getPage();
+    const screen = await trackModalChanges(page, async () => {});
+    const dom = new JSDOM(screen.html);
+    const element = dom.window.document.querySelector(selector);
+    const elementSimpleHtml = simplifyHtml(element?.innerHTML || "", true);
 
-  async unselect() {
+    const pageSimpleHtml = simplifyHtml(await page.content(), true);
+    const pageDescription = await getPageDescription(pageSimpleHtml);
+    const partDescription = await getPartDescription(
+      elementSimpleHtml,
+      pageDescription
+    );
+    const actionComponents = await parsingAgent({
+      html: element?.innerHTML || "",
+      screenDescription: partDescription,
+    });
+    return {
+      type: "part",
+      screenDescription: partDescription,
+      actionComponents,
+    };
+  }
+  async unfocus() {
     const page = await this.getPage();
     const screen = await trackModalChanges(page, async () => {});
     const pageSimpleHtml = simplifyHtml(await page.content(), true);
