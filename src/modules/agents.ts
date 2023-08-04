@@ -124,7 +124,17 @@ export async function executionAgent(
   page: PageHandler,
   component: ParsingResult,
   //   chats: Chat[],
-  screenDescription: string
+  screenDescription: string,
+  currentFocusedSection: {
+    type: string;
+    screenDescription: string;
+    actionComponents: {
+      i: string;
+      action: string;
+      description: string | undefined;
+      html: string;
+    }[];
+  }
 ) {
   console.log(`
 ---------------
@@ -167,6 +177,18 @@ Execution Agent:
 
     actionValue = valueBasedOnHistory.value;
   } else if (component.action == "select") {
+    const options = await page.select(`[i="${component.i}"]`);
+    createAIChat({
+      content: `Which one do you want?
+    Possible options could be:
+    ${options.itemComponents.map(
+      (item) => `- ${item.description}\n (i=${item.i}))`
+    )}`,
+    });
+
+    // TODO: Wait for the user's answer. Then update chat history in the database.
+    // suppose the answer is "<integer i>".
+    actionValue = "1";
   }
   const confirmationQuestion = await makeQuestionForConfirmation(
     component,
@@ -181,11 +203,13 @@ Execution Agent:
 
   if (answer == "yes") {
     if (component.action == "inputText") {
-      await page.inputText(`[i=${component.i}]`, actionValue);
+      return await page.inputText(`[i=${component.i}]`, actionValue);
     } else if (component.action == "click") {
-      await page.click(`[i="${component.i}"]`);
+      return await page.click(`[i="${component.i}"]`);
+    } else if (component.action == "select") {
+      return await page.focus(`[i="${component.i}"]`);
     }
   }
-
+  return currentFocusedSection;
   // TODO: Update task history or system context in the database.
 }

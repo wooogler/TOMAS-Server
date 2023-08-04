@@ -497,7 +497,7 @@ export async function getUserContext(chats: Chat[]) {
 
 export async function makeQuestionForActionValue(
   pageDescription: string,
-  componentDescription: string
+  componentDescription: string | undefined
 ) {
   const makeQuestionPrompt: Prompt = {
     role: "SYSTEM",
@@ -515,7 +515,7 @@ ${componentDescription}
 
 export async function findInputTextValue(
   pageDescription: string,
-  componentDescription: string,
+  componentDescription: string | undefined,
   userContext: string
 ) {
   const inputComponentPrompt: Prompt = {

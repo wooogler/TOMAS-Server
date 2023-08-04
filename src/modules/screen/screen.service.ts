@@ -126,12 +126,18 @@ export async function navigate(input: NavigateInput) {
       // Get first task
       const task = taskList[0];
       if (task) {
-        await executionAgent(
+        focusSection = await executionAgent(
           page,
           actionComponents.find((item) => item.i === task.i)!,
-          focusSection.screenDescription
+          focusSection.screenDescription,
+          focusSection
         );
       } else {
+        // TODO: Haven't tested unfocus yet
+        if (focusSection.type === "part") {
+          page.unfocus();
+          continue;
+        }
         break;
       }
     }
