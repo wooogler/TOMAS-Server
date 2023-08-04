@@ -1,7 +1,7 @@
 import {
   Prompt,
   findInputTextValue,
-  getAiResponse,
+  getGpt4Response,
   getUserContext,
   makeQuestionForActionValue,
   makeQuestionForConfirmation,
@@ -16,25 +16,39 @@ export interface taskList {
 
 import { createAIChat } from "./chat/chat.service";
 export async function planningAgent(
-  components: ParsingResult[],
   userObjective: string,
+  focusedSection: {
+    type: string;
+    screenDescription: string;
+    actionComponents: {
+      i: string;
+      action: string;
+      description: string | undefined;
+      html: string;
+    }[];
+  },
   userContext: string,
   systemContext: string
 ) {
-  const planningActionPrompt: Prompt = {
+  const planningActionPromptForSystem: Prompt = {
     role: "SYSTEM",
     content: `
 You are the AI that creates a plan to interact with the main web page based on the user's and system's contexts.
 
-You need to plan the action sequence using the following possible actions on the webpage.
-Possible actions:
-${components.map((comp) => `- ${comp.description} (i=${comp.i})`).join("\n")}
+You need to plan the action sequence using the following possible actions in the part of the web page. Considering the description for the whole page: ${
+      focusedSection.screenDescription
+    }.
 
 Actions should be selected in order to achieve what the user wants: ${userObjective}. ${userContext}
 
+Possible actions:
+${focusedSection.actionComponents
+  .map((comp) => `- ${comp.description} (i=${comp.i})`)
+  .join("\n")}
+
 Actions should reflect the results of the interactions the system has executed before: ${systemContext}
 
-First, describe the most effective interaction plan in natural language by referring to the user's and system's contexts.
+First, describe the most efficient interaction plan in natural language by referring to the user's and system's contexts. Do not add any useless actions to the plan.
 
 Then, return the plan as the list of actions as a numbered list in the format:
 
@@ -43,6 +57,14 @@ Then, return the plan as the list of actions as a numbered list in the format:
 
 The entries must be consecutively numbered, starting with 1. The number of each entry must be followed by a period.
 Do not include any headers before your list or follow your list with any other output. No other information should be included in the output.
+
+If you cannot find any actions to achieve the user's objective with possible actions in this part, return "No plans".
+    `,
+  };
+  const planningActionPromptForUser: Prompt = {
+    role: "HUMAN",
+    content: `
+
     `,
   };
   console.log(`
@@ -50,17 +72,17 @@ Do not include any headers before your list or follow your list with any other o
 Planning Agent:
 ---------------
 `);
-  console.log(planningActionPrompt.content);
-  const response = await getAiResponse([planningActionPrompt]);
-  //   const response = await getGpt4Response([planningActionPrompt]);
-  // const extractFirstItemIValue = (input: string): number | null => {
-  //   const lines = input.split("\n");
-  //   const firstLine = lines[0];
-  //   const match = firstLine.match(/\(i=(\d+)\)/);
-  //   return match ? parseInt(match[1], 10) : null;
-  // };
+  console.log(planningActionPromptForSystem.content);
+  console.log(planningActionPromptForUser.content);
+  //   const response = await getAiResponse([
+  //     planningActionPromptForSystem,
+  //     planningActionPromptForUser,
+  //   ]);
+  const response = await getGpt4Response([
+    planningActionPromptForSystem,
+    // planningActionPromptForUser,
+  ]);
 
-  //   console.log(response);
   // Here we assume the response is in the format:
   // 1. <First action> (i=<i>)
   // 2. <Second action> (i=<i>)
@@ -111,7 +133,7 @@ Execution Agent:
 `);
 
   let chats = await getChats();
-  const userContext = await getUserContext(chats);
+  let userContext = await getUserContext(chats);
   let actionValue = "";
   if (component.action == "inputText") {
     let valueBasedOnHistory = await JSON.parse(
@@ -131,6 +153,9 @@ Execution Agent:
       await createAIChat({ content: question });
 
       chats = await getChats();
+
+      userContext = await getUserContext(chats);
+
       valueBasedOnHistory = await JSON.parse(
         await findInputTextValue(
           screenDescription,
@@ -141,8 +166,8 @@ Execution Agent:
     }
 
     actionValue = valueBasedOnHistory.value;
+  } else if (component.action == "select") {
   }
-
   const confirmationQuestion = await makeQuestionForConfirmation(
     component,
     actionValue

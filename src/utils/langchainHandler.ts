@@ -23,6 +23,7 @@ const chat4 = new ChatOpenAI({
   openAIApiKey: process.env.OPENAI_API_KEY,
   modelName: "gpt-4",
   temperature: 0,
+  maxTokens: 4096,
 });
 
 export const getAiResponse = async (prompts: Prompt[]) => {
@@ -489,16 +490,17 @@ export const getPossibleInteractionDescription = async (
 };
 
 export async function getUserContext(chats: Chat[]) {
+  const chatsPrompt: Prompt = makeChatsPrompt(chats);
   const findUserContextPrompt: Prompt = {
     role: "SYSTEM",
     content: `
-      Based on the conversation between the system and the user, describe the user's context.
+      Based on the conversation between the system and the user, describe the user's context. Please keep all useful information from the conversation in the context considering the user's goal.
       
       Conversation:
-      ${makeChatsPrompt(chats)}
+
         `,
   };
-  const userContext = await getAiResponse([findUserContextPrompt]);
+  const userContext = await getAiResponse([findUserContextPrompt, chatsPrompt]);
   return userContext;
 }
 
@@ -550,6 +552,40 @@ export async function findInputTextValue(
             value: null
           }
         `,
+  };
+  return await getAiResponse([inputComponentPrompt]);
+}
+
+export async function findSelectValue(
+  pageDescription: string,
+  componentDescription: string,
+  userContext: string
+) {
+  const inputComponentPrompt: Prompt = {
+    role: "SYSTEM",
+    content: `
+            You are the AI assistant who sees the abstraction of part of the user's web page. Based on the user's context, you have to decide what to input in the given component abstraction on the web page. If you cannot decide what content to fill in the input box, please explain why you can't. Don't assume general context; only refer to the given user's context.
+      
+            Description of the web page:
+            ${pageDescription}
+      
+            Component description:
+            ${componentDescription}
+            
+            User's context:
+            ${userContext}
+      
+            Output needs to follow one of the JSON formats in plain text. Never provide additional context.
+            {
+              reason: <the reason why you need to input certain content>,
+              value: <the text that is most relevant for the given component>
+            }
+            OR
+            {
+              reason: <the reason why you cannot decide what content to input>,
+              value: null
+            }
+          `,
   };
   return await getAiResponse([inputComponentPrompt]);
 }

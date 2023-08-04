@@ -112,13 +112,13 @@ export async function navigate(input: NavigateInput) {
       const actionComponents = focusSection.actionComponents.map((item) => ({
         i: item.i,
         action: item.action,
-        description: item.description ? item.description : "",
+        description: item.description || "",
         html: item.html,
       }));
       // Get task list
       const taskList = await planningAgent(
-        actionComponents,
         userObjective,
+        focusSection,
         userContext,
         "" // put system context here
       );

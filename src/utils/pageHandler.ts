@@ -182,6 +182,22 @@ export class PageHandler {
     };
   }
 
+  async unselect() {
+    const page = await this.getPage();
+    const screen = await trackModalChanges(page, async () => {});
+    const pageSimpleHtml = simplifyHtml(await page.content(), true);
+    const pageDescription = await getPageDescription(pageSimpleHtml);
+    const actionComponents = await parsingAgent({
+      html: screen.html,
+      screenDescription: pageDescription,
+    });
+    return {
+      type: "page",
+      screenDescription: pageDescription,
+      actionComponents,
+    };
+  }
+
   async close() {
     if (this.page) {
       await this.page.close();
