@@ -14,6 +14,7 @@ export interface taskList {
   description: string;
 }
 
+import { createAIChat } from "./chat/chat.service";
 export async function planningAgent(
   components: ParsingResult[],
   userObjective: string,
@@ -128,6 +129,7 @@ Execution Agent:
       );
 
       // TODO: Ask the user the question, and get the answer. Then update chat history in the database.
+      await createAIChat({ content: question });
 
       chats = await getChats();
       valueBasedOnHistory = await JSON.parse(
@@ -146,7 +148,11 @@ Execution Agent:
     component,
     actionValue
   );
-  // TODO: Ask for confirmation, and get the answer. Then update chat history in the database.
+
+  // Add confirmation question to database. TODO: Get the answer.
+  createAIChat({ content: confirmationQuestion });
+
+  // Suppose the answer is "yes"/"no".
   const answer = "yes";
 
   if (answer == "yes") {
