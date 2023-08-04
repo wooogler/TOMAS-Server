@@ -2,14 +2,9 @@ import { Interaction } from "@prisma/client";
 import { minify } from "html-minifier-terser";
 import { JSDOM } from "jsdom";
 import { Browser, Page } from "puppeteer";
-import {
-  PossibleInteractions,
-  parsingPossibleInteraction,
-  simplifyHtml,
-} from "../../utils/htmlHandler";
+import { PossibleInteractions, simplifyHtml } from "../../utils/htmlHandler";
 import {
   getPossibleInteractionDescription,
-  getScreenDescription,
   getUserContext,
   getUserObjective,
 } from "../../utils/langchainHandler";
@@ -77,47 +72,6 @@ function comparePossibleInteractions(
   }
   return 0;
 }
-export async function parsingAgent(
-  rawHtml: string | undefined,
-  screenDescription: string
-): Promise<ParsingResult[]> {
-  if (!rawHtml) {
-    throw Error("no html");
-  }
-  const possibleInteractions = parsingPossibleInteraction(rawHtml).sort(
-    comparePossibleInteractions
-  );
-
-  const dom = new JSDOM(rawHtml);
-  const body = dom.window.document.body;
-
-  const actionComponents: {
-    i: string;
-    action: string;
-    description: Promise<string>;
-    html: string | undefined;
-  }[] = possibleInteractions.map((interaction) => ({
-    i: interaction.i,
-    action: interaction.actionType,
-    description: getPossibleInteractionDescription(
-      rawHtml,
-      JSON.stringify([interaction]),
-      screenDescription
-    ),
-    html: body.querySelector(`[i="${interaction.i}"]`)?.outerHTML,
-  }));
-  const results: ParsingResult[] = [];
-  for (const item of actionComponents) {
-    const description: string = await item.description; // 等待 Promise 结果
-    results.push({
-      i: item.i,
-      action: item.action,
-      description,
-      html: item.html!,
-    });
-  }
-  return results;
-}
 
 async function createAction(
   type: Interaction,
@@ -139,12 +93,14 @@ export async function navigate(input: NavigateInput) {
     await page.initialize();
 
     const prevAction = await createAction("GOTO", input.url);
-    let navigateResult = await page.navigate(input.url);
+
+    let focusSection = await page.navigate(input.url); // Current focused section. Can be a page, a modal or a part.
 
     while (true) {
-      const simpleHtml = await simplifyHtml(navigateResult.html, false);
-      const screenDescription = await getScreenDescription(simpleHtml);
-      const parsingResult = await parsingAgent(simpleHtml, screenDescription);
+      //   const simpleHtml = await simplifyHtml(focusSection.html, false);
+      //   const screenDescription = await getScreenDescription(simpleHtml);
+      //   const parsingResult = await parsingAgent(simpleHtml, screenDescription);
+
       const chats = await getChats();
       const [userObjective, userContext] = await Promise.all([
         getUserObjective(chats),
@@ -153,13 +109,18 @@ export async function navigate(input: NavigateInput) {
 
       //   const systemContext = await getSystemContext(); // TODO: get system context
       //   await planningAgent(parsingResult, userObjective, userContext, systemContext);
-
+      const actionComponents = focusSection.actionComponents.map((item) => ({
+        i: item.i,
+        action: item.action,
+        description: item.description ? item.description : "",
+        html: item.html,
+      }));
       // Get task list
       const taskList = await planningAgent(
-        parsingResult,
+        actionComponents,
         userObjective,
         userContext,
-        ""
+        "" // put system context here
       );
 
       // Get first task
@@ -167,17 +128,13 @@ export async function navigate(input: NavigateInput) {
       if (task) {
         await executionAgent(
           page,
-          parsingResult.find((item) => item.i === task.i)!,
-          screenDescription
+          actionComponents.find((item) => item.i === task.i)!,
+          focusSection.screenDescription
         );
       } else {
         break;
       }
     }
-
-    // const pageName = await getPageName(removeAttributeI(simpleHtml));
-
-    // return screenResult;
   } catch (error: any) {
     console.error("Failed to navigate to the webpage.", error);
     throw error;
