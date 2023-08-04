@@ -359,7 +359,7 @@ export async function parsingItemAgent({
   const itemComponentsPromises = components.map(async (comp, index) => {
     const iAttr = comp.getAttribute("i");
     const itemDescription = await getItemDescription({
-      itemHtml: comp.outerHTML,
+      itemHtml: simplifyHtml(comp.outerHTML, true),
       screenDescription,
       prevDescription: index === 0 ? firstDescription : undefined, // 첫 번째 요소에서만 prevDescription을 사용합니다.
     });

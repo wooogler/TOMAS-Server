@@ -39,6 +39,11 @@ export class PageHandler {
     return element;
   }
 
+  private extractBaseURL(url: string) {
+    const parsedURL = new URL(url);
+    return parsedURL.origin + parsedURL.pathname;
+  }
+
   async navigate(url: string) {
     const page = await this.getPage();
     const screen = await trackModalChanges(page, async () => {
@@ -75,6 +80,7 @@ export class PageHandler {
         type: "page",
         screenDescription: pageDescription,
         actionComponents,
+        id: `${this.extractBaseURL(page.url())}-page`,
       };
     }
   }
@@ -104,6 +110,7 @@ export class PageHandler {
         type: "modal",
         screenDescription: modalDescription,
         actionComponents,
+        id: `${page.url()}-modal-${screen.modalI}`,
       };
     } else {
       const actionComponents = await parsingAgent({
@@ -115,6 +122,7 @@ export class PageHandler {
         type: "page",
         screenDescription: pageDescription,
         actionComponents,
+        id: `${page.url()}-page`,
       };
     }
   }
@@ -143,6 +151,7 @@ export class PageHandler {
         type: "modal",
         screenDescription: modalDescription,
         actionComponents,
+        id: `${page.url()}-modal-${screen.modalI}`,
       };
     } else {
       const actionComponents = await parsingAgent({
@@ -154,6 +163,7 @@ export class PageHandler {
         type: "page",
         screenDescription: pageDescription,
         actionComponents,
+        id: `${page.url()}-page`,
       };
     }
   }

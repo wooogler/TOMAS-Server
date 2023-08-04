@@ -11,10 +11,7 @@ describe("pageHandler", () => {
 
   it("navigate and interact with page", async () => {
     const mainScreen = await pageHandler.navigate("https://www.greyhound.com");
-    const searchScreen = await pageHandler.click('[aria-label="Search trips"]');
-    const BusList = await pageHandler.select(
-      ".ResultsList__resultsList___eGsLK"
-    );
+    const tripTypePart = await pageHandler.select('[i="347"]');
   }, 100000);
 
   // afterAll(async () => {

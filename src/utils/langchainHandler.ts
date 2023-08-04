@@ -85,18 +85,13 @@ export const analyzeActionComponentPrompts: Prompt[] = [
 export const getPageDescription = async (html: string) => {
   const describePageSystemPrompt: Prompt = {
     role: "SYSTEM",
-    content: `You are a web developer, and you need to read the HTML of a given webpage and describe its purpose in a single sentence.`,
+    content: `Given the HTML code, summarize the purpose of the web page it represents.
+    
+HTML code:
+${html}`,
   };
 
-  const htmlPrompt: Prompt = {
-    role: "HUMAN",
-    content: html,
-  };
-
-  const pageDescription = await getAiResponse([
-    describePageSystemPrompt,
-    htmlPrompt,
-  ]);
+  const pageDescription = await getAiResponse([describePageSystemPrompt]);
   console.log("page description: ", pageDescription);
 
   return pageDescription;
@@ -108,9 +103,12 @@ export const getModalDescription = async (
 ) => {
   const describeModalSystemPrompt: Prompt = {
     role: "SYSTEM",
-    content: `You are a web developer, and you need to read the HTML of a given modal and describe its purpose in a single sentence. 
+    content: `Given the HTML code, summarize the purpose of the modal in the web page it represents.
     
-    Consider the description on the webpage where the modal is located: ${pageDescription}`,
+Consider the description on the web page where the modal is located: ${pageDescription}
+
+HTML code:
+${html}`,
   };
 
   const htmlPrompt: Prompt = {
@@ -118,10 +116,7 @@ export const getModalDescription = async (
     content: html,
   };
 
-  const screenDescription = await getAiResponse([
-    describeModalSystemPrompt,
-    htmlPrompt,
-  ]);
+  const screenDescription = await getAiResponse([describeModalSystemPrompt]);
   console.log("modal description: ", screenDescription);
 
   return screenDescription;
@@ -133,20 +128,15 @@ export const getPartDescription = async (
 ) => {
   const describePartSystemPrompt: Prompt = {
     role: "SYSTEM",
-    content: `You are a web developer, and you need to read the HTML of a given partial element and describe its purpose in a single sentence. 
+    content: `Given the HTML code, summarize the purpose of the part in the web page it represents.
     
-    Consider the description on the webpage where the modal is located: ${pageDescription}`,
+Consider the description on the webpage where the part is located: ${pageDescription}
+
+HTML code:
+${html}`,
   };
 
-  const htmlPrompt: Prompt = {
-    role: "HUMAN",
-    content: html,
-  };
-
-  const partDescription = await getAiResponse([
-    describePartSystemPrompt,
-    htmlPrompt,
-  ]);
+  const partDescription = await getAiResponse([describePartSystemPrompt]);
   console.log("part description: ", partDescription);
 
   return partDescription;
@@ -269,6 +259,7 @@ Consider the description about where this item is located: ${screenDescription}
 HTML code:
 ${itemHtml}
 
+Do provide information, not the purpose of the HTML element.
 `,
   };
 
@@ -626,4 +617,34 @@ export async function makeQuestionForConfirmation(
   ];
   const confirmation = await getAiResponse(makeConfirmationPrompts);
   return confirmation;
+}
+
+export async function getActionHistory(
+  triedAction: string,
+  actionType: string,
+  actionValue: string
+) {
+  const actionHistoryPrompt: Prompt = {
+    role: "SYSTEM",
+    content: `Here are the actions that the system tried and have done on the web page. 
+
+Tried: ${triedAction}
+Done: ${actionType} '${actionValue}'
+
+Describe the action on the web page in one sentence`,
+  };
+  return await getAiResponse([actionHistoryPrompt]);
+}
+
+export async function getSystemContext(
+  actionHistory: string[],
+  screenDescription: string,
+  modalDescription?: string
+) {
+  const summarizePageDescriptionPrompt: Prompt = {
+    role: "SYSTEM",
+    content: `Summarize the description in a short sentence.
+
+`,
+  };
 }
