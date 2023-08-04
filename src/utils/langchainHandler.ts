@@ -246,6 +246,38 @@ Output following JSON format in plain text. Never provide additional context.
   }
 };
 
+export const getItemDescription = async ({
+  itemHtml,
+  screenDescription,
+  prevDescription,
+}: {
+  itemHtml: string;
+  screenDescription: string;
+  prevDescription?: string;
+}) => {
+  const describeItemPrompt: Prompt = {
+    role: "SYSTEM",
+    content: `
+Describe an item in the list as a noun phrase with modifiers${
+      prevDescription && ` with reference to the previous item's description`
+    }. The description must include all the information in the item. The item is given in HTML code below.
+${prevDescription && `Previous description: ${prevDescription}`}
+
+Consider the description about where this item is located: ${screenDescription}
+
+HTML code:
+${itemHtml}
+
+`,
+  };
+
+  try {
+    return await getAiResponse([describeItemPrompt]);
+  } catch (error) {
+    console.error("Error in loading item info: ", error);
+  }
+};
+
 export const getSelectInfo = async ({
   componentHtml,
   screenDescription,
@@ -472,7 +504,6 @@ export async function getUserContext(chats: Chat[]) {
 
 export async function makeQuestionForActionValue(
   pageDescription: string,
-  chats: Chat[],
   componentDescription: string
 ) {
   const makeQuestionPrompt: Prompt = {

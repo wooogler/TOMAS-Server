@@ -1,4 +1,5 @@
 import { parsingAgent, simplifyHtml } from "../src/utils/htmlHandler";
+import { makeQuestionForConfirmation } from "../src/utils/langchainHandler";
 import { PageHandler } from "../src/utils/pageHandler";
 
 describe("pageHandler", () => {
@@ -10,12 +11,10 @@ describe("pageHandler", () => {
 
   it("navigate and interact with page", async () => {
     const mainScreen = await pageHandler.navigate("https://www.greyhound.com");
-    const searchScreen = await pageHandler.click('[i="442"]');
-
-    const busList = searchScreen.actionComponents.find(
-      (comp) => comp.i === "158"
+    const searchScreen = await pageHandler.click('[aria-label="Search trips"]');
+    const BusList = await pageHandler.select(
+      ".ResultsList__resultsList___eGsLK"
     );
-    console.log(simplifyHtml(busList?.html || "", true, true));
   }, 100000);
 
   // afterAll(async () => {

@@ -56,7 +56,7 @@ export async function getVisibleHtml(hiddenElementIds: string[]) {
 export interface ParsingResult {
   i: string;
   action: string;
-  description: string;
+  description?: string;
   html: string;
 }
 

@@ -5,7 +5,7 @@ import {
   getPageDescription,
   getPartDescription,
 } from "./langchainHandler";
-import { parsingAgent, simplifyHtml } from "./htmlHandler";
+import { parsingAgent, parsingItemAgent, simplifyHtml } from "./htmlHandler";
 
 const NO_PAGE_ERROR = new Error("Cannot find a page.");
 
@@ -171,14 +171,14 @@ export class PageHandler {
       elementSimpleHtml,
       pageDescription
     );
-    const actionComponents = await parsingAgent({
+    const itemComponents = await parsingItemAgent({
       html: element?.innerHTML || "",
       screenDescription: partDescription,
     });
     return {
       type: "part",
       screenDescription: partDescription,
-      actionComponents,
+      itemComponents,
     };
   }
 

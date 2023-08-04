@@ -124,7 +124,6 @@ Execution Agent:
     if (valueBasedOnHistory.value == null) {
       const question = await makeQuestionForActionValue(
         screenDescription,
-        chats,
         component.description
       );
 
