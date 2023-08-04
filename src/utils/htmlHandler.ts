@@ -106,8 +106,12 @@ const simplifyNestedStructure = (
   );
 };
 
-export const simplifyHtml = (html: string, removeI: boolean = true) => {
-  const dom = new JSDOM(html);
+export const simplifyHtml = (
+  html: string,
+  removeI: boolean = true,
+  isClass: boolean = false
+) => {
+  const dom = new JSDOM(html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, ""));
   const document = dom.window.document;
   const rootElement = document.body;
   if (rootElement) {
@@ -119,41 +123,39 @@ export const simplifyHtml = (html: string, removeI: boolean = true) => {
       "link",
       "meta",
     ]);
-    removeAttributes(rootElement, removeI ? ["href"] : ["i", "href"], [
-      "input",
-      "button",
-      "label",
-    ]);
+
+    const attributesToKeepForAllComps = ["href"];
+    if (isClass === true) {
+      attributesToKeepForAllComps.push("class");
+    }
     removeAttributes(
       rootElement,
       removeI
-        ? [
-            "href",
-            "type",
-            "aria-label",
-            "role",
-            "checked",
-            "aria-expanded",
-            "aria-controls",
-            "readonly",
-            "role",
-            "class",
-            "alt",
-          ]
-        : [
-            "i",
-            "href",
-            "type",
-            "aria-label",
-            "role",
-            "checked",
-            "aria-expanded",
-            "aria-controls",
-            "readonly",
-            "role",
-            "class",
-            "alt",
-          ],
+        ? attributesToKeepForAllComps
+        : ["i", ...attributesToKeepForAllComps],
+      ["input", "button", "label"]
+    );
+
+    const attributesToKeepForActionComps = [
+      "href",
+      "type",
+      "aria-label",
+      "role",
+      "checked",
+      "aria-expanded",
+      "aria-controls",
+      "readonly",
+      "role",
+      "alt",
+    ];
+    if (isClass === true) {
+      attributesToKeepForActionComps.push("class");
+    }
+    removeAttributes(
+      rootElement,
+      removeI
+        ? attributesToKeepForActionComps
+        : ["i", ...attributesToKeepForActionComps],
       []
     );
     removeEmptyElements(rootElement, ["input", "button", "label", "a"]);
@@ -361,12 +363,12 @@ export async function parsingAgent({
       const componentInfo =
         actionType === "select"
           ? await getSelectInfo({
-              componentHtml: simplifyHtml(componentHtml, false) || "",
+              componentHtml: simplifyHtml(componentHtml, true) || "",
               screenDescription,
               actionType: interaction.actionType,
             })
           : await getComponentInfo({
-              componentHtml: simplifyHtml(componentHtml, false) || "",
+              componentHtml: simplifyHtml(componentHtml, true) || "",
               screenDescription,
               actionType: interaction.actionType,
             });

@@ -1,0 +1,93 @@
+.SearchResult__searchResult___cgxzZ,
+.SearchResult__expandable___M10px {
+  padding: 15px;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.SearchResult__voText___aFyh5 {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.SearchResult__main___I4TtH {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.SearchResult__labelsRow___yUI9I {
+  display: flex;
+  align-items: center;
+}
+
+.hcr-tag-7-6-0 {
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  font-size: 12px;
+  margin-right: 10px;
+}
+
+.SearchResult__rowRideAndPrice___u0TJA,
+.SearchResult__rowMessage___jxm8z,
+.SearchResult__rowInfo___kevIw {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 10px 0;
+}
+
+.LocationsHorizontal__departure___bnRmG,
+.LocationsHorizontal__station___ItGEv {
+  display: flex;
+  flex-direction: column;
+}
+
+.LocationsHorizontal__voText___pUgoW,
+.DurationTime__voText___N4rJk,
+.LocationsHorizontal__timeWrapper___TujDY,
+.SearchResult__seatsLeft___UkJBY {
+  font-size: 14px;
+  color: #555;
+}
+
+.hcr-col-6-7-6-0,
+.hcr-col-7-sm-7-6-0,
+.hcr-col-5-sm-7-6-0 {
+  flex: 1;
+}
+
+.Price__priceWrapper___eDs_Y {
+  font-size: 24px;
+  color: #e44d26;
+}
+
+.RoundBookButton__iconOnlyCTA___EK4X7 {
+  background-color: #e44d26;
+  color: #fff;
+  padding: 10px;
+  border: none;
+  cursor: pointer;
+}
+
+.RideCapacity__busCapacity___VoHUl {
+  display: flex;
+  align-items: center;
+}
+
+.RideCapacity__iconCapacity___mjkiC {
+  margin-right: 5px;
+}
+
+.Usps__uspIconContainers___LGw3v {
+  display: flex;
+}
+
+.hci-icon {
+  margin-right: 5px;
+}
+
+.SearchResult__capacity___di8HI {
+  border-right: 1px solid #eaeaea;
+  padding-right: 10px;
+}

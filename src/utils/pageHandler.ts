@@ -89,6 +89,7 @@ export class PageHandler {
     const pageSimpleHtml = simplifyHtml(await page.content(), true);
     const pageDescription = await getPageDescription(pageSimpleHtml);
     const screenSimpleHtml = simplifyHtml(screen.html, true);
+
     if (screen.modalI) {
       // if screen is a modal
       const modalDescription = await getModalDescription(
