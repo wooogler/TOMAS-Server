@@ -58,30 +58,6 @@ export const getGpt4Response = async (prompts: Prompt[]) => {
   return response.text;
 };
 
-export const findComponentPrompts: Prompt[] = [
-  {
-    role: "SYSTEM",
-    content: `You are a React developer. You read the HTML code of a legacy website and want to organize it by purpose into five large React components. Each component has an attribute called i, which is equal to the value of i in the top-level tag that the component contains. Show your React components as follows:
-
-    <Name of the component i="{i}">
-    Description of the UI included in the component over 50 words
-    </Name of the component>`,
-  },
-];
-
-export const analyzeActionComponentPrompts: Prompt[] = [
-  {
-    role: "SYSTEM",
-    content: `You are a web developer working on an internal system that on-site customer-facing staff can see only. Think about the moment when staff might need a given component and create a question that the staff can ask a customer at the moment. Output following JSON format in plain text. Never provide additional context.
-
-    {
-      description: <description of the component>,
-      moment: <moment>,
-      question: <question>,
-    }`,
-  },
-];
-
 export const getPageDescription = async (html: string) => {
   const describePageSystemPrompt: Prompt = {
     role: "SYSTEM",
@@ -92,7 +68,6 @@ ${html}`,
   };
 
   const pageDescription = await getAiResponse([describePageSystemPrompt]);
-  console.log("page description: ", pageDescription);
 
   return pageDescription;
 };
@@ -111,57 +86,28 @@ HTML code:
 ${html}`,
   };
 
-  const htmlPrompt: Prompt = {
-    role: "HUMAN",
-    content: html,
-  };
-
   const screenDescription = await getAiResponse([describeModalSystemPrompt]);
-  console.log("modal description: ", screenDescription);
 
   return screenDescription;
 };
 
-export const getPartDescription = async (
+export const getSectionDescription = async (
   html: string,
   pageDescription: string
 ) => {
-  const describePartSystemPrompt: Prompt = {
+  const describeSectionSystemPrompt: Prompt = {
     role: "SYSTEM",
-    content: `Given the HTML code, summarize the purpose of the part in the web page it represents.
+    content: `Given the HTML code, summarize the purpose of the section in the web page it represents.
     
-Consider the description on the webpage where the part is located: ${pageDescription}
+Consider the description on the webpage where the section is located: ${pageDescription}
 
 HTML code:
 ${html}`,
   };
 
-  const partDescription = await getAiResponse([describePartSystemPrompt]);
-  console.log("part description: ", partDescription);
+  const sectionDescription = await getAiResponse([describeSectionSystemPrompt]);
 
-  return partDescription;
-};
-
-export const getComponentFeature = async (
-  componentHtml: string,
-  screenDescription: string
-) => {
-  const describeComponentFeaturePrompts: Prompt[] = [
-    {
-      role: "SYSTEM",
-      content: `
-      You are a web developer who explains why people should use the given part of the website. 
-      Output the purpose using "To ~" without providing additional context.
-      Consider the description of the webpage where this element is located: ${screenDescription}`,
-    },
-  ];
-
-  const htmlPrompt: Prompt = {
-    role: "HUMAN",
-    content: componentHtml,
-  };
-
-  return getAiResponse([...describeComponentFeaturePrompts, htmlPrompt]);
+  return sectionDescription;
 };
 
 export const makeChatsPrompt = (chats: Chat[]): Prompt => ({
@@ -202,6 +148,9 @@ export const getComponentInfo = async ({
   screenDescription: string;
   actionType: string;
 }) => {
+  const action = actionType === "focus" ? "select" : actionType;
+  const actionName =
+    action.charAt(0).toUpperCase() + action.slice(1).toLowerCase();
   const extractComponentSystemPrompt: Prompt = {
     role: "SYSTEM",
     content: `You are a web developer. You need to explain the context when the user interacts with a given HTML element and the action for the user to interact with the element.
@@ -213,10 +162,10 @@ Output following JSON format in plain text. Never provide additional context.
 {
   context : <the context when the user interacts with the element>,
   action: {
-    type: ${actionType},
+    type: ${action},
     description: <description of the action>
   },
-  description: <describe the action based on the context starting with '${actionType} '>
+  description: <describe the action based on the context starting with '${actionName} '>
 }`,
   };
 

@@ -94,7 +94,7 @@ export async function navigate(input: NavigateInput) {
 
     const prevAction = await createAction("GOTO", input.url);
 
-    let focusSection = await page.navigate(input.url); // Current focused section. Can be a page, a modal or a part.
+    let focusSection = await page.navigate(input.url); // Current focused section. Can be a page, a modal or a section.
 
     while (true) {
       //   const simpleHtml = await simplifyHtml(focusSection.html, false);
@@ -134,7 +134,7 @@ export async function navigate(input: NavigateInput) {
         );
       } else {
         // TODO: Haven't tested unfocus yet
-        if (focusSection.type === "part") {
+        if (focusSection.type === "section") {
           page.unfocus();
           continue;
         }
