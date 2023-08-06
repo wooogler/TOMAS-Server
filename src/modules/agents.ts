@@ -126,6 +126,7 @@ export async function executionAgent(
   //   chats: Chat[],
   screenDescription: string,
   currentFocusedSection: {
+    id: string;
     type: string;
     screenDescription: string;
     actionComponents: {
@@ -181,8 +182,8 @@ Execution Agent:
     createAIChat({
       content: `Which one do you want?
     Possible options could be:
-    ${options.itemComponents.map(
-      (item) => `- ${item.description}\n (i=${item.i}))`
+    ${options.actionComponents.map(
+      (action) => `- ${action.description}\n (i=${action.i}))`
     )}`,
     });
 

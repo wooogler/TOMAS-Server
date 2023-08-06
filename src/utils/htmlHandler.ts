@@ -250,13 +250,23 @@ function createActionType(interactiveElement: Element): string {
     case "a":
       return "click";
     case "select":
-    case "ul":
-    case "ol":
     case "table":
     case "fieldset":
-      return "select";
+      return "focus";
     case "textarea":
       return "inputText";
+    case "ul":
+    case "ol":
+      const listItems = interactiveElement.querySelectorAll("li");
+      for (let li of listItems) {
+        const clickElements = li.querySelectorAll(
+          'input[type="checkbox"], input[type="radio"], input[type="button"], button, a'
+        );
+        if (clickElements.length >= 2) {
+          return "select";
+        }
+      }
+      return "focus";
   }
   return "select";
 }
@@ -367,19 +377,19 @@ export async function parsingItemAgent({
       firstDescription = itemDescription || ""; // 첫 번째 description을 저장합니다.
     }
     return {
-      i: iAttr,
-      actionType: "item",
+      i: iAttr || "",
+      action: "item",
       description: itemDescription,
       html: comp.outerHTML,
     };
   });
 
   const itemComponents = await Promise.all(itemComponentsPromises);
-  console.log(
-    itemComponents
-      .map((comp) => `- ${comp.description} (i=${comp.i})`)
-      .join("\n")
-  );
+  // console.log(
+  //   itemComponents
+  //     .map((comp) => `- ${comp.description} (i=${comp.i})`)
+  //     .join("\n")
+  // );
   return itemComponents;
 }
 
@@ -426,10 +436,10 @@ export async function parsingAgent({
   );
 
   const actionComponents = await Promise.all(actionComponentsPromises);
-  console.log(
-    actionComponents
-      .map((comp) => `- ${comp.description} (i=${comp.i})`)
-      .join("\n")
-  );
+  // console.log(
+  //   actionComponents
+  //     .map((comp) => `- ${comp.description} (i=${comp.i})`)
+  //     .join("\n")
+  // );
   return actionComponents;
 }

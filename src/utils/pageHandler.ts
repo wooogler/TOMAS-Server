@@ -3,11 +3,23 @@ import { JSDOM } from "jsdom";
 import {
   getModalDescription,
   getPageDescription,
-  getPartDescription,
+  getSectionDescription,
 } from "./langchainHandler";
 import { parsingAgent, parsingItemAgent, simplifyHtml } from "./htmlHandler";
 
 const NO_PAGE_ERROR = new Error("Cannot find a page.");
+
+export interface ScreenResult {
+  id: string;
+  type: string;
+  screenDescription: string;
+  actionComponents: {
+    i: string;
+    action: string;
+    description: string | undefined;
+    html: string;
+  }[];
+}
 
 export class PageHandler {
   private browser: Browser | null = null;
@@ -44,7 +56,7 @@ export class PageHandler {
     return parsedURL.origin + parsedURL.pathname;
   }
 
-  async navigate(url: string) {
+  async navigate(url: string): Promise<ScreenResult> {
     const page = await this.getPage();
     const screen = await trackModalChanges(page, async () => {
       await page.goto(url, {
@@ -69,6 +81,7 @@ export class PageHandler {
         type: "modal",
         screenDescription: modalDescription,
         actionComponents,
+        id: `${this.extractBaseURL(page.url())}/modal/${screen.modalI}`,
       };
     } else {
       const actionComponents = await parsingAgent({
@@ -80,12 +93,12 @@ export class PageHandler {
         type: "page",
         screenDescription: pageDescription,
         actionComponents,
-        id: `${this.extractBaseURL(page.url())}-page`,
+        id: `${this.extractBaseURL(page.url())}`,
       };
     }
   }
 
-  async click(selector: string) {
+  async click(selector: string): Promise<ScreenResult> {
     const page = await this.getPage();
     const element = await this.getElement(selector);
     const screen = await trackModalChanges(page, async () => {
@@ -110,7 +123,7 @@ export class PageHandler {
         type: "modal",
         screenDescription: modalDescription,
         actionComponents,
-        id: `${page.url()}-modal-${screen.modalI}`,
+        id: `${this.extractBaseURL(page.url())}/modal/${screen.modalI}`,
       };
     } else {
       const actionComponents = await parsingAgent({
@@ -122,12 +135,12 @@ export class PageHandler {
         type: "page",
         screenDescription: pageDescription,
         actionComponents,
-        id: `${page.url()}-page`,
+        id: `${this.extractBaseURL(page.url())}`,
       };
     }
   }
 
-  async inputText(selector: string, text: string) {
+  async inputText(selector: string, text: string): Promise<ScreenResult> {
     const page = await this.getPage();
     const element = await this.getElement(selector);
     const screen = await trackModalChanges(page, async () => {
@@ -151,7 +164,7 @@ export class PageHandler {
         type: "modal",
         screenDescription: modalDescription,
         actionComponents,
-        id: `${page.url()}-modal-${screen.modalI}`,
+        id: `${this.extractBaseURL(page.url())}-modal-${screen.modalI}`,
       };
     } else {
       const actionComponents = await parsingAgent({
@@ -163,12 +176,13 @@ export class PageHandler {
         type: "page",
         screenDescription: pageDescription,
         actionComponents,
-        id: `${page.url()}-page`,
+        id: `${this.extractBaseURL(page.url())}`,
       };
     }
   }
 
-  async select(selector: string) {
+  //select one item in the list
+  async select(selector: string): Promise<ScreenResult> {
     const page = await this.getPage();
     const screen = await trackModalChanges(page, async () => {});
     const dom = new JSDOM(screen.html);
@@ -177,21 +191,25 @@ export class PageHandler {
 
     const pageSimpleHtml = simplifyHtml(await page.content(), true);
     const pageDescription = await getPageDescription(pageSimpleHtml);
-    const partDescription = await getPartDescription(
+    const sectionDescription = await getSectionDescription(
       elementSimpleHtml,
       pageDescription
     );
     const itemComponents = await parsingItemAgent({
       html: element?.innerHTML || "",
-      screenDescription: partDescription,
+      screenDescription: sectionDescription,
     });
     return {
-      type: "part",
-      screenDescription: partDescription,
-      itemComponents,
+      type: "section",
+      screenDescription: sectionDescription,
+      actionComponents: itemComponents,
+      id: `${this.extractBaseURL(page.url())}/section/${element?.getAttribute(
+        "i"
+      )}`,
     };
   }
-  async focus(selector: string) {
+
+  async focus(selector: string): Promise<ScreenResult> {
     const page = await this.getPage();
     const screen = await trackModalChanges(page, async () => {});
     const dom = new JSDOM(screen.html);
@@ -200,21 +218,25 @@ export class PageHandler {
 
     const pageSimpleHtml = simplifyHtml(await page.content(), true);
     const pageDescription = await getPageDescription(pageSimpleHtml);
-    const partDescription = await getPartDescription(
+    const sectionDescription = await getSectionDescription(
       elementSimpleHtml,
       pageDescription
     );
     const actionComponents = await parsingAgent({
       html: element?.innerHTML || "",
-      screenDescription: partDescription,
+      screenDescription: sectionDescription,
     });
     return {
-      type: "part",
-      screenDescription: partDescription,
+      type: "section",
+      screenDescription: sectionDescription,
       actionComponents,
+      id: `${this.extractBaseURL(page.url())}/section/${element?.getAttribute(
+        "i"
+      )}`,
     };
   }
-  async unfocus() {
+
+  async unfocus(): Promise<ScreenResult> {
     const page = await this.getPage();
     const screen = await trackModalChanges(page, async () => {});
     const pageSimpleHtml = simplifyHtml(await page.content(), true);
@@ -227,6 +249,7 @@ export class PageHandler {
       type: "page",
       screenDescription: pageDescription,
       actionComponents,
+      id: `${this.extractBaseURL(page.url())}`,
     };
   }
 
@@ -314,8 +337,8 @@ async function findModals(
   hiddenElementIs: string[]
 ): Promise<{ i: string; html: string; zIndex: number }[]> {
   return await page.evaluate((hiddenElementIs) => {
-    const MIN_MODAL_SIZE = 120; // 예시: 모달이 가져야 할 최소 크기
-    const MIN_Z_INDEX = 5; // 예시: 모달로 간주되려면 최소한 얼마나 높은 z-index를 가져야 하는지
+    const MIN_MODAL_SIZE = 120;
+    const MIN_Z_INDEX = 5;
 
     const filterHiddenElements = (
       html: string,
@@ -363,8 +386,6 @@ async function findModals(
         }
       }
     });
-
-    console.log("modals: ", modals);
 
     return modals;
   }, hiddenElementIs);
