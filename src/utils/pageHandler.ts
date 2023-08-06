@@ -60,7 +60,7 @@ export class PageHandler {
     const page = await this.getPage();
     const screen = await trackModalChanges(page, async () => {
       await page.goto(url, {
-        waitUntil: "networkidle0",
+        // waitUntil: "networkidle0",
       });
     });
 
@@ -81,7 +81,7 @@ export class PageHandler {
         type: "modal",
         screenDescription: modalDescription,
         actionComponents,
-        id: `${this.extractBaseURL(page.url())}/modal/${screen.modalI}`,
+        id: `${this.extractBaseURL(page.url())}modal/${screen.modalI}`,
       };
     } else {
       const actionComponents = await parsingAgent({
@@ -123,7 +123,7 @@ export class PageHandler {
         type: "modal",
         screenDescription: modalDescription,
         actionComponents,
-        id: `${this.extractBaseURL(page.url())}/modal/${screen.modalI}`,
+        id: `${this.extractBaseURL(page.url())}modal/${screen.modalI}`,
       };
     } else {
       const actionComponents = await parsingAgent({
@@ -164,7 +164,7 @@ export class PageHandler {
         type: "modal",
         screenDescription: modalDescription,
         actionComponents,
-        id: `${this.extractBaseURL(page.url())}-modal-${screen.modalI}`,
+        id: `${this.extractBaseURL(page.url())}modal/${screen.modalI}`,
       };
     } else {
       const actionComponents = await parsingAgent({
@@ -203,7 +203,7 @@ export class PageHandler {
       type: "section",
       screenDescription: sectionDescription,
       actionComponents: itemComponents,
-      id: `${this.extractBaseURL(page.url())}/section/${element?.getAttribute(
+      id: `${this.extractBaseURL(page.url())}section/${element?.getAttribute(
         "i"
       )}`,
     };
@@ -230,7 +230,7 @@ export class PageHandler {
       type: "section",
       screenDescription: sectionDescription,
       actionComponents,
-      id: `${this.extractBaseURL(page.url())}/section/${element?.getAttribute(
+      id: `${this.extractBaseURL(page.url())}section/${element?.getAttribute(
         "i"
       )}`,
     };
@@ -419,7 +419,7 @@ export async function trackModalChanges(
   });
   await action();
   if (page.url() !== initialUrl) {
-    await navigationPromise;
+    // await navigationPromise;
     await new Promise((r) => setTimeout(r, 3000));
   } else {
     await new Promise((r) => setTimeout(r, 3000));

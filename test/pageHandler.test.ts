@@ -25,8 +25,8 @@ ${screen.actionComponents
   it("navigate and interact with page", async () => {
     const mainScreen = await pageHandler.navigate("https://www.greyhound.com");
     logScreenResult(mainScreen);
-    const tripTypeSection = await pageHandler.focus('[i="347"]');
-    logScreenResult(tripTypeSection);
+    const dateScreen = await pageHandler.click('[i="411"]');
+    logScreenResult(dateScreen);
   }, 100000);
 
   // afterAll(async () => {

@@ -26,14 +26,19 @@ const chat4 = new ChatOpenAI({
   maxTokens: 4096,
 });
 
+const MAX_CHARACTERS_16K = 50000;
+
 export const getAiResponse = async (prompts: Prompt[]) => {
   const promptMessages = prompts.map((prompt) => {
+    const promptContent =
+      prompt.content.slice(0, MAX_CHARACTERS_16K) +
+      "... [Content trimmed due to token limits]";
     if (prompt.role === "HUMAN") {
-      return new HumanChatMessage(prompt.content);
+      return new HumanChatMessage(promptContent);
     } else if (prompt.role === "AI") {
-      return new AIChatMessage(prompt.content);
+      return new AIChatMessage(promptContent);
     } else {
-      return new SystemChatMessage(prompt.content);
+      return new SystemChatMessage(promptContent);
     }
   });
 

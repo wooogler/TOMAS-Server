@@ -283,23 +283,26 @@ export function parsingPossibleInteractions(
   const body = dom.window.document.body;
   const iAttrSet = new Set<string>();
 
-  // Gather I attributes from specified elements
-  let specifiedElements = Array.from(
-    body.querySelectorAll("ul, ol, table, fieldset")
-  );
+  let components: Element[] = [];
   const repeatingComponents = findRepeatingComponents(html);
   repeatingComponents.forEach((element) => {
-    const iAttr = element.getAttribute("i");
-    if (iAttr && !iAttrSet.has(iAttr)) {
-      specifiedElements.push(element);
-      iAttrSet.add(iAttr);
-    }
-  });
-
-  specifiedElements.forEach((element) => {
     Array.from(element.querySelectorAll("[i]")).forEach((el) =>
       iAttrSet.add(el.getAttribute("i")!)
     );
+    components.push(element);
+  });
+
+  let specifiedElements = Array.from(
+    body.querySelectorAll("ul, ol, table, fieldset")
+  );
+  specifiedElements.forEach((element) => {
+    const iAttr = element.getAttribute("i");
+    if (iAttr && !iAttrSet.has(iAttr)) {
+      components.push(element);
+      Array.from(element.querySelectorAll("[i]")).forEach((el) =>
+        iAttrSet.add(el.getAttribute("i")!)
+      );
+    }
   });
 
   // Filter interactive elements
@@ -309,7 +312,8 @@ export function parsingPossibleInteractions(
     (element) =>
       !(element.getAttribute("i") && iAttrSet.has(element.getAttribute("i")!))
   );
-  interactiveElements.push(...specifiedElements);
+
+  interactiveElements.push(...components);
 
   const possibleInteractions: PossibleInteractions[] = [];
 
