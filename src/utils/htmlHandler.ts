@@ -255,21 +255,23 @@ function createActionType(interactiveElement: Element): ActionType {
     case "select":
     case "table":
     case "fieldset":
-      return "focus";
-    case "textarea":
-      return "inputText";
     case "ul":
     case "ol":
-      const listItems = interactiveElement.querySelectorAll("li");
-      for (let li of listItems) {
-        const clickElements = li.querySelectorAll(
-          'input[type="checkbox"], input[type="radio"], input[type="button"], button, a'
-        );
-        if (clickElements.length >= 2) {
-          return "select";
-        }
-      }
-      return "focus";
+      return "select";
+    case "textarea":
+      return "inputText";
+    // case "ul":
+    // case "ol":
+    //   const listItems = interactiveElement.querySelectorAll("li");
+    //   for (let li of listItems) {
+    //     const clickElements = li.querySelectorAll(
+    //       'input[type="checkbox"], input[type="radio"], input[type="button"], button, a'
+    //     );
+    //     if (clickElements.length >= 2) {
+    //       return "select";
+    //     }
+    //   }
+    //   return "focus";
   }
   return "select";
 }
@@ -379,8 +381,8 @@ export async function parsingItemAgent({
       }
       return {
         i: iAttr || "",
-        actionType: "item",
-        description: itemDescription,
+        actionType: "select",
+        description: "Select " + itemDescription,
         html: comp.outerHTML,
       };
     }

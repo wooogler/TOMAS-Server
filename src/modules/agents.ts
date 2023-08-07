@@ -159,7 +159,7 @@ Execution Agent:
 
     actionValue = valueBasedOnHistory.value;
   } else if (component.action == "select") {
-    const options = await page.select(`[i="${component.i}"]`);
+    const options = await page.focus(`[i="${component.i}"]`);
     createAIChat({
       content: `Which one do you want?
     Possible options could be:

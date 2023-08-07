@@ -483,18 +483,17 @@ export async function getActionHistory(
     if (actionValue === "yes") {
       actionDone = "Click";
     } else {
-      actionDone = "No Click";
+      actionDone = "Cancel Click";
     }
+  } else {
+    actionDone = actionValue;
   }
-
-  actionDone = actionValue;
-
   const actionHistoryPrompt: Prompt = {
     role: "SYSTEM",
     content: `Here are the actions that the system tried and have done on the web page. 
 
 Tried: ${actionComponent.description}
-Done: ${editActionType(actionType)} '${actionValue}'
+Done: ${editActionType(actionType)} '${actionDone}'
 
 Describe the action on the web page in one sentence`,
   };
