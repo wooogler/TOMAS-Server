@@ -53,8 +53,11 @@ ${screen.actionComponents
 
   it("navigate and interact with page", async () => {
     const mainScreen = await pageHandler.navigate("https://www.greyhound.com");
-    const dateScreen = await pageHandler.click('[i="411"]');
-    const datePickerSection = await pageHandler.select('[i="869"]');
+    logScreenResult(mainScreen);
+    const searchScreen = await pageHandler.click('[i="442"]');
+    logScreenResult(searchScreen);
+    const options = await pageHandler.select('[i="163"]');
+    logScreenResult(options);
   }, 100000);
 
   // afterAll(async () => {
