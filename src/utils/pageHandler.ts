@@ -23,7 +23,7 @@ export type ActionComponent = {
 
 export interface ScreenResult {
   id: string;
-  type: string;
+  type: "page" | "section" | "modal";
   screenDescription: string;
   actionComponents: ActionComponent[];
 }
@@ -189,32 +189,32 @@ export class PageHandler {
   }
 
   //select one item in the list
-  //   async select(selector: string): Promise<ScreenResult> {
-  //     const page = await this.getPage();
-  //     const screen = await trackModalChanges(page, async () => {});
-  //     const dom = new JSDOM(screen.html);
-  //     const element = dom.window.document.querySelector(selector);
-  //     const elementSimpleHtml = simplifyHtml(element?.innerHTML || "", true);
+  async select(selector: string): Promise<ScreenResult> {
+    const page = await this.getPage();
+    const screen = await trackModalChanges(page, async () => {});
+    const dom = new JSDOM(screen.html);
+    const element = dom.window.document.querySelector(selector);
+    const elementSimpleHtml = simplifyHtml(element?.innerHTML || "", true);
 
-  //     const pageSimpleHtml = simplifyHtml(await page.content(), true);
-  //     const pageDescription = await getPageDescription(pageSimpleHtml);
-  //     const sectionDescription = await getSectionDescription(
-  //       elementSimpleHtml,
-  //       pageDescription
-  //     );
-  //     const itemComponents = await parsingItemAgent({
-  //       html: element?.innerHTML || "",
-  //       screenDescription: sectionDescription,
-  //     });
-  //     return {
-  //       type: "section",
-  //       screenDescription: sectionDescription,
-  //       actionComponents: itemComponents,
-  //       id: `${this.extractBaseURL(page.url())}section/${element?.getAttribute(
-  //         "i"
-  //       )}`,
-  //     };
-  //   }
+    const pageSimpleHtml = simplifyHtml(await page.content(), true);
+    const pageDescription = await getPageDescription(pageSimpleHtml);
+    const sectionDescription = await getSectionDescription(
+      elementSimpleHtml,
+      pageDescription
+    );
+    const itemComponents = await parsingItemAgent({
+      html: element?.innerHTML || "",
+      screenDescription: sectionDescription,
+    });
+    return {
+      type: "section",
+      screenDescription: sectionDescription,
+      actionComponents: itemComponents,
+      id: `${this.extractBaseURL(page.url())}section/${element?.getAttribute(
+        "i"
+      )}`,
+    };
+  }
 
   async focus(selector: string): Promise<ScreenResult> {
     const page = await this.getPage();
@@ -229,7 +229,7 @@ export class PageHandler {
       elementSimpleHtml,
       pageDescription
     );
-    const actionComponents = await parsingItemAgent({
+    const actionComponents = await parsingAgent({
       html: element?.innerHTML || "",
       screenDescription: sectionDescription,
     });
