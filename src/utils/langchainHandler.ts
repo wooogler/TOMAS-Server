@@ -28,7 +28,7 @@ const chat4 = new ChatOpenAI({
   maxTokens: 4096,
 });
 
-const MAX_CHARACTERS_16K = 50000;
+const MAX_CHARACTERS_16K = 30000;
 
 export const getAiResponse = async (prompts: Prompt[]) => {
   const promptMessages = prompts.map((prompt) => {
