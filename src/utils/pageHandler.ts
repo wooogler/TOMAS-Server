@@ -17,7 +17,7 @@ const NO_PAGE_ERROR = new Error("Cannot find a page.");
 export type ActionComponent = {
   i: string;
   actionType: ActionType;
-  description: string | undefined;
+  description?: string;
   html: string;
 };
 
