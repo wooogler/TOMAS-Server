@@ -111,7 +111,7 @@ export async function navigate(input: NavigateInput) {
       //   await planningAgent(parsingResult, userObjective, userContext, systemContext);
       const actionComponents = focusSection.actionComponents.map((item) => ({
         i: item.i,
-        action: item.action,
+        action: item.actionType,
         description: item.description || "",
         html: item.html,
       }));

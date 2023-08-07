@@ -4,6 +4,7 @@ import {
   getItemDescription,
   getSelectInfo,
 } from "./langchainHandler";
+import { ActionComponent } from "./pageHandler";
 
 const removeSpecificTags = (element: Element, tagNames: string[]) => {
   for (const tagName of tagNames) {
@@ -239,7 +240,9 @@ export function findRepeatingComponents(html: string) {
   });
 }
 
-function createActionType(interactiveElement: Element): string {
+export type ActionType = "select" | "inputText" | "click" | "focus" | "item";
+
+function createActionType(interactiveElement: Element): ActionType {
   switch (interactiveElement.tagName.toLowerCase()) {
     case "input":
       const type = interactiveElement.getAttribute("type");
@@ -272,7 +275,7 @@ function createActionType(interactiveElement: Element): string {
 }
 
 export interface PossibleInteractions {
-  actionType: string;
+  actionType: ActionType;
   i: string;
 }
 
@@ -351,42 +354,37 @@ function comparePossibleInteractions(
   return 0;
 }
 
-export interface ParsingResult {
-  i: string;
-  action: string;
-  description: string;
-  html: string;
-}
-
 export async function parsingItemAgent({
   html,
   screenDescription,
 }: {
   html: string;
   screenDescription: string;
-}) {
+}): Promise<ActionComponent[]> {
   const dom = new JSDOM(html);
   const body = dom.window.document.body;
   const components = Array.from(body.children);
-  let firstDescription: string; // 맨 처음 나온 description을 추적하는 변수를 추가합니다.
+  let firstDescription: string;
 
-  const itemComponentsPromises = components.map(async (comp, index) => {
-    const iAttr = comp.getAttribute("i");
-    const itemDescription = await getItemDescription({
-      itemHtml: simplifyHtml(comp.outerHTML, true),
-      screenDescription,
-      prevDescription: index === 0 ? firstDescription : undefined, // 첫 번째 요소에서만 prevDescription을 사용합니다.
-    });
-    if (index === 0) {
-      firstDescription = itemDescription || ""; // 첫 번째 description을 저장합니다.
+  const itemComponentsPromises = components.map<Promise<ActionComponent>>(
+    async (comp, index) => {
+      const iAttr = comp.getAttribute("i");
+      const itemDescription = await getItemDescription({
+        itemHtml: simplifyHtml(comp.outerHTML, true),
+        screenDescription,
+        prevDescription: index === 0 ? firstDescription : undefined,
+      });
+      if (index === 0) {
+        firstDescription = itemDescription || "";
+      }
+      return {
+        i: iAttr || "",
+        actionType: "item",
+        description: itemDescription,
+        html: comp.outerHTML,
+      };
     }
-    return {
-      i: iAttr || "",
-      action: "item",
-      description: itemDescription,
-      html: comp.outerHTML,
-    };
-  });
+  );
 
   const itemComponents = await Promise.all(itemComponentsPromises);
   // console.log(
@@ -403,7 +401,7 @@ export async function parsingAgent({
 }: {
   html: string;
   screenDescription: string;
-}) {
+}): Promise<ActionComponent[]> {
   const possibleInteractions = parsingPossibleInteractions(html).sort(
     comparePossibleInteractions
   );
@@ -432,7 +430,7 @@ export async function parsingAgent({
 
       return {
         i: iAttr,
-        action: interaction.actionType,
+        actionType: interaction.actionType,
         description: componentInfo?.description,
         html: componentHtml,
       };

@@ -6,6 +6,8 @@ import {
   SystemChatMessage,
 } from "langchain/schema";
 import { ParsingResult } from "../modules/screen/screen.service";
+import { ActionComponent } from "./pageHandler";
+import { ActionType } from "./htmlHandler";
 
 export type Prompt = {
   role: "SYSTEM" | "HUMAN" | "AI";
@@ -66,7 +68,7 @@ export const getGpt4Response = async (prompts: Prompt[]) => {
 export const getPageDescription = async (html: string) => {
   const describePageSystemPrompt: Prompt = {
     role: "SYSTEM",
-    content: `Given the HTML code, summarize the purpose of the web page it represents.
+    content: `Given the HTML code, summarize the general purpose of the web page it represents.
     
 HTML code:
 ${html}`,
@@ -83,7 +85,7 @@ export const getModalDescription = async (
 ) => {
   const describeModalSystemPrompt: Prompt = {
     role: "SYSTEM",
-    content: `Given the HTML code, summarize the purpose of the modal in the web page it represents.
+    content: `Given the HTML code, summarize the general purpose of the modal in the web page it represents.
     
 Consider the description on the web page where the modal is located: ${pageDescription}
 
@@ -102,7 +104,7 @@ export const getSectionDescription = async (
 ) => {
   const describeSectionSystemPrompt: Prompt = {
     role: "SYSTEM",
-    content: `Given the HTML code, summarize the purpose of the section in the web page it represents.
+    content: `Given the HTML code, summarize the general purpose of the section in the web page it represents.
     
 Consider the description on the webpage where the section is located: ${pageDescription}
 
@@ -115,34 +117,44 @@ ${html}`,
   return sectionDescription;
 };
 
-export const makeChatsPrompt = (chats: Chat[]): Prompt => ({
+export const makeConversationPrompt = (chats: Chat[]): Prompt => ({
   role: "HUMAN",
-  content: chats
+  content: `Conversation:
+  ${chats
     .map(
       (chat) => `${chat.role === "HUMAN" ? "User" : "System"}: ${chat.content}`
     )
-    .join("\n"),
+    .join("\n")}`,
 });
 
 export const getUserObjective = async (chats: Chat[]) => {
   const findTaskObjectiveSystemPrompt: Prompt = {
     role: "SYSTEM",
-    content: `You need to examine the conversation between the user and the assistant and determine the user's objective. Output the objective using "To ~" without providing additional context.`,
+    content: `You need to examine the conversation between user and system and determine the user's objective. Output the objective using "To ~" without providing additional context.`,
   };
 
-  const chatsPrompt: Prompt = makeChatsPrompt(chats);
+  const conversationPrompt: Prompt = makeConversationPrompt(chats);
 
-  return getAiResponse([findTaskObjectiveSystemPrompt, chatsPrompt]);
+  return getAiResponse([findTaskObjectiveSystemPrompt, conversationPrompt]);
 };
 
 export interface ComponentInfo {
   context: string;
   action: {
-    type: string;
+    type: ActionType;
     description: string;
   };
   description: string;
 }
+
+const capitalizeFirstCharacter = (str: string) =>
+  str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+
+const editActionType = (actionType: ActionType) => {
+  const action = actionType === "focus" ? "select" : actionType;
+  const actionName = capitalizeFirstCharacter(action);
+  return actionName;
+};
 
 export const getComponentInfo = async ({
   componentHtml,
@@ -151,11 +163,8 @@ export const getComponentInfo = async ({
 }: {
   componentHtml: string;
   screenDescription: string;
-  actionType: string;
+  actionType: ActionType;
 }) => {
-  const action = actionType === "focus" ? "select" : actionType;
-  const actionName =
-    action.charAt(0).toUpperCase() + action.slice(1).toLowerCase();
   const extractComponentSystemPrompt: Prompt = {
     role: "SYSTEM",
     content: `You are a web developer. You need to explain the context when the user interacts with a given HTML element and the action for the user to interact with the element.
@@ -167,10 +176,12 @@ Output following JSON format in plain text. Never provide additional context.
 {
   context : <the context when the user interacts with the element>,
   action: {
-    type: ${action},
+    type: ${editActionType(actionType)},
     description: <description of the action>
   },
-  description: <describe the action based on the context starting with '${actionName} '>
+  description: <describe the action based on the context starting with '${editActionType(
+    actionType
+  )} '>
 }`,
   };
 
@@ -231,7 +242,7 @@ export const getSelectInfo = async ({
 }: {
   componentHtml: string;
   screenDescription: string;
-  actionType: string;
+  actionType: ActionType;
 }) => {
   const extractComponentSystemPrompt: Prompt = {
     role: "SYSTEM",
@@ -246,10 +257,12 @@ Output following JSON format in plain text. Never provide additional context.
 {
   context : <the context when the user interacts with the element>,
   action: {
-    type: ${actionType},
+    type: ${editActionType(actionType)},
     description: <description of the action>
   },
-  description: <describe the action based on the context starting with '${actionType} one'>
+  description: <describe the action based on the context starting with '${editActionType(
+    actionType
+  )} one'>
 }`,
   };
 
@@ -270,62 +283,6 @@ Output following JSON format in plain text. Never provide additional context.
   }
 };
 
-function extractIValues(inputStr: string) {
-  const regex = /i=(\d+)/g;
-  let match;
-  const result = [];
-
-  while ((match = regex.exec(inputStr)) !== null) {
-    result.push(parseInt(match[1]));
-  }
-
-  return result;
-}
-
-export const getTaskOrder = async ({
-  components,
-  objective,
-  pageDescription,
-}: {
-  components: Prisma.ComponentCreateInput[];
-  objective: string;
-  pageDescription: string;
-}) => {
-  const orderTasksSystemPrompt: Prompt = {
-    role: "SYSTEM",
-    content: `
-You are looking at a webpage.
-The description of the webpage: ${pageDescription}
-
-You need to plan the sequence of following possible actions on a single webpage.
-Possible Actions:
-${components
-  .map((comp, tmpIndex) => `- ${comp.description} (i=${tmpIndex})`)
-  .join("\n")}
-
-Consider the user's objective: ${objective}
-
-Actions should be selected in an order to advance to the next page.
-Return the list of actions as a numbered list in the format:
-
-#. First action (i=<i>)
-#. Second action (i=<i>)
-
-The entries must be consecutively numbered, starting with 1. The number of each entry must be followed by a period.
-Do not include any headers before your list or follow your list with any other output.`,
-  };
-
-  const response = await getAiResponse([orderTasksSystemPrompt]);
-  console.log(`Prompt: 
-${orderTasksSystemPrompt.content}
-`);
-  console.log(`Response:
-${response}
-`);
-
-  return extractIValues(response);
-};
-
 interface SuggestedInteraction {
   type: string;
   elementI: string;
@@ -339,62 +296,6 @@ interface InteractionQuestion {
 type InteractionJson =
   | { suggestedInteraction: SuggestedInteraction }
   | { question: InteractionQuestion };
-
-export const getInteractionOrQuestion = async ({
-  component,
-  chats,
-}: {
-  component: Prisma.ComponentCreateInput;
-  chats: Chat[];
-}): Promise<InteractionJson> => {
-  const interactionSystemPrompt: Prompt = {
-    role: "SYSTEM",
-    content: `
-You are an agent interacting with HTML on behalf of a user. Let's think step by step.
-First, read the possible interaction that the agent can do with the given HTML element. Second, read the chat history with users and think about whether you have enough information to interact with the element. 
-
-If yes, suggest the interaction with the element based on the chat history. The output should follow JSON format in plain text without providing additional context.
-{
-  "suggestedInteraction": {
-    "type": <click or input or scroll>
-    "elementI": <i attribute of the target element>
-    "value": <if the interaction type is input, fill the text for input>
-  }
-}
-
-If no, create a natural language question to ask the user to get information to interact with the element. The output should follow JSON format in plain text without providing additional context.
-{
-  "question": <question to user>
-}
-`,
-  };
-
-  const interactionUserPrompt: Prompt = {
-    role: "HUMAN",
-    content: `
-HTML element:
-${component.html}
-
-Possible interaction with the element:
-${component.description}
-
-Chat history:
-${makeChatsPrompt(chats)}
-    `,
-  };
-
-  try {
-    const interactionJson = await getGpt4Response([
-      interactionSystemPrompt,
-      interactionUserPrompt,
-    ]);
-    const componentObj: InteractionJson = JSON.parse(interactionJson);
-    return componentObj;
-  } catch (error) {
-    console.error("Error parsing JSON:", error);
-    throw error;
-  }
-};
 
 export function isSuggestedInteraction(
   obj: InteractionJson
@@ -435,17 +336,16 @@ export const getPossibleInteractionDescription = async (
 };
 
 export async function getUserContext(chats: Chat[]) {
-  const chatsPrompt: Prompt = makeChatsPrompt(chats);
+  const converationPrompt: Prompt = makeConversationPrompt(chats);
   const findUserContextPrompt: Prompt = {
     role: "SYSTEM",
-    content: `
-      Based on the conversation between the system and the user, describe the user's context. Please keep all useful information from the conversation in the context considering the user's goal.
-      
-      Conversation:
-
-        `,
+    content: `Based on the conversation between the system and the user, describe the user's context. Please keep all useful information from the conversation in the context considering the user's goal.
+`,
   };
-  const userContext = await getAiResponse([findUserContextPrompt, chatsPrompt]);
+  const userContext = await getAiResponse([
+    findUserContextPrompt,
+    converationPrompt,
+  ]);
   return userContext;
 }
 
@@ -574,31 +474,82 @@ export async function makeQuestionForConfirmation(
 }
 
 export async function getActionHistory(
-  triedAction: string,
-  actionType: string,
+  actionComponent: ActionComponent,
   actionValue: string
 ) {
+  let actionDone = "";
+  const actionType = actionComponent.actionType;
+  if (actionType === "click") {
+    if (actionValue === "yes") {
+      actionDone = "Click";
+    } else {
+      actionDone = "No Click";
+    }
+  }
+
+  actionDone = actionValue;
+
   const actionHistoryPrompt: Prompt = {
     role: "SYSTEM",
     content: `Here are the actions that the system tried and have done on the web page. 
 
-Tried: ${triedAction}
-Done: ${actionType} '${actionValue}'
+Tried: ${actionComponent.description}
+Done: ${editActionType(actionType)} '${actionValue}'
 
 Describe the action on the web page in one sentence`,
   };
   return await getAiResponse([actionHistoryPrompt]);
 }
 
-export async function getSystemContext(
-  actionHistory: string[],
-  screenDescription: string,
-  modalDescription?: string
-) {
-  const summarizePageDescriptionPrompt: Prompt = {
-    role: "SYSTEM",
-    content: `Summarize the description in a short sentence.
+export interface ActionLog {
+  id: string;
+  type: "page" | "modal" | "section" | "action";
+  screenDescription: string;
+  actionDescription: string;
+}
 
+export async function getSystemContext(actionLogs: ActionLog[]) {
+  let actionHistory: {
+    type: "page" | "modal" | "section" | "action";
+    description: string;
+  }[] = [];
+  let prevId = "";
+  actionLogs.map((log) => {
+    if (prevId !== log.id) {
+      // Action in new screen
+      actionHistory.push({
+        type: log.type,
+        description: log.screenDescription,
+      });
+      actionHistory.push({
+        type: log.type,
+        description: log.actionDescription,
+      });
+      prevId = log.id;
+    } else {
+      // Action in prev screen
+      actionHistory.push({
+        type: log.type,
+        description: log.actionDescription,
+      });
+    }
+  });
+
+  const makeSystemContextPrompt: Prompt = {
+    role: "SYSTEM",
+    content: `You are using the system to use mobile website automatically.
+Based on the history of the system's actions, please describe the context of the system in natural language.
+
+${actionHistory.map((item) => {
+  if (item.type === "action") {
+    ` - ${item.description}\n`;
+  } else {
+    `In ${item.type}: ${item.description}\n`;
+  }
+})}
 `,
   };
+
+  const systemContext = await getAiResponse([makeSystemContextPrompt]);
+  return systemContext;
 }

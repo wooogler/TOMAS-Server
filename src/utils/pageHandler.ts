@@ -5,20 +5,27 @@ import {
   getPageDescription,
   getSectionDescription,
 } from "./langchainHandler";
-import { parsingAgent, parsingItemAgent, simplifyHtml } from "./htmlHandler";
+import {
+  ActionType,
+  parsingAgent,
+  parsingItemAgent,
+  simplifyHtml,
+} from "./htmlHandler";
 
 const NO_PAGE_ERROR = new Error("Cannot find a page.");
+
+export type ActionComponent = {
+  i: string;
+  actionType: ActionType;
+  description: string | undefined;
+  html: string;
+};
 
 export interface ScreenResult {
   id: string;
   type: string;
   screenDescription: string;
-  actionComponents: {
-    i: string;
-    action: string;
-    description: string | undefined;
-    html: string;
-  }[];
+  actionComponents: ActionComponent[];
 }
 
 export class PageHandler {

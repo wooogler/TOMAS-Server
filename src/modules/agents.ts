@@ -6,7 +6,7 @@ import {
   makeQuestionForActionValue,
   makeQuestionForConfirmation,
 } from "../utils/langchainHandler";
-import { PageHandler } from "../utils/pageHandler";
+import { PageHandler, ScreenResult } from "../utils/pageHandler";
 import { getChats } from "./chat/chat.service";
 import { ParsingResult } from "./screen/screen.service";
 export interface taskList {
@@ -17,16 +17,7 @@ export interface taskList {
 import { createAIChat } from "./chat/chat.service";
 export async function planningAgent(
   userObjective: string,
-  focusedSection: {
-    type: string;
-    screenDescription: string;
-    actionComponents: {
-      i: string;
-      action: string;
-      description: string | undefined;
-      html: string;
-    }[];
-  },
+  focusedSection: ScreenResult,
   userContext: string,
   systemContext: string
 ) {
@@ -125,17 +116,7 @@ export async function executionAgent(
   component: ParsingResult,
   //   chats: Chat[],
   screenDescription: string,
-  currentFocusedSection: {
-    id: string;
-    type: string;
-    screenDescription: string;
-    actionComponents: {
-      i: string;
-      action: string;
-      description: string | undefined;
-      html: string;
-    }[];
-  }
+  currentFocusedSection: ScreenResult
 ) {
   console.log(`
 ---------------
