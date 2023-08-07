@@ -67,7 +67,7 @@ export class PageHandler {
     const page = await this.getPage();
     const screen = await trackModalChanges(page, async () => {
       await page.goto(url, {
-        // waitUntil: "networkidle0",
+        waitUntil: "networkidle0",
       });
     });
 
