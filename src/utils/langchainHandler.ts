@@ -1,4 +1,4 @@
-import { Chat, Prisma } from "@prisma/client";
+import { Chat } from "@prisma/client";
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import {
   AIChatMessage,
@@ -6,8 +6,8 @@ import {
   SystemChatMessage,
 } from "langchain/schema";
 import { ParsingResult } from "../modules/screen/screen.service";
-import { ActionComponent } from "./pageHandler";
 import { ActionType } from "./htmlHandler";
+import { ActionComponent } from "./pageHandler";
 
 export type Prompt = {
   role: "SYSTEM" | "HUMAN" | "AI";
@@ -500,20 +500,21 @@ Describe the action on the web page in one sentence`,
   return await getAiResponse([actionHistoryPrompt]);
 }
 
-export interface ActionLog {
+// Include all description for page, modal, section, and action.
+export interface SystemLog {
   id: string;
   type: "page" | "modal" | "section" | "action";
   screenDescription: string;
   actionDescription: string;
 }
 
-export async function getSystemContext(actionLogs: ActionLog[]) {
+export async function getSystemContext(systemLogs: SystemLog[]) {
   let actionHistory: {
     type: "page" | "modal" | "section" | "action";
     description: string;
   }[] = [];
   let prevId = "";
-  actionLogs.map((log) => {
+  systemLogs.forEach((log) => {
     if (prevId !== log.id) {
       // Action in new screen
       actionHistory.push({
@@ -521,7 +522,7 @@ export async function getSystemContext(actionLogs: ActionLog[]) {
         description: log.screenDescription,
       });
       actionHistory.push({
-        type: log.type,
+        type: "action",
         description: log.actionDescription,
       });
       prevId = log.id;
@@ -541,9 +542,9 @@ Based on the history of the system's actions, please describe the context of the
 
 ${actionHistory.map((item) => {
   if (item.type === "action") {
-    ` - ${item.description}\n`;
+    return ` - ${item.description}\n`;
   } else {
-    `In ${item.type}: ${item.description}\n`;
+    return `In ${item.type}: ${item.description}\n`;
   }
 })}
 `,

@@ -1,6 +1,7 @@
 import {
   Prompt,
   findInputTextValue,
+  getActionHistory,
   getGpt4Response,
   getUserContext,
   makeQuestionForActionValue,
@@ -30,7 +31,7 @@ You need to plan the action sequence using the following possible actions in the
       focusedSection.screenDescription
     }.
 
-Actions should be selected in order to achieve what the user wants: ${userObjective}. ${userContext}
+Actions should be selected in order to achieve what the user wants: ${userContext}
 
 Possible actions:
 ${focusedSection.actionComponents
@@ -159,12 +160,12 @@ Execution Agent:
 
     actionValue = valueBasedOnHistory.value;
   } else if (component.action == "select") {
-    const options = await page.focus(`[i="${component.i}"]`);
+    const options = await page.select(`[i="${component.i}"]`);
     createAIChat({
       content: `Which one do you want?
     Possible options could be:
     ${options.actionComponents.map(
-      (action) => `- ${action.description}\n (i=${action.i}))`
+      (action) => `- ${action.description}\n (i=${action.i}))\n\n`
     )}`,
     });
 
@@ -185,11 +186,20 @@ Execution Agent:
 
   if (answer == "yes") {
     if (component.action == "inputText") {
-      return await page.inputText(`[i=${component.i}]`, actionValue);
+      let rt = await page.inputText(`[i=${component.i}]`, actionValue);
+      const actionHistoryDescription = getActionHistory(
+        {
+          i: component.i,
+          actionType: "click",
+          description: component.description,
+          html: component.html,
+        },
+        "yes"
+      );
     } else if (component.action == "click") {
       return await page.click(`[i="${component.i}"]`);
     } else if (component.action == "select") {
-      return await page.focus(`[i="${component.i}"]`);
+      return await page.focus(`[i="${actionValue}"]`);
     }
   }
   return currentFocusedSection;

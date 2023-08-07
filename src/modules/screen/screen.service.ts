@@ -1,17 +1,17 @@
 import { Interaction } from "@prisma/client";
 import { minify } from "html-minifier-terser";
-import { JSDOM } from "jsdom";
 import { Browser, Page } from "puppeteer";
-import { PossibleInteractions, simplifyHtml } from "../../utils/htmlHandler";
+import { PossibleInteractions } from "../../utils/htmlHandler";
 import {
-  getPossibleInteractionDescription,
+  SystemLog,
+  getSystemContext,
   getUserContext,
   getUserObjective,
 } from "../../utils/langchainHandler";
 import { PageHandler } from "../../utils/pageHandler";
 import prisma from "../../utils/prisma";
 import { executionAgent, planningAgent } from "../agents";
-import { getChats } from "../chat/chat.service";
+import { createHumanChat, getChats, createAIChat } from "../chat/chat.service";
 import { NavigateInput } from "./screen.schema";
 
 let globalBrowser: Browser | null = null;
@@ -88,6 +88,8 @@ async function createAction(
 }
 
 export async function navigate(input: NavigateInput) {
+  createAIChat({ content: "How can I help you?" });
+  createHumanChat({ content: "I want to book a ticket." });
   try {
     let page = await new PageHandler();
     await page.initialize();
@@ -95,7 +97,13 @@ export async function navigate(input: NavigateInput) {
     const prevAction = await createAction("GOTO", input.url);
 
     let focusSection = await page.navigate(input.url); // Current focused section. Can be a page, a modal or a section.
-
+    let actionLogs: SystemLog[] = []; // List of actions that have been executed
+    actionLogs.push({
+      id: focusSection.id,
+      type: focusSection.type,
+      screenDescription: focusSection.screenDescription,
+      actionDescription: `Navigate to the page: ${focusSection.screenDescription}`,
+    });
     while (true) {
       //   const simpleHtml = await simplifyHtml(focusSection.html, false);
       //   const screenDescription = await getScreenDescription(simpleHtml);
@@ -115,12 +123,14 @@ export async function navigate(input: NavigateInput) {
         description: item.description || "",
         html: item.html,
       }));
+
+      const systemContext = await getSystemContext(actionLogs);
       // Get task list
       const taskList = await planningAgent(
         userObjective,
         focusSection,
         userContext,
-        "" // put system context here
+        systemContext
       );
 
       // Get first task
