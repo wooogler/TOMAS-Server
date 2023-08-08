@@ -1,9 +1,9 @@
 import { Chat } from "@prisma/client";
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import {
-    AIChatMessage,
-    HumanChatMessage,
-    SystemChatMessage,
+  AIChatMessage,
+  HumanChatMessage,
+  SystemChatMessage,
 } from "langchain/schema";
 import { ActionType } from "./htmlHandler";
 import { ActionComponent } from "./pageHandler";
@@ -441,8 +441,7 @@ export async function makeQuestionForConfirmation(
   const makeConfirmationPrompts: Prompt[] = [
     {
       role: "SYSTEM",
-      content:
-        `
+      content: `
           You are the AI assistant who sees the abstraction of part of the user's web page. You have decided what to do for the given component abstraction on the web page based on the user's context
     
           Now you need to create a human natural language question to confirm the user's aim, without specifying which element to operate or using web terms. Don't assume general context; only refer to the given context. Don't mention the component in your question. Confirm the aim of the value.
@@ -467,14 +466,6 @@ export async function makeQuestionForConfirmation(
             ${component.actionType === "click" ? "" : `"value": ${actionValue}`}
           }
         `,
-        ` +
-        `
-        {
-          "type": ${component.action},
-          "description": ${component.description},
-          ${component.action === "click" ? "" : `"value": ${actionValue}`}
-        }
-      `,
     },
   ];
   const confirmation = await getAiResponse(makeConfirmationPrompts);
