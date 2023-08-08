@@ -7,9 +7,11 @@ import {
 import prisma from "../../utils/prisma";
 import {
   AnswerInput,
+  AnswerResponse,
   ConfirmInput,
   CreateHumanChatInput,
   NavigateInput,
+  navigateResponse,
 } from "./chat.schema";
 import {
   ActionComponent,
@@ -54,7 +56,9 @@ export function getChats() {
   return prisma.chat.findMany();
 }
 
-export async function navigate(input: NavigateInput) {
+export async function navigate(
+  input: NavigateInput
+): Promise<navigateResponse> {
   try {
     await page.initialize();
     focusSection = await page.navigate(input.url);
@@ -65,89 +69,106 @@ export async function navigate(input: NavigateInput) {
       actionDescription: `Navigate to the page`,
     });
     createAIChat({ content: "How can I help you?" });
-    return "navigate";
+    return {
+      screenDescription: focusSection.screenDescription,
+      type: "navigate",
+    };
   } catch (error: any) {
     console.error("Failed to navigate to the webpage.", error);
     throw error;
   }
 }
 
-export async function firstOrder(input: CreateHumanChatInput) {
+export async function firstOrder(
+  input: CreateHumanChatInput
+): Promise<AnswerResponse> {
   createHumanChat(input);
-  await planning();
+  const response = await planningAndAsk();
+  if (response) {
+    return response;
+  } else {
+    throw new Error("Failed to get the response from the planning agent.");
+  }
 }
 
-async function planning() {
-  const chats = await getChats();
-  const userContext = await getUserContext(chats);
-  const actionComponents = focusSection.actionComponents;
+async function planningAndAsk(): Promise<AnswerResponse | undefined> {
+  try {
+    const chats = await getChats();
+    const userContext = await getUserContext(chats);
+    const actionComponents = focusSection.actionComponents;
 
-  const systemContext = await getSystemContext(actionLogs);
-  const taskList = await planningAgent(
-    "",
-    focusSection,
-    userContext,
-    systemContext
-  );
+    const systemContext = await getSystemContext(actionLogs);
+    const taskList = await planningAgent(
+      "",
+      focusSection,
+      userContext,
+      systemContext
+    );
 
-  const task = taskList[0];
-  if (task) {
-    const component = actionComponents.find((item) => item.i === task.i);
-    const screenDescription = focusSection.screenDescription;
-    if (component) {
-      if (component.actionType === "input") {
-        let valueBasedOnHistory = await JSON.parse(
-          await findInputTextValue(
-            screenDescription,
-            component.description,
-            userContext
-          )
-        );
-
-        const actionValue = valueBasedOnHistory.value;
-        // If user context is not enough to answer the question
-        if (actionValue === null) {
-          const question = await makeQuestionForActionValue(
-            screenDescription,
-            component.description
+    const task = taskList[0];
+    if (task) {
+      const component = actionComponents.find((item) => item.i === task.i);
+      const screenDescription = focusSection.screenDescription;
+      if (component) {
+        if (component.actionType === "input") {
+          let valueBasedOnHistory = await JSON.parse(
+            await findInputTextValue(
+              screenDescription,
+              component.description,
+              userContext
+            )
           );
-          await createAIChat({ content: question });
-          return { component, type: "questionForInput" };
-        } else {
-          const confirmationQuestion = await makeQuestionForConfirmation(
-            component,
-            actionValue
-          );
-          await createAIChat({ content: confirmationQuestion });
-          return { component, type: "requestConfirmation", actionValue };
-        }
-      } else if (component.actionType === "select") {
-        const options = await page.select(`['i="${component.i}"]`);
-        await createAIChat({
-          content: `Which one do you want?
+
+          const actionValue = valueBasedOnHistory.value;
+          // If user context is not enough to answer the question
+          if (actionValue === null) {
+            const question = await makeQuestionForActionValue(
+              screenDescription,
+              component.description
+            );
+            await createAIChat({ content: question });
+            return { component, type: "questionForInput" };
+          } else {
+            const confirmationQuestion = await makeQuestionForConfirmation(
+              component,
+              actionValue
+            );
+            await createAIChat({ content: confirmationQuestion });
+            return { component, type: "requestConfirmation", actionValue };
+          }
+        } else if (component.actionType === "select") {
+          const options = await page.select(`['i="${component.i}"]`);
+          await createAIChat({
+            content: `Which one do you want?
 
 Possible options could be:
 ${options.actionComponents.map(
   (action) => `- ${action.description} (i=${action.i}))`
 )}`,
-        });
-        return { component, type: "questionForSelect" };
-      } else {
-        const confirmationQuestion = await makeQuestionForConfirmation(
-          component,
-          ""
-        );
-        await createAIChat({ content: confirmationQuestion });
-        return { component, type: "requestConfirmation" };
+          });
+          return { component, type: "questionForSelect" };
+        } else {
+          const confirmationQuestion = await makeQuestionForConfirmation(
+            component,
+            ""
+          );
+          await createAIChat({ content: confirmationQuestion });
+          return { component, type: "requestConfirmation" };
+        }
       }
+    } else {
+      console.log("no task");
+      focusSection = await page.unfocus();
+      return await planningAndAsk();
     }
-  } else {
-    console.log("no task");
-    focusSection = await page.unfocus();
+  } catch (error) {
+    throw new Error(error as any);
   }
 }
 
-export async function answerForInput(input: AnswerInput) {
+export async function answerForInput(
+  input: AnswerInput
+): Promise<AnswerResponse> {
   createHumanChat(input);
   const chats = await getChats();
   const userContext = await getUserContext(chats);
@@ -204,7 +225,9 @@ export async function answerForSelect(input: AnswerInput) {
   }
 }
 
-export async function confirm(input: ConfirmInput) {
+export async function confirm(
+  input: ConfirmInput
+): Promise<AnswerResponse | undefined> {
   createHumanChat(input);
   const component = input.component;
   if (input.content === "yes") {
@@ -262,5 +285,5 @@ export async function confirm(input: ConfirmInput) {
       actionDescription,
     });
   }
-  await planning();
+  return await planningAndAsk();
 }

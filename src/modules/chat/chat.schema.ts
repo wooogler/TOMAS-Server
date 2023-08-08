@@ -44,14 +44,23 @@ const chatResponseSchema = z.object({
 
 const chatsResponseSchema = z.array(chatResponseSchema);
 
-const screenResponseSchema = z.object({
-  description: z.string(),
+const navigateResponseSchema = z.object({
+  screenDescription: z.string(),
+  type: z.string(),
+});
+
+const answerResponseSchema = z.object({
+  component: ActionComponentSchema,
+  type: z.string(),
+  actionValue: z.string().optional(),
 });
 
 export type CreateHumanChatInput = z.infer<typeof createHumanChatSchema>;
 export type NavigateInput = z.infer<typeof navigateSchema>;
 export type AnswerInput = z.infer<typeof answerSchema>;
 export type ConfirmInput = z.infer<typeof confirmSchema>;
+export type AnswerResponse = z.infer<typeof answerResponseSchema>;
+export type navigateResponse = z.infer<typeof navigateResponseSchema>;
 
 export const { schemas: chatSchemas, $ref } = buildJsonSchemas(
   {
@@ -59,7 +68,10 @@ export const { schemas: chatSchemas, $ref } = buildJsonSchemas(
     navigateSchema,
     chatResponseSchema,
     chatsResponseSchema,
-    screenResponseSchema,
+    navigateResponseSchema,
+    answerResponseSchema,
+    answerSchema,
+    confirmSchema,
   },
   {
     $id: "ChatSchema",
