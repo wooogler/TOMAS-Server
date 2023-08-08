@@ -1,5 +1,6 @@
 import {
   Prompt,
+  SystemLog,
   findInputTextValue,
   getActionHistory,
   getGpt4Response,
@@ -38,7 +39,7 @@ ${focusedSection.actionComponents
   .map((comp) => `- ${comp.description} (i=${comp.i})`)
   .join("\n")}
 
-Actions should reflect the results of the interactions the system has executed before: ${systemContext}
+Actions should reflect the results of the interactions the system has executed before: ${systemContext}. Please skip those actions that have been executed before if nessesary.
 
 First, describe the most efficient interaction plan in natural language by referring to the user's and system's contexts. Do not add any useless actions to the plan.
 
@@ -117,7 +118,8 @@ export async function executionAgent(
   component: ParsingResult,
   //   chats: Chat[],
   screenDescription: string,
-  currentFocusedSection: ScreenResult
+  currentFocusedSection: ScreenResult,
+  systemLogs: SystemLog[]
 ) {
   console.log(`
 ---------------
@@ -171,23 +173,26 @@ Execution Agent:
 
     // TODO: Wait for the user's answer. Then update chat history in the database.
     // suppose the answer is "<integer i>".
-    actionValue = "1";
+    actionValue = "352";
   }
-  const confirmationQuestion = await makeQuestionForConfirmation(
-    component,
-    actionValue
-  );
-
-  // Add confirmation question to database. TODO: Get the answer.
-  createAIChat({ content: confirmationQuestion });
+  if (component.action != "select") {
+    const confirmationQuestion = await makeQuestionForConfirmation(
+      component,
+      actionValue
+    );
+    // Add confirmation question to database. TODO: Get the answer.
+    createAIChat({ content: confirmationQuestion });
+  }
 
   // Suppose the answer is "yes"/"no".
   const answer = "yes";
 
   if (answer == "yes") {
     if (component.action == "inputText") {
-      let rt = await page.inputText(`[i=${component.i}]`, actionValue);
-      const actionHistoryDescription = getActionHistory(
+      let rt = await page.inputText(`[i="${component.i}"]`, actionValue);
+      return rt;
+    } else if (component.action == "click") {
+      const actionHistoryDescription = await getActionHistory(
         {
           i: component.i,
           actionType: "click",
@@ -196,7 +201,13 @@ Execution Agent:
         },
         "yes"
       );
-    } else if (component.action == "click") {
+      systemLogs.push({
+        id: currentFocusedSection.id,
+        type: "action",
+        screenDescription: screenDescription,
+        actionDescription: actionHistoryDescription,
+      });
+
       return await page.click(`[i="${component.i}"]`);
     } else if (component.action == "select") {
       return await page.focus(`[i="${actionValue}"]`);

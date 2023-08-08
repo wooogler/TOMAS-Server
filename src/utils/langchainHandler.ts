@@ -68,7 +68,7 @@ export const getGpt4Response = async (prompts: Prompt[]) => {
 export const getPageDescription = async (html: string) => {
   const describePageSystemPrompt: Prompt = {
     role: "SYSTEM",
-    content: `Given the HTML code, summarize the general purpose of the web page it represents.
+    content: `Given the HTML code, briefly summarize the general purpose of the web page it represents.
     
 HTML code:
 ${html}`,
@@ -442,7 +442,8 @@ export async function makeQuestionForConfirmation(
   const makeConfirmationPrompts: Prompt[] = [
     {
       role: "SYSTEM",
-      content: `
+      content:
+        `
           You are the AI assistant who sees the abstraction of part of the user's web page. You have decided what to do for the given component abstraction on the web page based on the user's context
     
           Now you need to create a human natural language question to confirm the user's aim, without specifying which element to operate or using web terms. Don't assume general context; only refer to the given context. Don't mention the component in your question. Confirm the aim of the value.
@@ -456,17 +457,14 @@ export async function makeQuestionForConfirmation(
             "description": <The description of the specific action component>,
             "value": <(Optional) The value to be filled in the component>
           }
-        `,
-    },
-    {
-      role: "HUMAN",
-      content: `
-          {
-            "type": ${component.action},
-            "description": ${component.description},
-            ${component.action === "click" ? "" : `"value": ${actionValue}`}
-          }
-        `,
+        ` +
+        `
+        {
+          "type": ${component.action},
+          "description": ${component.description},
+          ${component.action === "click" ? "" : `"value": ${actionValue}`}
+        }
+      `,
     },
   ];
   const confirmation = await getAiResponse(makeConfirmationPrompts);
@@ -537,7 +535,8 @@ export async function getSystemContext(systemLogs: SystemLog[]) {
 
   const makeSystemContextPrompt: Prompt = {
     role: "SYSTEM",
-    content: `You are using the system to use mobile website automatically.
+    content: `There is a system using mobile website automatically.
+
 Based on the history of the system's actions, please describe the context of the system in natural language.
 
 ${actionHistory.map((item) => {
