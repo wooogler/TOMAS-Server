@@ -54,13 +54,6 @@ export async function getVisibleHtml(hiddenElementIds: string[]) {
   throw NO_GLOBAL_PAGE_ERROR;
 }
 
-export interface ParsingResult {
-  i: string;
-  action: string;
-  description?: string;
-  html: string;
-}
-
 function comparePossibleInteractions(
   a: PossibleInteractions,
   b: PossibleInteractions
@@ -118,12 +111,7 @@ export async function navigate(input: NavigateInput) {
 
       //   const systemContext = await getSystemContext(); // TODO: get system context
       //   await planningAgent(parsingResult, userObjective, userContext, systemContext);
-      const actionComponents = focusSection.actionComponents.map((item) => ({
-        i: item.i,
-        action: item.actionType,
-        description: item.description || "",
-        html: item.html,
-      }));
+      const actionComponents = focusSection.actionComponents;
 
       const systemContext = await getSystemContext(actionLogs);
       // Get task list

@@ -1,11 +1,10 @@
 import { Chat } from "@prisma/client";
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import {
-  AIChatMessage,
-  HumanChatMessage,
-  SystemChatMessage,
+    AIChatMessage,
+    HumanChatMessage,
+    SystemChatMessage,
 } from "langchain/schema";
-import { ParsingResult } from "../modules/screen/screen.service";
 import { ActionType } from "./htmlHandler";
 import { ActionComponent } from "./pageHandler";
 
@@ -28,7 +27,7 @@ const chat4 = new ChatOpenAI({
   maxTokens: 4096,
 });
 
-const MAX_CHARACTERS_16K = 50000;
+const MAX_CHARACTERS_16K = 30000;
 
 export const getAiResponse = async (prompts: Prompt[]) => {
   const promptMessages = prompts.map((prompt) => {
@@ -436,7 +435,7 @@ export async function findSelectValue(
 }
 
 export async function makeQuestionForConfirmation(
-  component: ParsingResult,
+  component: ActionComponent,
   actionValue: string
 ) {
   const makeConfirmationPrompts: Prompt[] = [
@@ -457,6 +456,17 @@ export async function makeQuestionForConfirmation(
             "description": <The description of the specific action component>,
             "value": <(Optional) The value to be filled in the component>
           }
+        `,
+    },
+    {
+      role: "HUMAN",
+      content: `
+          {
+            "type": ${component.actionType},
+            "description": ${component.description},
+            ${component.actionType === "click" ? "" : `"value": ${actionValue}`}
+          }
+        `,
         ` +
         `
         {
@@ -479,9 +489,9 @@ export async function getActionHistory(
   const actionType = actionComponent.actionType;
   if (actionType === "click") {
     if (actionValue === "yes") {
-      actionDone = "Click";
+      actionDone = "Do Click";
     } else {
-      actionDone = "Cancel Click";
+      actionDone = "Don't Click";
     }
   } else {
     actionDone = actionValue;
@@ -491,7 +501,11 @@ export async function getActionHistory(
     content: `Here are the actions that the system tried and have done on the web page. 
 
 Tried: ${actionComponent.description}
-Done: ${editActionType(actionType)} '${actionDone}'
+Done: ${
+      actionType === "click"
+        ? `${actionDone}`
+        : `${editActionType(actionType)} '${actionDone}'`
+    }
 
 Describe the action on the web page in one sentence`,
   };

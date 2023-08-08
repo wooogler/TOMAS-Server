@@ -17,7 +17,7 @@ const NO_PAGE_ERROR = new Error("Cannot find a page.");
 export type ActionComponent = {
   i: string;
   actionType: ActionType;
-  description: string | undefined;
+  description?: string;
   html: string;
 };
 
@@ -68,7 +68,7 @@ export class PageHandler {
     await page.setDefaultNavigationTimeout(0);
     const screen = await trackModalChanges(page, async () => {
       await page.goto(url, {
-        // waitUntil: "networkidle0",
+        waitUntil: "networkidle0",
       });
     });
 

@@ -240,13 +240,13 @@ export function findRepeatingComponents(html: string) {
   });
 }
 
-export type ActionType = "select" | "inputText" | "click" | "focus" | "item";
+export type ActionType = "select" | "input" | "click" | "focus" | "item";
 
 function createActionType(interactiveElement: Element): ActionType {
   switch (interactiveElement.tagName.toLowerCase()) {
     case "input":
       const type = interactiveElement.getAttribute("type");
-      if (!type || type === "text") return "inputText";
+      if (!type || type === "text") return "input";
       if (["checkbox", "radio", "button"].includes(type)) return "click";
       break;
     case "button":
@@ -259,7 +259,7 @@ function createActionType(interactiveElement: Element): ActionType {
     case "ol":
       return "select";
     case "textarea":
-      return "inputText";
+      return "input";
     // case "ul":
     // case "ol":
     //   const listItems = interactiveElement.querySelectorAll("li");

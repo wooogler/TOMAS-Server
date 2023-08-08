@@ -8,9 +8,12 @@ import {
   makeQuestionForActionValue,
   makeQuestionForConfirmation,
 } from "../utils/langchainHandler";
-import { PageHandler, ScreenResult } from "../utils/pageHandler";
+import {
+  ActionComponent,
+  PageHandler,
+  ScreenResult,
+} from "../utils/pageHandler";
 import { getChats } from "./chat/chat.service";
-import { ParsingResult } from "./screen/screen.service";
 export interface taskList {
   i: string;
   description: string;
@@ -115,7 +118,7 @@ interface ActionValue {
 
 export async function executionAgent(
   page: PageHandler,
-  component: ParsingResult,
+  component: ActionComponent,
   //   chats: Chat[],
   screenDescription: string,
   currentFocusedSection: ScreenResult,
@@ -130,7 +133,7 @@ Execution Agent:
   let chats = await getChats();
   let userContext = await getUserContext(chats);
   let actionValue = "";
-  if (component.action == "inputText") {
+  if (component.actionType == "input") {
     let valueBasedOnHistory = await JSON.parse(
       await findInputTextValue(
         screenDescription,
@@ -161,7 +164,7 @@ Execution Agent:
     }
 
     actionValue = valueBasedOnHistory.value;
-  } else if (component.action == "select") {
+  } else if (component.actionType == "select") {
     const options = await page.select(`[i="${component.i}"]`);
     createAIChat({
       content: `Which one do you want?
@@ -175,7 +178,7 @@ Execution Agent:
     // suppose the answer is "<integer i>".
     actionValue = "352";
   }
-  if (component.action != "select") {
+  if (component.actionType != "select") {
     const confirmationQuestion = await makeQuestionForConfirmation(
       component,
       actionValue
@@ -188,10 +191,10 @@ Execution Agent:
   const answer = "yes";
 
   if (answer == "yes") {
-    if (component.action == "inputText") {
+    if (component.actionType == "input") {
       let rt = await page.inputText(`[i="${component.i}"]`, actionValue);
       return rt;
-    } else if (component.action == "click") {
+    } else if (component.actionType == "click") {
       const actionHistoryDescription = await getActionHistory(
         {
           i: component.i,
@@ -209,7 +212,7 @@ Execution Agent:
       });
 
       return await page.click(`[i="${component.i}"]`);
-    } else if (component.action == "select") {
+    } else if (component.actionType == "select") {
       return await page.focus(`[i="${actionValue}"]`);
     }
   }
