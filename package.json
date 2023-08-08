@@ -42,6 +42,7 @@
     "pnpm": "^8.6.11",
     "prisma": "^5.0.0",
     "puppeteer": "^19.7.2",
+    "ts-node": "^10.9.1",
     "zod": "^3.21.4",
     "zod-to-json-schema": "^3.21.3"
   },

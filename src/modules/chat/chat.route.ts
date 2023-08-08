@@ -11,7 +11,7 @@ import {
 import { $ref } from "./chat.schema";
 
 async function chatRoutes(server: FastifyInstance) {
-  server.get(
+  server.post(
     "/navigate",
     {
       schema: {
