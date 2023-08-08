@@ -171,21 +171,38 @@ export async function answerForInput(input: AnswerInput) {
         component.description
       );
       await createAIChat({ content: question });
-      return "questionForInput";
+      return { component, type: "questionForInput" };
     } else {
       const confirmationQuestion = await makeQuestionForConfirmation(
         component,
         actionValue
       );
       await createAIChat({ content: confirmationQuestion });
-      return "requestConfirmation";
+      return { component, type: "requestConfirmation" };
     }
   } else {
     throw new Error("No Component!");
   }
 }
 
-//TODO: Make function for answerForSelect
+export async function answerForSelect(input: AnswerInput) {
+  createHumanChat(input);
+  const component = input.component;
+  const options = await page.select(`['i="${component.i}"]`);
+  const selectedItem = options.actionComponents[parseInt(input.content) - 1];
+  if (selectedItem) {
+    const confirmationQuestion = await makeQuestionForConfirmation(
+      component,
+      selectedItem.description || ""
+    );
+    await createAIChat({ content: confirmationQuestion });
+    return {
+      component,
+      type: "requestConfirmation",
+      actionValue: selectedItem.i + "---" + selectedItem.description,
+    };
+  }
+}
 
 export async function confirm(input: ConfirmInput) {
   createHumanChat(input);
@@ -217,10 +234,13 @@ export async function confirm(input: ConfirmInput) {
           actionDescription,
         });
       } else if (component.actionType === "select") {
-        focusSection = await page.focus(`[i="${component.i}"]`);
+        const selected = input.actionValue.split("---");
+        const iAttr = selected[0];
+        const description = selected[1];
+        focusSection = await page.focus(`[i="${iAttr}"]`);
         const actionDescription = await getActionHistory(
           component,
-          component.description || ""
+          description
         );
         actionLogs.push({
           type: focusSection.type,
