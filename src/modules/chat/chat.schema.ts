@@ -34,7 +34,7 @@ const answerSchema = z.object({
 const confirmSchema = z.object({
   content: z.string(),
   component: ActionComponentSchema,
-  actionValue: z.string(),
+  actionValue: z.string().optional(),
 });
 
 const chatResponseSchema = z.object({

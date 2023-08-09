@@ -233,6 +233,9 @@ export async function confirm(
   if (input.content === "yes") {
     if (component) {
       if (component.actionType === "input") {
+        if (!input.actionValue) {
+          throw new Error("No action value for input");
+        }
         focusSection = await page.inputText(
           `[i=${component.i}]`,
           input.actionValue
@@ -257,6 +260,9 @@ export async function confirm(
           actionDescription,
         });
       } else if (component.actionType === "select") {
+        if (!input.actionValue) {
+          throw new Error("No action value for select");
+        }
         const selected = input.actionValue.split("---");
         const iAttr = selected[0];
         const description = selected[1];

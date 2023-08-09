@@ -6,12 +6,12 @@ import screenRoutes from "./modules/screen/screen.route";
 import { chatSchemas } from "./modules/chat/chat.schema";
 import { screenSchemas } from "./modules/screen/screen.schema";
 import cors from "@fastify/cors";
-import multer from 'fastify-multer'
+import multer from "fastify-multer";
 
 dotenv.config();
 
 export const server = Fastify({ logger: true });
-server.register(multer.contentParser)
+server.register(multer.contentParser);
 
 async function main() {
   server.register(cors, {
@@ -24,7 +24,7 @@ async function main() {
   server.register(chatRoutes, { prefix: "/api/chats" });
   server.register(screenRoutes, { prefix: "/api/screen" });
   server.register(openaiRoutes, { prefix: "/api/openai" });
-  
+
   try {
     await server.listen({ port: 8000, host: "0.0.0.0" });
     console.log(`Server ready at http://localhost:8000`);
