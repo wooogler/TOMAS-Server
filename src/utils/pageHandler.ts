@@ -448,6 +448,18 @@ export async function trackModalChanges(
       (html, hiddenElementIs) => {
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, "text/html");
+
+        // click이 가능한 div 요소에 대해 attribute 추가
+        const clickableDivs = Array.from(doc.querySelectorAll("div")).filter(
+          (div) => {
+            const style = window.getComputedStyle(div);
+            return style.cursor === "pointer";
+          }
+        );
+        clickableDivs.forEach((div) => {
+          div.setAttribute("clickable", "true");
+        });
+
         hiddenElementIs.forEach((hiddenI) => {
           const hiddenEl = doc.querySelector(`[i="${hiddenI}"]`);
           if (hiddenEl) hiddenEl.remove();

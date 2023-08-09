@@ -82,6 +82,7 @@ export async function navigate(
 export async function firstOrder(
   input: CreateHumanChatInput
 ): Promise<AnswerResponse> {
+  console.log("firstOrder");
   createHumanChat(input);
   const response = await planningAndAsk();
   if (response) {
@@ -92,6 +93,7 @@ export async function firstOrder(
 }
 
 async function planningAndAsk(): Promise<AnswerResponse | undefined> {
+  console.log("planningAndAsk");
   try {
     const chats = await getChats();
     const userContext = await getUserContext(chats);
@@ -137,7 +139,7 @@ async function planningAndAsk(): Promise<AnswerResponse | undefined> {
             return { component, type: "requestConfirmation", actionValue };
           }
         } else if (component.actionType === "select") {
-          const options = await page.select(`['i="${component.i}"]`);
+          const options = await page.select(`[i="${component.i}"]`);
           await createAIChat({
             content: `Which one do you want?
 
@@ -169,6 +171,7 @@ ${options.actionComponents.map(
 export async function answerForInput(
   input: AnswerInput
 ): Promise<AnswerResponse> {
+  console.log("answerForInput");
   createHumanChat(input);
   const chats = await getChats();
   const userContext = await getUserContext(chats);
@@ -187,6 +190,7 @@ export async function answerForInput(
     const actionValue = valueBasedOnHistory.value;
     // If user context is not enough to answer the question
     if (actionValue === null) {
+      console.log("actionValue is null");
       const question = await makeQuestionForActionValue(
         screenDescription,
         component.description
@@ -194,12 +198,13 @@ export async function answerForInput(
       await createAIChat({ content: question });
       return { component, type: "questionForInput" };
     } else {
+      console.log("actionValue is " + actionValue);
       const confirmationQuestion = await makeQuestionForConfirmation(
         component,
         actionValue
       );
       await createAIChat({ content: confirmationQuestion });
-      return { component, type: "requestConfirmation" };
+      return { component, type: "requestConfirmation", actionValue };
     }
   } else {
     throw new Error("No Component!");
@@ -207,9 +212,10 @@ export async function answerForInput(
 }
 
 export async function answerForSelect(input: AnswerInput) {
+  console.log("answerForSelect");
   createHumanChat(input);
   const component = input.component;
-  const options = await page.select(`['i="${component.i}"]`);
+  const options = await page.select(`[i="${component.i}"]`);
   const selectedItem = options.actionComponents[parseInt(input.content) - 1];
   if (selectedItem) {
     const confirmationQuestion = await makeQuestionForConfirmation(
@@ -228,6 +234,7 @@ export async function answerForSelect(input: AnswerInput) {
 export async function confirm(
   input: ConfirmInput
 ): Promise<AnswerResponse | undefined> {
+  console.log("confirm");
   createHumanChat(input);
   const component = input.component;
   if (input.content === "yes") {
@@ -236,10 +243,6 @@ export async function confirm(
         if (!input.actionValue) {
           throw new Error("No action value for input");
         }
-        focusSection = await page.inputText(
-          `[i=${component.i}]`,
-          input.actionValue
-        );
         const actionDescription = await getActionHistory(
           component,
           input.actionValue
@@ -250,8 +253,11 @@ export async function confirm(
           screenDescription: focusSection.screenDescription,
           actionDescription,
         });
+        focusSection = await page.inputText(
+          `[i="${component.i}"]`,
+          input.actionValue
+        );
       } else if (component.actionType === "click") {
-        focusSection = await page.click(`[i="${component.i}"]`);
         const actionDescription = await getActionHistory(component, "yes");
         actionLogs.push({
           type: focusSection.type,
@@ -259,6 +265,7 @@ export async function confirm(
           screenDescription: focusSection.screenDescription,
           actionDescription,
         });
+        focusSection = await page.click(`[i="${component.i}"]`);
       } else if (component.actionType === "select") {
         if (!input.actionValue) {
           throw new Error("No action value for select");
@@ -266,17 +273,17 @@ export async function confirm(
         const selected = input.actionValue.split("---");
         const iAttr = selected[0];
         const description = selected[1];
+        // const actionDescription = await getActionHistory(
+        //   component,
+        //   description
+        // );
+        // actionLogs.push({
+        //   type: focusSection.type,
+        //   id: focusSection.id,
+        //   screenDescription: focusSection.screenDescription,
+        //   actionDescription,
+        // });
         focusSection = await page.focus(`[i="${iAttr}"]`);
-        const actionDescription = await getActionHistory(
-          component,
-          description
-        );
-        actionLogs.push({
-          type: focusSection.type,
-          id: focusSection.id,
-          screenDescription: focusSection.screenDescription,
-          actionDescription,
-        });
       }
     }
   } else {
@@ -291,6 +298,5 @@ export async function confirm(
       actionDescription,
     });
   }
-  console.log(actionLogs);
   return await planningAndAsk();
 }

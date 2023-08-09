@@ -5,6 +5,8 @@ import {
   getSelectInfo,
 } from "./langchainHandler";
 import { ActionComponent } from "./pageHandler";
+import { array } from "zod";
+import e from "express";
 
 const removeSpecificTags = (element: Element, tagNames: string[]) => {
   for (const tagName of tagNames) {
@@ -251,6 +253,7 @@ function createActionType(interactiveElement: Element): ActionType {
       break;
     case "button":
     case "a":
+    case "div":
       return "click";
     case "select":
     case "table":
@@ -310,13 +313,29 @@ export function parsingPossibleInteractions(
     }
   });
 
+  let divElements = Array.from(body.querySelectorAll("div")).filter(
+    (element) => element.getAttribute("clickable") === "true"
+  );
+
+  divElements.forEach((element) => {
+    const iAttr = element.getAttribute("i");
+    if (iAttr && !iAttrSet.has(iAttr)) {
+      components.push(element);
+      Array.from(element.querySelectorAll("[i]")).forEach((el) =>
+        iAttrSet.add(el.getAttribute("i")!)
+      );
+    }
+  });
+
   // Filter interactive elements
   let interactiveElements = Array.from(
     body.querySelectorAll("input, button, a, select, textarea")
-  ).filter(
-    (element) =>
-      !(element.getAttribute("i") && iAttrSet.has(element.getAttribute("i")!))
-  );
+  ).filter((element) => {
+    let isUniqueElement = !(
+      element.getAttribute("i") && iAttrSet.has(element.getAttribute("i")!)
+    );
+    return isUniqueElement;
+  });
 
   interactiveElements.push(...components);
 

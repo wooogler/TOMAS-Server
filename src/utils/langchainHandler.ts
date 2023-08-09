@@ -67,7 +67,7 @@ export const getGpt4Response = async (prompts: Prompt[]) => {
 export const getPageDescription = async (html: string) => {
   const describePageSystemPrompt: Prompt = {
     role: "SYSTEM",
-    content: `Given the HTML code, briefly summarize the general purpose of the web page it represents.
+    content: `Given the HTML code, briefly summarize the general purpose of the web page it represents in one sentence.
     
 HTML code:
 ${html}`,
@@ -532,18 +532,18 @@ export async function getSystemContext(systemLogs: SystemLog[]) {
     } else {
       // Action in prev screen
       actionHistory.push({
-        type: log.type,
+        type: "action",
         description: log.actionDescription,
       });
     }
   });
+  console.log(actionHistory);
 
   const makeSystemContextPrompt: Prompt = {
     role: "SYSTEM",
-    content: `There is a system using mobile website automatically.
+    content: `Based on the history of the system's actions, please describe the actions the system have done in natural language.
 
-Based on the history of the system's actions, please describe the context of the system in natural language.
-
+Action History:
 ${actionHistory.map((item) => {
   if (item.type === "action") {
     return ` - ${item.description}\n`;
@@ -553,6 +553,7 @@ ${actionHistory.map((item) => {
 })}
 `,
   };
+  console.log(makeSystemContextPrompt.content);
 
   const systemContext = await getAiResponse([makeSystemContextPrompt]);
   return systemContext;
