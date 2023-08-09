@@ -409,6 +409,17 @@ function getTopmostModal(
   });
 }
 
+async function markClickableDivs(page: Page): Promise<void> {
+  await page.$$eval("div", (divs: HTMLDivElement[]) => {
+    divs.forEach((div) => {
+      const style = window.getComputedStyle(div);
+      if (style.cursor === "pointer") {
+        div.setAttribute("clickable", "true");
+      }
+    });
+  });
+}
+
 export async function trackModalChanges(
   page: Page,
   action: () => Promise<void>
@@ -434,6 +445,7 @@ export async function trackModalChanges(
   }
 
   await addIAttribute(page);
+  await markClickableDivs(page);
 
   // Recheck for modals
   const finalHiddenElementIs = await getHiddenElementIs(page);
@@ -448,17 +460,6 @@ export async function trackModalChanges(
       (html, hiddenElementIs) => {
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, "text/html");
-
-        // click이 가능한 div 요소에 대해 attribute 추가
-        const clickableDivs = Array.from(doc.querySelectorAll("div")).filter(
-          (div) => {
-            const style = window.getComputedStyle(div);
-            return style.cursor === "pointer";
-          }
-        );
-        clickableDivs.forEach((div) => {
-          div.setAttribute("clickable", "true");
-        });
 
         hiddenElementIs.forEach((hiddenI) => {
           const hiddenEl = doc.querySelector(`[i="${hiddenI}"]`);

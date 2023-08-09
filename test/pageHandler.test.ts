@@ -25,10 +25,14 @@ ${screen.actionComponents
   it("navigate and interact with page", async () => {
     const mainScreen = await pageHandler.navigate("https://www.greyhound.com");
     logScreenResult(mainScreen);
-    const searchScreen = await pageHandler.click('[i="442"]');
+    const searchScreen = await pageHandler.click('[i="365"]');
     logScreenResult(searchScreen);
-    const options = await pageHandler.select('[i="163"]');
-    logScreenResult(options);
+    const searchScreen2 = await pageHandler.select(
+      ".hcr-autocomplete__list-7-6-0.hcr-autocomplete__list--boxed"
+    );
+    logScreenResult(searchScreen2);
+    const searchScreen3 = await pageHandler.select('[i="877"]');
+    logScreenResult(searchScreen3);
   }, 100000);
 
   // afterAll(async () => {
