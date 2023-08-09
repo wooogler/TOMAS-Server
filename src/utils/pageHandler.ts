@@ -1,16 +1,16 @@
-import puppeteer, { Browser, Page } from "puppeteer";
 import { JSDOM } from "jsdom";
-import {
-  getModalDescription,
-  getPageDescription,
-  getSectionDescription,
-} from "./langchainHandler";
+import puppeteer, { Browser, Page } from "puppeteer";
 import {
   ActionType,
   parsingAgent,
   parsingItemAgent,
   simplifyHtml,
 } from "./htmlHandler";
+import {
+  getModalDescription,
+  getPageDescription,
+  getSectionDescription,
+} from "./langchainHandler";
 
 const NO_PAGE_ERROR = new Error("Cannot find a page.");
 
@@ -65,6 +65,7 @@ export class PageHandler {
 
   async navigate(url: string): Promise<ScreenResult> {
     const page = await this.getPage();
+    await page.setDefaultNavigationTimeout(0);
     const screen = await trackModalChanges(page, async () => {
       await page.goto(url, {
         waitUntil: "networkidle0",
@@ -222,8 +223,8 @@ export class PageHandler {
     const dom = new JSDOM(screen.html);
     const element = dom.window.document.querySelector(selector);
     const elementSimpleHtml = simplifyHtml(element?.innerHTML || "", true);
-
-    const pageSimpleHtml = simplifyHtml(await page.content(), true);
+    const tmp = await page.content();
+    const pageSimpleHtml = await simplifyHtml(tmp, true);
     const pageDescription = await getPageDescription(pageSimpleHtml);
     const sectionDescription = await getSectionDescription(
       elementSimpleHtml,

@@ -4,6 +4,7 @@ import { Browser, Page } from "puppeteer";
 import { PossibleInteractions } from "../../utils/htmlHandler";
 import {
   SystemLog,
+  getActionHistory,
   getSystemContext,
   getUserContext,
   getUserObjective,
@@ -128,7 +129,8 @@ export async function navigate(input: NavigateInput) {
           page,
           actionComponents.find((item) => item.i === task.i)!,
           focusSection.screenDescription,
-          focusSection
+          focusSection,
+          actionLogs
         );
       } else {
         // TODO: Haven't tested unfocus yet
