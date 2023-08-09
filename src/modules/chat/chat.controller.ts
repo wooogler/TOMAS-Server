@@ -37,8 +37,8 @@ export async function navigateHandler(
 export async function firstOrderHandler(
   request: FastifyRequest<{ Body: CreateHumanChatInput }>
 ) {
-  const navigateResponse = await firstOrder(request.body);
-  return navigateResponse;
+  const orderResponse = await firstOrder(request.body);
+  return orderResponse;
 }
 
 export async function answerForInputHandler(

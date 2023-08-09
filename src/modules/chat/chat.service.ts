@@ -291,5 +291,6 @@ export async function confirm(
       actionDescription,
     });
   }
+  console.log(actionLogs);
   return await planningAndAsk();
 }
