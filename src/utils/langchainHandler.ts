@@ -67,7 +67,7 @@ export const getGpt4Response = async (prompts: Prompt[]) => {
 export const getPageDescription = async (html: string) => {
   const describePageSystemPrompt: Prompt = {
     role: "SYSTEM",
-    content: `Given the HTML code, summarize the general purpose of the web page it represents.
+    content: `Given the HTML code, briefly summarize the general purpose of the web page it represents.
     
 HTML code:
 ${html}`,
@@ -540,7 +540,8 @@ export async function getSystemContext(systemLogs: SystemLog[]) {
 
   const makeSystemContextPrompt: Prompt = {
     role: "SYSTEM",
-    content: `You are using the system to use mobile website automatically.
+    content: `There is a system using mobile website automatically.
+
 Based on the history of the system's actions, please describe the context of the system in natural language.
 
 ${actionHistory.map((item) => {
