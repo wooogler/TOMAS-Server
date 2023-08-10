@@ -100,7 +100,7 @@ export class PageHandler {
         pageDescription
       );
       const actionComponents = await parsingAgent({
-        html: screen.html,
+        html: simplifyHtml(screen.html, true),
         screenDescription: modalDescription,
       });
       return {
