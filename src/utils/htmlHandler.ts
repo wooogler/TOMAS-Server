@@ -5,8 +5,6 @@ import {
   getSelectInfo,
 } from "./langchainHandler";
 import { ActionComponent } from "./pageHandler";
-import { array } from "zod";
-import e from "express";
 
 const removeSpecificTags = (element: Element, tagNames: string[]) => {
   for (const tagName of tagNames) {
@@ -300,12 +298,22 @@ export function parsingPossibleInteractions(
     components.push(element);
   });
 
+  const iAttrForReapeatingComponents = new Set<string>();
+  repeatingComponents.forEach((element) => {
+    const iAttr = element.getAttribute("i");
+    iAttrForReapeatingComponents.add(iAttr!);
+  });
+
   let specifiedElements = Array.from(
     body.querySelectorAll("ul, ol, table, fieldset")
   );
   specifiedElements.forEach((element) => {
     const iAttr = element.getAttribute("i");
-    if (iAttr && !iAttrSet.has(iAttr)) {
+    if (
+      iAttr &&
+      !iAttrSet.has(iAttr) &&
+      !iAttrForReapeatingComponents.has(iAttr)
+    ) {
       components.push(element);
       Array.from(element.querySelectorAll("[i]")).forEach((el) =>
         iAttrSet.add(el.getAttribute("i")!)
