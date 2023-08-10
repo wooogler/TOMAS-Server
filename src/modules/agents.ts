@@ -31,18 +31,23 @@ export async function planningAgent(
     content: `
 You are the AI that creates a plan to interact with the main web page based on the user's and system's contexts.
 
-You need to plan the action sequence using the following possible actions in the part of the web page. Considering the description for the whole page: ${
-      focusedSection.screenDescription
-    }.
 
-Actions should be selected in order to achieve what the user wants: ${userContext}
 
+Actions should be selected in order to achieve what the user wants based on the user's context. 
+User's context: ${userContext}
+
+
+You need to plan the action sequence using the following possible actions in the part of the current screen. 
+Description of the current screen: ${focusedSection.screenDescription}
 Possible actions:
 ${focusedSection.actionComponents
   .map((comp) => `- ${comp.description} (i=${comp.i})`)
   .join("\n")}
 
-Actions should reflect the results of the interactions the system has executed before: ${systemContext}. Please skip those actions that have been executed before if nessesary.
+Actions should reflect the results of the interactions the system has executed before: 
+${systemContext}
+
+Please skip those actions that have been executed before if nessesary.
 
 First, describe the most efficient interaction plan in natural language by referring to the user's and system's contexts. Do not add any useless actions to the plan.
 
