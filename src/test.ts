@@ -22,22 +22,10 @@ ${screen.actionComponents
     `);
   };
 
-  const mainScreen = await pageHandler.navigate("https://www.greyhound.com");
-  logScreenResult(mainScreen);
-  let tmp_str = "365";
-  const searchScreen = await pageHandler.click('[i="' + tmp_str + '"]');
-  logScreenResult(searchScreen);
-  const searchScreen2 = await pageHandler.select(
-    ".hcr-autocomplete__list-7-6-0.hcr-autocomplete__list--boxed"
+  logScreenResult(
+    await pageHandler.navigate("https://www.greyhound.com", false)
   );
-  logScreenResult(searchScreen2);
-  tmp_str = "875";
-  const searchScreen3 = await pageHandler.select('[i="' + tmp_str + '"]');
-  logScreenResult(searchScreen3);
-  tmp_str = "901";
-  await pageHandler.click('[i="878"]');
-  // afterAll(async () => {
-  //   await pageHandler.close();
-  // });
+  logScreenResult(await pageHandler.click(".hcr-fieldset-7-6-0", true));
+  logScreenResult(await pageHandler.select(".hcr-fieldset-7-6-0", true));
 }
 main();

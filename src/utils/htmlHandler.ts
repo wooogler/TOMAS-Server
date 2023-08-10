@@ -1,8 +1,9 @@
 import { JSDOM } from "jsdom";
 import {
+  getComplexItemDescription,
   getComponentInfo,
-  getItemDescription,
   getSelectInfo,
+  getSimpleItemDescription,
 } from "./langchainHandler";
 import { ActionComponent } from "./pageHandler";
 
@@ -174,64 +175,76 @@ export const simplifyHtml = (
   return rootElement.innerHTML.replace(/\s\s+/g, "");
 };
 
+const COMPLEX_TAG_LIST = ["img", "a"];
+const MIN_COMPLEX_TAG_COUNT = 12;
+
+function isComplex(element: Element): boolean {
+  let complexTagCount = 0;
+
+  for (const tag of COMPLEX_TAG_LIST) {
+    complexTagCount += element.querySelectorAll(tag).length;
+    if (complexTagCount >= MIN_COMPLEX_TAG_COUNT) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 export function findRepeatingComponents(html: string) {
   const dom = new JSDOM(html);
   const body = dom.window.document.body;
   const result: Element[] = [];
 
+  const attributesToConsider = new Set(["class"]);
+  const tagsToExcludeFromResults = new Set(["main", "footer", "header"]);
+
   function createFrequencyMap(element: Element): Map<string, number> {
     const frequencyMap: Map<string, number> = new Map();
 
-    const attributesToConsider = ["class"];
-
-    element.childNodes.forEach((child) => {
-      if (child.nodeType === 1) {
-        const childElement = child as Element;
-
-        Array.from(childElement.classList).forEach((className) => {
-          if (!className.includes("mask")) {
-            frequencyMap.set(className, (frequencyMap.get(className) || 0) + 1);
-          }
-        });
-
-        Array.from(childElement.attributes).forEach((attr) => {
-          if (
-            attributesToConsider.includes(attr.name) ||
-            attr.name.startsWith("data-")
-          ) {
-            const attrKey = `${attr.name}=${attr.value}`;
-            frequencyMap.set(attrKey, (frequencyMap.get(attrKey) || 0) + 1);
-          }
-        });
+    for (const childElement of element.children) {
+      for (const className of childElement.classList) {
+        if (!className.includes("mask")) {
+          frequencyMap.set(className, (frequencyMap.get(className) || 0) + 1);
+        }
       }
-    });
-    return frequencyMap;
-  }
 
-  const tagsToExcludeFromResults = ["main", "footer", "header"];
-
-  function traverseAndFind(element: Element): void {
-    if (element.tagName.toLowerCase() !== "body") {
-      const tagName = element.tagName.toLowerCase();
-
-      if (!tagsToExcludeFromResults.includes(tagName)) {
-        const frequencyMap = createFrequencyMap(element);
-
-        for (const frequency of frequencyMap.values()) {
-          if (frequency >= 3) {
-            result.push(element);
-            break;
-          }
+      for (const attr of childElement.attributes) {
+        if (
+          attributesToConsider.has(attr.name) ||
+          attr.name.startsWith("data-")
+        ) {
+          const attrKey = `${attr.name}=${attr.value}`;
+          frequencyMap.set(attrKey, (frequencyMap.get(attrKey) || 0) + 1);
         }
       }
     }
 
-    for (const child of Array.from(element.children)) {
+    return frequencyMap;
+  }
+
+  function traverseAndFind(element: Element): void {
+    if (
+      element.tagName.toLowerCase() !== "body" &&
+      !tagsToExcludeFromResults.has(element.tagName.toLowerCase())
+    ) {
+      const frequencyMap = createFrequencyMap(element);
+
+      for (const frequency of frequencyMap.values()) {
+        if (frequency >= 3 && isComplex(element)) {
+          result.push(element);
+          break;
+        }
+      }
+    }
+
+    for (const child of element.children) {
       traverseAndFind(child as Element);
     }
   }
 
   traverseAndFind(body);
+
   return result.filter((parentElement, _, arr) => {
     return !arr.some(
       (otherElement) =>
@@ -291,6 +304,7 @@ export function parsingPossibleInteractions(
 
   let components: Element[] = [];
   const repeatingComponents = findRepeatingComponents(html);
+  console.log(repeatingComponents.length);
   repeatingComponents.forEach((element) => {
     Array.from(element.querySelectorAll("[i]")).forEach((el) =>
       iAttrSet.add(el.getAttribute("i")!)
@@ -400,19 +414,19 @@ export async function parsingItemAgent({
   >(async (comp, index) => {
     const iAttr = comp.getAttribute("i");
     const possibleInteractions = parsingPossibleInteractions(comp.outerHTML);
-    const itemDescription = await getItemDescription({
-      itemHtml: simplifyHtml(comp.outerHTML, true),
-      screenDescription,
-      prevDescription: index === 0 ? firstDescription : undefined,
-    });
-    if (index === 0) {
-      firstDescription = itemDescription || "";
-    }
+    let itemDescription: string | undefined;
 
     switch (possibleInteractions.length) {
       case 0:
         return null;
       case 1:
+        itemDescription = await getSimpleItemDescription({
+          itemHtml: simplifyHtml(comp.outerHTML, true),
+          screenDescription,
+        });
+        if (index === 0) {
+          firstDescription = itemDescription || "";
+        }
         return {
           i: iAttr || "",
           actionType: "click",
@@ -420,6 +434,14 @@ export async function parsingItemAgent({
           html: comp.outerHTML,
         };
       default:
+        itemDescription = await getComplexItemDescription({
+          itemHtml: simplifyHtml(comp.outerHTML, true),
+          screenDescription,
+          prevDescription: index === 0 ? firstDescription : undefined,
+        });
+        if (index === 0) {
+          firstDescription = itemDescription || "";
+        }
         return {
           i: iAttr || "",
           actionType: "select",

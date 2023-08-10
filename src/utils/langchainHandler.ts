@@ -15,6 +15,13 @@ export type Prompt = {
 
 const chat = new ChatOpenAI({
   openAIApiKey: process.env.OPENAI_API_KEY,
+  modelName: "gpt-3.5-turbo",
+  maxTokens: -1,
+  temperature: 0,
+});
+
+const chat16k = new ChatOpenAI({
+  openAIApiKey: process.env.OPENAI_API_KEY,
   modelName: "gpt-3.5-turbo-16k",
   maxTokens: -1,
   temperature: 0,
@@ -29,7 +36,10 @@ const chat4 = new ChatOpenAI({
 
 const MAX_CHARACTERS_16K = 30000;
 
-export const getAiResponse = async (prompts: Prompt[]) => {
+export const getAiResponse = async (
+  prompts: Prompt[],
+  long: boolean = true
+) => {
   const promptMessages = prompts.map((prompt) => {
     const promptContent =
       prompt.content.slice(0, MAX_CHARACTERS_16K) +
@@ -43,7 +53,8 @@ export const getAiResponse = async (prompts: Prompt[]) => {
     }
   });
 
-  const response = await chat.call(promptMessages);
+  let chatModel = long ? chat16k : chat;
+  const response = await chatModel.call(promptMessages);
 
   return response.text;
 };
@@ -103,9 +114,9 @@ export const getSectionDescription = async (
 ) => {
   const describeSectionSystemPrompt: Prompt = {
     role: "SYSTEM",
-    content: `Given the HTML code, summarize the general purpose of the section in the web page it represents.
+    content: `Given the HTML code, summarize the general purpose of the list in the web page it represents.
     
-Consider the description on the webpage where the section is located: ${pageDescription}
+Consider the description on the webpage where the list is located: ${pageDescription}
 
 HTML code:
 ${html}`,
@@ -201,7 +212,36 @@ Output following JSON format in plain text. Never provide additional context.
   }
 };
 
-export const getItemDescription = async ({
+export const getSimpleItemDescription = async ({
+  itemHtml,
+  screenDescription,
+}: {
+  itemHtml: string;
+  screenDescription: string;
+  prevDescription?: string;
+}) => {
+  const describeItemPrompt: Prompt = {
+    role: "SYSTEM",
+    content: `
+Describe an item in the list as a noun phrase with modifiers.
+
+Consider the description of the list: ${screenDescription}
+
+The item is given in HTML code below.
+${itemHtml}
+`,
+  };
+
+  console.log(describeItemPrompt.content);
+
+  try {
+    return await getAiResponse([describeItemPrompt]);
+  } catch (error) {
+    console.error("Error in loading item info: ", error);
+  }
+};
+
+export const getComplexItemDescription = async ({
   itemHtml,
   screenDescription,
   prevDescription,
