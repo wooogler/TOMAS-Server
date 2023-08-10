@@ -212,6 +212,16 @@ Output following JSON format in plain text. Never provide additional context.
   }
 };
 
+function removeBeforeAndIncludingRepresents(sentence: string): string {
+  const keyword = "represents ";
+  const index = sentence.indexOf(keyword);
+
+  if (index !== -1) {
+    return sentence.substring(index + keyword.length);
+  }
+  return sentence; // 만약 "represents"가 문장에 없다면 원래 문장을 반환
+}
+
 export const getSimpleItemDescription = async ({
   itemHtml,
   screenDescription,
@@ -223,19 +233,23 @@ export const getSimpleItemDescription = async ({
   const describeItemPrompt: Prompt = {
     role: "SYSTEM",
     content: `
-Describe an item in the list as a noun phrase with modifiers.
+Summarize the content of an item in the list.
 
 Consider the description of the list: ${screenDescription}
 
 The item is given in HTML code below.
 ${itemHtml}
+
+What does the item in the list represent? Describe in one sentence, including the word "represents"
 `,
   };
 
   console.log(describeItemPrompt.content);
 
   try {
-    return await getAiResponse([describeItemPrompt]);
+    return removeBeforeAndIncludingRepresents(
+      await getAiResponse([describeItemPrompt])
+    );
   } catch (error) {
     console.error("Error in loading item info: ", error);
   }
