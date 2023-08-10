@@ -213,7 +213,7 @@ Execution Agent:
 
       return await page.click(`[i="${component.i}"]`);
     } else if (component.actionType == "select") {
-      return await page.focus(`[i="${actionValue}"]`);
+      return await page.select(`[i="${actionValue}"]`);
     }
   }
   return currentFocusedSection;
