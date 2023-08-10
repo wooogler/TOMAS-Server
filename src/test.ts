@@ -23,9 +23,9 @@ ${screen.actionComponents
   };
 
   logScreenResult(
-    await pageHandler.navigate("https://www.greyhound.com", false)
+    await pageHandler.navigate("https://www.greyhound.com", true)
   );
-  logScreenResult(await pageHandler.click(".hcr-fieldset-7-6-0", true));
-  logScreenResult(await pageHandler.select(".hcr-fieldset-7-6-0", true));
+  logScreenResult(await pageHandler.click(".hcr-fieldset-7-6-0", false));
+  logScreenResult(await pageHandler.select(".hcr-fieldset-7-6-0", false));
 }
 main();

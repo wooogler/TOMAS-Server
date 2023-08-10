@@ -335,6 +335,19 @@ export function parsingPossibleInteractions(
     }
   });
 
+  // Filter interactive elements
+  let interactiveElements = Array.from(
+    body.querySelectorAll("input, button, a, select, textarea")
+  ).filter((element) => {
+    let isUniqueElement = !(
+      element.getAttribute("i") && iAttrSet.has(element.getAttribute("i")!)
+    );
+    Array.from(element.querySelectorAll("[i]")).forEach((el) =>
+      iAttrSet.add(el.getAttribute("i")!)
+    );
+    return isUniqueElement;
+  });
+
   let divElements = Array.from(body.querySelectorAll("div")).filter(
     (element) => element.getAttribute("clickable") === "true"
   );
@@ -347,16 +360,6 @@ export function parsingPossibleInteractions(
         iAttrSet.add(el.getAttribute("i")!)
       );
     }
-  });
-
-  // Filter interactive elements
-  let interactiveElements = Array.from(
-    body.querySelectorAll("input, button, a, select, textarea")
-  ).filter((element) => {
-    let isUniqueElement = !(
-      element.getAttribute("i") && iAttrSet.has(element.getAttribute("i")!)
-    );
-    return isUniqueElement;
   });
 
   interactiveElements.push(...components);
