@@ -304,7 +304,6 @@ export function parsingPossibleInteractions(
 
   let components: Element[] = [];
   const repeatingComponents = findRepeatingComponents(html);
-  console.log(repeatingComponents.length);
   repeatingComponents.forEach((element) => {
     Array.from(element.querySelectorAll("[i]")).forEach((el) =>
       iAttrSet.add(el.getAttribute("i")!)

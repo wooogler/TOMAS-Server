@@ -244,8 +244,6 @@ What does the item in the list represent? Describe in one sentence, including th
 `,
   };
 
-  console.log(describeItemPrompt.content);
-
   try {
     return removeBeforeAndIncludingRepresents(
       await getAiResponse([describeItemPrompt])

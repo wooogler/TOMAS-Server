@@ -258,6 +258,7 @@ export async function confirm(
           input.actionValue
         );
       } else if (component.actionType === "click") {
+        console.log("confirm for click");
         const actionDescription = await getActionHistory(component, "yes");
         actionLogs.push({
           type: focusSection.type,
@@ -270,6 +271,7 @@ export async function confirm(
         if (!input.actionValue) {
           throw new Error("No action value for select");
         }
+        console.log("confirm for select");
         const selected = input.actionValue.split("---");
         const iAttr = selected[0];
         const description = selected[1];
@@ -283,7 +285,7 @@ export async function confirm(
         //   screenDescription: focusSection.screenDescription,
         //   actionDescription,
         // });
-        focusSection = await page.focus(`[i="${iAttr}"]`);
+        focusSection = await page.select(`[i="${iAttr}"]`);
       }
     }
   } else {
