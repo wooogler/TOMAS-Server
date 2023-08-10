@@ -291,48 +291,6 @@ export class PageHandler {
     };
   }
 
-  // async focus(
-  //   selector: string,
-  //   parsing: boolean = true
-  // ): Promise<ScreenResult> {
-  //   const page = await this.getPage();
-  //   const screen = await trackModalChanges(page, async () => {});
-  //   const dom = new JSDOM(screen.html);
-  //   const element = dom.window.document.querySelector(selector);
-  //   const elementSimpleHtml = simplifyHtml(element?.innerHTML || "", true);
-  //   const tmp = await page.content();
-  //   const pageSimpleHtml = await simplifyHtml(tmp, true);
-  //   if (parsing === false) {
-  //     return {
-  //       type: "section",
-  //       screenDescription: "",
-  //       actionComponents: [],
-  //       id: `${this.extractBaseURL(page.url())}section/${element?.getAttribute(
-  //         "i"
-  //       )}`,
-  //     };
-  //   }
-
-  //   const pageDescription = await getPageDescription(pageSimpleHtml);
-  //   const sectionDescription = await getSectionDescription(
-  //     elementSimpleHtml,
-  //     pageDescription
-  //   );
-  //   const actionComponents = await parsingItemAgent({
-  //     html: element?.innerHTML || "",
-  //     screenDescription: sectionDescription,
-  //     isFocus: true,
-  //   });
-  //   return {
-  //     type: "section",
-  //     screenDescription: sectionDescription,
-  //     actionComponents,
-  //     id: `${this.extractBaseURL(page.url())}section/${element?.getAttribute(
-  //       "i"
-  //     )}`,
-  //   };
-  // }
-
   async unfocus(parsing: boolean = true): Promise<ScreenResult> {
     const page = await this.getPage();
     const screen = await trackModalChanges(page, async () => {});
