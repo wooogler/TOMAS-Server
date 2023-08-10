@@ -63,7 +63,7 @@ export class PageHandler {
     return parsedURL.origin + parsedURL.pathname;
   }
 
-  async navigate(url: string): Promise<ScreenResult> {
+  async navigate(url: string, parsing: boolean = true): Promise<ScreenResult> {
     const page = await this.getPage();
     await page.setDefaultNavigationTimeout(0);
     const screen = await trackModalChanges(page, async () => {
@@ -72,6 +72,24 @@ export class PageHandler {
       });
     });
 
+    if (parsing === false) {
+      if (screen.modalI) {
+        return {
+          type: "modal",
+          screenDescription: "",
+          actionComponents: [],
+          id: `${this.extractBaseURL(page.url())}modal/${screen.modalI}`,
+        };
+      } else {
+        return {
+          type: "page",
+          screenDescription: "",
+          actionComponents: [],
+          id: `${this.extractBaseURL(page.url())}`,
+        };
+      }
+    }
+
     const pageSimpleHtml = simplifyHtml(await page.content(), true);
     const pageDescription = await getPageDescription(pageSimpleHtml);
     const screenSimpleHtml = simplifyHtml(screen.html, true);
@@ -106,13 +124,34 @@ export class PageHandler {
     }
   }
 
-  async click(selector: string): Promise<ScreenResult> {
+  async click(
+    selector: string,
+    parsing: boolean = true
+  ): Promise<ScreenResult> {
     const page = await this.getPage();
     const element = await this.getElement(selector);
     const screen = await trackModalChanges(page, async () => {
       await element.click();
     });
 
+    if (parsing === false) {
+      if (screen.modalI) {
+        return {
+          type: "modal",
+          screenDescription: "",
+          actionComponents: [],
+          id: `${this.extractBaseURL(page.url())}modal/${screen.modalI}`,
+        };
+      } else {
+        return {
+          type: "page",
+          screenDescription: "",
+          actionComponents: [],
+          id: `${this.extractBaseURL(page.url())}`,
+        };
+      }
+    }
+
     const pageSimpleHtml = simplifyHtml(await page.content(), true);
     const pageDescription = await getPageDescription(pageSimpleHtml);
     const screenSimpleHtml = simplifyHtml(screen.html, true);
@@ -148,16 +187,38 @@ export class PageHandler {
     }
   }
 
-  async inputText(selector: string, text: string): Promise<ScreenResult> {
+  async inputText(
+    selector: string,
+    text: string,
+    parsing: boolean = true
+  ): Promise<ScreenResult> {
     const page = await this.getPage();
     const element = await this.getElement(selector);
     const screen = await trackModalChanges(page, async () => {
       await element.type(text);
     });
+    if (parsing === false) {
+      if (screen.modalI) {
+        return {
+          type: "modal",
+          screenDescription: "",
+          actionComponents: [],
+          id: `${this.extractBaseURL(page.url())}modal/${screen.modalI}`,
+        };
+      } else {
+        return {
+          type: "page",
+          screenDescription: "",
+          actionComponents: [],
+          id: `${this.extractBaseURL(page.url())}`,
+        };
+      }
+    }
 
     const pageSimpleHtml = simplifyHtml(await page.content(), true);
     const pageDescription = await getPageDescription(pageSimpleHtml);
     const screenSimpleHtml = simplifyHtml(screen.html, true);
+
     if (screen.modalI) {
       // if screen is a modal
       const modalDescription = await getModalDescription(
@@ -190,13 +251,26 @@ export class PageHandler {
   }
 
   //select one item in the list
-  async select(selector: string): Promise<ScreenResult> {
+  async select(
+    selector: string,
+    parsing: boolean = true
+  ): Promise<ScreenResult> {
     const page = await this.getPage();
     const screen = await trackModalChanges(page, async () => {});
     const dom = new JSDOM(screen.html);
     const element = dom.window.document.querySelector(selector);
     const elementSimpleHtml = simplifyHtml(element?.innerHTML || "", true);
 
+    if (parsing === false) {
+      return {
+        type: "section",
+        screenDescription: "",
+        actionComponents: [],
+        id: `${this.extractBaseURL(page.url())}section/${element?.getAttribute(
+          "i"
+        )}`,
+      };
+    }
     const pageSimpleHtml = simplifyHtml(await page.content(), true);
     const pageDescription = await getPageDescription(pageSimpleHtml);
     const sectionDescription = await getSectionDescription(
@@ -217,37 +291,60 @@ export class PageHandler {
     };
   }
 
-  async focus(selector: string): Promise<ScreenResult> {
-    const page = await this.getPage();
-    const screen = await trackModalChanges(page, async () => {});
-    const dom = new JSDOM(screen.html);
-    const element = dom.window.document.querySelector(selector);
-    const elementSimpleHtml = simplifyHtml(element?.innerHTML || "", true);
-    const tmp = await page.content();
-    const pageSimpleHtml = await simplifyHtml(tmp, true);
-    const pageDescription = await getPageDescription(pageSimpleHtml);
-    const sectionDescription = await getSectionDescription(
-      elementSimpleHtml,
-      pageDescription
-    );
-    const actionComponents = await parsingAgent({
-      html: element?.innerHTML || "",
-      screenDescription: sectionDescription,
-    });
-    return {
-      type: "section",
-      screenDescription: sectionDescription,
-      actionComponents,
-      id: `${this.extractBaseURL(page.url())}section/${element?.getAttribute(
-        "i"
-      )}`,
-    };
-  }
+  // async focus(
+  //   selector: string,
+  //   parsing: boolean = true
+  // ): Promise<ScreenResult> {
+  //   const page = await this.getPage();
+  //   const screen = await trackModalChanges(page, async () => {});
+  //   const dom = new JSDOM(screen.html);
+  //   const element = dom.window.document.querySelector(selector);
+  //   const elementSimpleHtml = simplifyHtml(element?.innerHTML || "", true);
+  //   const tmp = await page.content();
+  //   const pageSimpleHtml = await simplifyHtml(tmp, true);
+  //   if (parsing === false) {
+  //     return {
+  //       type: "section",
+  //       screenDescription: "",
+  //       actionComponents: [],
+  //       id: `${this.extractBaseURL(page.url())}section/${element?.getAttribute(
+  //         "i"
+  //       )}`,
+  //     };
+  //   }
 
-  async unfocus(): Promise<ScreenResult> {
+  //   const pageDescription = await getPageDescription(pageSimpleHtml);
+  //   const sectionDescription = await getSectionDescription(
+  //     elementSimpleHtml,
+  //     pageDescription
+  //   );
+  //   const actionComponents = await parsingItemAgent({
+  //     html: element?.innerHTML || "",
+  //     screenDescription: sectionDescription,
+  //     isFocus: true,
+  //   });
+  //   return {
+  //     type: "section",
+  //     screenDescription: sectionDescription,
+  //     actionComponents,
+  //     id: `${this.extractBaseURL(page.url())}section/${element?.getAttribute(
+  //       "i"
+  //     )}`,
+  //   };
+  // }
+
+  async unfocus(parsing: boolean = true): Promise<ScreenResult> {
     const page = await this.getPage();
     const screen = await trackModalChanges(page, async () => {});
     const pageSimpleHtml = simplifyHtml(await page.content(), true);
+    if (parsing === false) {
+      return {
+        type: "page",
+        screenDescription: "",
+        actionComponents: [],
+        id: `${this.extractBaseURL(page.url())}`,
+      };
+    }
     const pageDescription = await getPageDescription(pageSimpleHtml);
     const actionComponents = await parsingAgent({
       html: screen.html,

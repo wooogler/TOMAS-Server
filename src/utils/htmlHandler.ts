@@ -387,33 +387,42 @@ export async function parsingItemAgent({
   const components = Array.from(body.children);
   let firstDescription: string;
 
-  const itemComponentsPromises = components.map<Promise<ActionComponent>>(
-    async (comp, index) => {
-      const iAttr = comp.getAttribute("i");
-      const itemDescription = await getItemDescription({
-        itemHtml: simplifyHtml(comp.outerHTML, true),
-        screenDescription,
-        prevDescription: index === 0 ? firstDescription : undefined,
-      });
-      if (index === 0) {
-        firstDescription = itemDescription || "";
-      }
-      return {
-        i: iAttr || "",
-        actionType: "select",
-        description: "Select " + itemDescription,
-        html: comp.outerHTML,
-      };
+  const itemComponentsPromises = components.map<
+    Promise<ActionComponent | null>
+  >(async (comp, index) => {
+    const iAttr = comp.getAttribute("i");
+    const possibleInteractions = parsingPossibleInteractions(comp.outerHTML);
+    const itemDescription = await getItemDescription({
+      itemHtml: simplifyHtml(comp.outerHTML, true),
+      screenDescription,
+      prevDescription: index === 0 ? firstDescription : undefined,
+    });
+    if (index === 0) {
+      firstDescription = itemDescription || "";
     }
-  );
+
+    switch (possibleInteractions.length) {
+      case 0:
+        return null;
+      case 1:
+        return {
+          i: iAttr || "",
+          actionType: "click",
+          description: "Click " + itemDescription,
+          html: comp.outerHTML,
+        };
+      default:
+        return {
+          i: iAttr || "",
+          actionType: "select",
+          description: "Select " + itemDescription,
+          html: comp.outerHTML,
+        };
+    }
+  });
 
   const itemComponents = await Promise.all(itemComponentsPromises);
-  // console.log(
-  //   itemComponents
-  //     .map((comp) => `- ${comp.description} (i=${comp.i})`)
-  //     .join("\n")
-  // );
-  return itemComponents;
+  return itemComponents.filter((item) => item !== null) as ActionComponent[];
 }
 
 export async function parsingAgent({
