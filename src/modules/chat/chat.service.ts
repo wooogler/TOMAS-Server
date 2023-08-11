@@ -98,7 +98,7 @@ async function planningAndAsk(): Promise<AnswerResponse | undefined> {
       "",
       focusSection,
       userContext,
-      systemContext
+      actionLogs.length !== 0 ? systemContext : ""
     );
 
     const task = taskList[0];
