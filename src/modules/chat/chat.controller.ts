@@ -16,6 +16,7 @@ import {
   deleteChats,
   closePage,
   deleteLogs,
+  getNewestChat,
 } from "./chat.service";
 
 export async function createHumanChatHandler(
@@ -28,6 +29,11 @@ export async function createHumanChatHandler(
 export async function getChatsHandler() {
   const chats = await getChats();
   return chats;
+}
+
+export async function getNewestChatHandler() {
+  const chat = await getNewestChat();
+  return chat;
 }
 
 export async function navigateHandler(
@@ -69,8 +75,8 @@ export async function deleteChatsHandler(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
+  deleteLogs();
   await deleteChats();
   await closePage();
-  await deleteLogs();
   reply.code(200).send();
 }

@@ -60,6 +60,14 @@ export function getChats() {
   });
 }
 
+export function getNewestChat() {
+  return prisma.chat.findFirst({
+    orderBy: {
+      createdAt: "asc",
+    },
+  });
+}
+
 export async function navigate(
   input: NavigateInput
 ): Promise<navigateResponse> {
@@ -151,7 +159,7 @@ ${options.actionComponents.map(
   (action) => `- ${action.description} (i=${action.i}))`
 )}`,
           });
-          return { component, type: "questionForSelect" };
+          return { component, type: `questionForSelect` };
         } else {
           const confirmationQuestion = await makeQuestionForConfirmation(
             component,
@@ -337,6 +345,6 @@ export async function closePage() {
   await page.close();
 }
 
-export async function deleteLogs() {
+export function deleteLogs() {
   actionLogs = [];
 }

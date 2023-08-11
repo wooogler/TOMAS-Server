@@ -7,6 +7,7 @@ import {
   deleteChatsHandler,
   firstOrderHandler,
   getChatsHandler,
+  getNewestChatHandler,
   navigateHandler,
 } from "./chat.controller";
 import { $ref } from "./chat.schema";
@@ -98,6 +99,15 @@ async function chatRoutes(server: FastifyInstance) {
       },
     },
     getChatsHandler
+  );
+  server.get(
+    "/newest",
+    {
+      schema: {
+        response: { 200: $ref("chatResponseSchema") },
+      },
+    },
+    getNewestChatHandler
   );
 
   server.delete("/", deleteChatsHandler);

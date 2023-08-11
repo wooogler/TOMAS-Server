@@ -445,7 +445,6 @@ ${pageDescription}
 Component description:
 ${componentDescription}
 
-User's context:
 ${userContext}
 
 Output needs to follow one of the JSON formats in plain text. Never provide additional context.
