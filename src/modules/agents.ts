@@ -31,11 +31,8 @@ export async function planningAgent(
     content: `
 You are the AI that creates a plan to interact with the main web page based on the user's and system's contexts.
 
-
-
 Actions should be selected in order to achieve what the user wants based on the user's context. 
-User's context: ${userContext}
-
+${userContext}
 
 You need to plan the action sequence using the following possible actions in the part of the current screen. 
 Description of the current screen: ${focusedSection.screenDescription}
@@ -47,7 +44,7 @@ ${focusedSection.actionComponents
 Actions should reflect the results of the interactions the system has executed before: 
 ${systemContext}
 
-Please skip those actions that have been executed before if nessesary.
+Please skip those actions that have been executed before and try different ways to achieve the user's objective.
 
 First, describe the most efficient interaction plan in natural language by referring to the user's and system's contexts. Do not add any useless actions to the plan.
 
@@ -83,6 +80,7 @@ Planning Agent:
     planningActionPromptForSystem,
     // planningActionPromptForUser,
   ]);
+  console.log(response);
 
   // Here we assume the response is in the format:
   // 1. <First action> (i=<i>)
@@ -90,7 +88,6 @@ Planning Agent:
   // ...
   const filter: RegExp = /^\d+\./;
   const tasks = response.split("\n").filter((line) => filter.test(line));
-  console.log(tasks);
   const taskList: taskList[] = [];
   for (const task of tasks) {
     const match = task.match(/(\d+)\. (.*) \(i=(\d+)\)/);

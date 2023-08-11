@@ -100,8 +100,7 @@ export class PageHandler {
         pageDescription
       );
       const actionComponents = await parsingAgent({
-        html: simplifyHtml(screen.html, true),
-        screenDescription: modalDescription,
+        screenHtml: screen.html,
       });
       return {
         type: "modal",
@@ -111,8 +110,7 @@ export class PageHandler {
       };
     } else {
       const actionComponents = await parsingAgent({
-        html: screen.html,
-        screenDescription: pageDescription,
+        screenHtml: screen.html,
       });
 
       return {
@@ -163,8 +161,7 @@ export class PageHandler {
         pageDescription
       );
       const actionComponents = await parsingAgent({
-        html: screen.html,
-        screenDescription: modalDescription,
+        screenHtml: screen.html,
       });
       return {
         type: "modal",
@@ -174,8 +171,7 @@ export class PageHandler {
       };
     } else {
       const actionComponents = await parsingAgent({
-        html: screen.html,
-        screenDescription: pageDescription,
+        screenHtml: screen.html,
       });
 
       return {
@@ -226,8 +222,7 @@ export class PageHandler {
         pageDescription
       );
       const actionComponents = await parsingAgent({
-        html: screen.html,
-        screenDescription: modalDescription,
+        screenHtml: screen.html,
       });
       return {
         type: "modal",
@@ -237,8 +232,7 @@ export class PageHandler {
       };
     } else {
       const actionComponents = await parsingAgent({
-        html: screen.html,
-        screenDescription: pageDescription,
+        screenHtml: screen.html,
       });
 
       return {
@@ -278,8 +272,7 @@ export class PageHandler {
       pageDescription
     );
     const itemComponents = await parsingItemAgent({
-      html: element?.innerHTML || "",
-      screenDescription: sectionDescription,
+      screenHtml: element?.innerHTML || "",
     });
     return {
       type: "section",
@@ -294,6 +287,8 @@ export class PageHandler {
   async unfocus(parsing: boolean = true): Promise<ScreenResult> {
     const page = await this.getPage();
     const screen = await trackModalChanges(page, async () => {});
+    const screenSimpleHtml = simplifyHtml(screen.html, true);
+
     const pageSimpleHtml = simplifyHtml(await page.content(), true);
     if (parsing === false) {
       return {
@@ -305,8 +300,7 @@ export class PageHandler {
     }
     const pageDescription = await getPageDescription(pageSimpleHtml);
     const actionComponents = await parsingAgent({
-      html: screen.html,
-      screenDescription: pageDescription,
+      screenHtml: screen.html,
     });
     return {
       type: "page",

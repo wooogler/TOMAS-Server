@@ -168,18 +168,22 @@ const editActionType = (actionType: ActionType) => {
 
 export const getComponentInfo = async ({
   componentHtml,
-  screenDescription,
+  screenHtml,
   actionType,
 }: {
   componentHtml: string;
-  screenDescription: string;
+  screenHtml: string;
   actionType: ActionType;
 }) => {
   const extractComponentSystemPrompt: Prompt = {
     role: "SYSTEM",
     content: `You are a web developer. You need to explain the context when the user interacts with a given HTML element and the action for the user to interact with the element.
 
-Consider the description about where this element is located: ${screenDescription}
+This is the HTML code of the screen:
+${screenHtml}
+
+This is the HTML code of the element:
+${componentHtml}
 
 Output following JSON format in plain text. Never provide additional context.
 
@@ -224,23 +228,23 @@ function removeBeforeAndIncludingRepresents(sentence: string): string {
 
 export const getSimpleItemDescription = async ({
   itemHtml,
-  screenDescription,
+  screenHtml,
 }: {
   itemHtml: string;
-  screenDescription: string;
-  prevDescription?: string;
+  screenHtml: string;
 }) => {
   const describeItemPrompt: Prompt = {
     role: "SYSTEM",
     content: `
 Summarize the content of an item in the list.
 
-Consider the description of the list: ${screenDescription}
+This is the HTML code of the list:
+${screenHtml}
 
-The item is given in HTML code below.
+This is the HTML code of the item:
 ${itemHtml}
 
-What does the item in the list represent? Describe in one sentence, including the word "represents"
+What does the item in the list represent? Describe in one sentence, including the word "represents". Don't mention the HTML tags.
 `,
   };
 
@@ -255,11 +259,11 @@ What does the item in the list represent? Describe in one sentence, including th
 
 export const getComplexItemDescription = async ({
   itemHtml,
-  screenDescription,
+  screenHtml,
   prevDescription,
 }: {
   itemHtml: string;
-  screenDescription: string;
+  screenHtml: string;
   prevDescription?: string;
 }) => {
   const describeItemPrompt: Prompt = {
@@ -270,9 +274,10 @@ Describe an item in the list as a noun phrase with modifiers${
     }. The description must include all the information in the item. The item is given in HTML code below.
 ${prevDescription && `Previous description: ${prevDescription}`}
 
-Consider the description about where this item is located: ${screenDescription}
+This is the HTML code of the list:
+${screenHtml}
 
-HTML code:
+This is the HTML code of the item:
 ${itemHtml}
 
 Do provide information, not the purpose of the HTML element.
@@ -288,20 +293,24 @@ Do provide information, not the purpose of the HTML element.
 
 export const getSelectInfo = async ({
   componentHtml,
-  screenDescription,
+  screenHtml,
   actionType,
 }: {
   componentHtml: string;
-  screenDescription: string;
+  screenHtml: string;
   actionType: ActionType;
 }) => {
   const extractComponentSystemPrompt: Prompt = {
     role: "SYSTEM",
-    content: `You are a web developer. You need to explain the context when the user see a given HTML element
+    content: `You are a web developer. You need to explain the context when the user see the screen and the action for the user to interact with the element.
     
-The action of user is selecting one of the components in the given HTML element.
+The action of user is selecting one of the elements in the screen.
 
-Consider the description about where this element is located: ${screenDescription}
+This is the HTML code of the screen:
+${screenHtml}
+
+This is the HTML code of the element:
+${componentHtml}
 
 Output following JSON format in plain text. Never provide additional context.
 
@@ -390,8 +399,7 @@ export async function getUserContext(chats: Chat[]) {
   const converationPrompt: Prompt = makeConversationPrompt(chats);
   const findUserContextPrompt: Prompt = {
     role: "SYSTEM",
-    content: `Based on the conversation between the system and the user, describe the user's context. Please keep all useful information from the conversation in the context considering the user's goal.
-`,
+    content: `Based on the conversation between the system and the user, describe the user's context. Please keep all useful information from the conversation in the context considering the user's goal. Start with "User's Context: "`,
   };
   const userContext = await getAiResponse([
     findUserContextPrompt,

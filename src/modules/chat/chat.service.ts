@@ -62,12 +62,6 @@ export async function navigate(
   try {
     await page.initialize();
     focusSection = await page.navigate(input.url);
-    actionLogs.push({
-      id: focusSection.id,
-      type: focusSection.type,
-      screenDescription: focusSection.screenDescription,
-      actionDescription: `Navigate to the page`,
-    });
     createAIChat({ content: "How can I help you?" });
     return {
       screenDescription: focusSection.screenDescription,
@@ -83,7 +77,7 @@ export async function firstOrder(
   input: CreateHumanChatInput
 ): Promise<AnswerResponse> {
   console.log("firstOrder");
-  createHumanChat(input);
+  await createHumanChat(input);
   const response = await planningAndAsk();
   if (response) {
     return response;
@@ -224,7 +218,7 @@ export async function answerForSelect(input: AnswerInput) {
     );
     await createAIChat({ content: confirmationQuestion });
     return {
-      component,
+      component: selectedItem,
       type: "requestConfirmation",
       actionValue: selectedItem.i + "---" + selectedItem.description,
     };

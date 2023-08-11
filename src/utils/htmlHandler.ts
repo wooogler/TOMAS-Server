@@ -400,13 +400,11 @@ function comparePossibleInteractions(
 }
 
 export async function parsingItemAgent({
-  html,
-  screenDescription,
+  screenHtml,
 }: {
-  html: string;
-  screenDescription: string;
+  screenHtml: string;
 }): Promise<ActionComponent[]> {
-  const dom = new JSDOM(html);
+  const dom = new JSDOM(screenHtml);
   const body = dom.window.document.body;
   const components = Array.from(body.children);
   let firstDescription: string;
@@ -424,13 +422,13 @@ export async function parsingItemAgent({
       case 1:
         itemDescription = await getSimpleItemDescription({
           itemHtml: simplifyHtml(comp.outerHTML, true),
-          screenDescription,
+          screenHtml: simplifyHtml(screenHtml, true),
         });
         if (index === 0) {
           firstDescription = itemDescription || "";
         }
         return {
-          i: iAttr || "",
+          i: possibleInteractions[0].i,
           actionType: "click",
           description: "Click " + itemDescription,
           html: comp.outerHTML,
@@ -438,7 +436,7 @@ export async function parsingItemAgent({
       default:
         itemDescription = await getComplexItemDescription({
           itemHtml: simplifyHtml(comp.outerHTML, true),
-          screenDescription,
+          screenHtml: simplifyHtml(screenHtml, true),
           prevDescription: index === 0 ? firstDescription : undefined,
         });
         if (index === 0) {
@@ -458,17 +456,15 @@ export async function parsingItemAgent({
 }
 
 export async function parsingAgent({
-  html,
-  screenDescription,
+  screenHtml,
 }: {
-  html: string;
-  screenDescription: string;
+  screenHtml: string;
 }): Promise<ActionComponent[]> {
-  const possibleInteractions = parsingPossibleInteractions(html).sort(
+  const possibleInteractions = parsingPossibleInteractions(screenHtml).sort(
     comparePossibleInteractions
   );
 
-  const dom = new JSDOM(html);
+  const dom = new JSDOM(screenHtml);
   const body = dom.window.document.body;
 
   const actionComponentsPromises = possibleInteractions.map(
@@ -481,12 +477,12 @@ export async function parsingAgent({
         actionType === "select"
           ? await getSelectInfo({
               componentHtml: simplifyHtml(componentHtml, true) || "",
-              screenDescription,
+              screenHtml: simplifyHtml(screenHtml, true),
               actionType: interaction.actionType,
             })
           : await getComponentInfo({
               componentHtml: simplifyHtml(componentHtml, true) || "",
-              screenDescription,
+              screenHtml: simplifyHtml(screenHtml, true),
               actionType: interaction.actionType,
             });
 
