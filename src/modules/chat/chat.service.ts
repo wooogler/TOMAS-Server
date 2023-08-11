@@ -98,7 +98,7 @@ async function planningAndAsk(): Promise<AnswerResponse | undefined> {
       "",
       focusSection,
       userContext,
-      actionLogs.length !== 0 ? systemContext : ""
+      actionLogs.length !== 0 ? systemContext : "No action history"
     );
 
     const task = taskList[0];
@@ -127,7 +127,8 @@ async function planningAndAsk(): Promise<AnswerResponse | undefined> {
           } else {
             const confirmationQuestion = await makeQuestionForConfirmation(
               component,
-              actionValue
+              actionValue,
+              screenDescription
             );
             await createAIChat({ content: confirmationQuestion });
             return { component, type: "requestConfirmation", actionValue };
@@ -146,7 +147,8 @@ ${options.actionComponents.map(
         } else {
           const confirmationQuestion = await makeQuestionForConfirmation(
             component,
-            ""
+            "",
+            screenDescription
           );
           await createAIChat({ content: confirmationQuestion });
           return { component, type: "requestConfirmation" };
@@ -195,7 +197,8 @@ export async function answerForInput(
       console.log("actionValue is " + actionValue);
       const confirmationQuestion = await makeQuestionForConfirmation(
         component,
-        actionValue
+        actionValue,
+        screenDescription
       );
       await createAIChat({ content: confirmationQuestion });
       return { component, type: "requestConfirmation", actionValue };
@@ -211,10 +214,12 @@ export async function answerForSelect(input: AnswerInput) {
   const component = input.component;
   const options = await page.select(`[i="${component.i}"]`);
   const selectedItem = options.actionComponents[parseInt(input.content) - 1];
+  const screenDescription = focusSection.screenDescription;
   if (selectedItem) {
     const confirmationQuestion = await makeQuestionForConfirmation(
       component,
-      selectedItem.description || ""
+      selectedItem.description || "",
+      screenDescription
     );
     await createAIChat({ content: confirmationQuestion });
     return {
