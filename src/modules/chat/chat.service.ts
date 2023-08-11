@@ -153,11 +153,11 @@ async function planningAndAsk(): Promise<AnswerResponse | undefined> {
           const options = await page.select(`[i="${component.i}"]`);
           await createAIChat({
             content: `${question}
-
-Possible options could be:
-${options.actionComponents.map(
-  (action) => `- ${action.description} (i=${action.i}))`
-)}`,
+            ${options.actionComponents
+              .map((comp, i) => {
+                return `${i + 1}. ${comp.description}`;
+              })
+              .join("\n")}`,
           });
           return { component, type: `questionForSelect` };
         } else {

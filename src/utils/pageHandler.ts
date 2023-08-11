@@ -101,6 +101,7 @@ export class PageHandler {
       );
       const actionComponents = await parsingAgent({
         screenHtml: screen.html,
+        screenDescription: modalDescription,
       });
       return {
         type: "modal",
@@ -111,6 +112,7 @@ export class PageHandler {
     } else {
       const actionComponents = await parsingAgent({
         screenHtml: screen.html,
+        screenDescription: pageDescription,
       });
 
       return {
@@ -131,6 +133,7 @@ export class PageHandler {
     const screen = await trackModalChanges(page, async () => {
       await element.click();
     });
+    console.log(screen.modalI);
 
     if (parsing === false) {
       if (screen.modalI) {
@@ -162,6 +165,7 @@ export class PageHandler {
       );
       const actionComponents = await parsingAgent({
         screenHtml: screen.html,
+        screenDescription: modalDescription,
       });
       return {
         type: "modal",
@@ -172,6 +176,7 @@ export class PageHandler {
     } else {
       const actionComponents = await parsingAgent({
         screenHtml: screen.html,
+        screenDescription: pageDescription,
       });
 
       return {
@@ -223,6 +228,7 @@ export class PageHandler {
       );
       const actionComponents = await parsingAgent({
         screenHtml: screen.html,
+        screenDescription: modalDescription,
       });
       return {
         type: "modal",
@@ -233,6 +239,7 @@ export class PageHandler {
     } else {
       const actionComponents = await parsingAgent({
         screenHtml: screen.html,
+        screenDescription: pageDescription,
       });
 
       return {
@@ -302,6 +309,7 @@ export class PageHandler {
     const pageDescription = await getPageDescription(pageSimpleHtml);
     const actionComponents = await parsingAgent({
       screenHtml: screen.html,
+      screenDescription: pageDescription,
     });
     return {
       type: "page",

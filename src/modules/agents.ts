@@ -41,7 +41,7 @@ ${focusedSection.actionComponents
   .map((comp) => `- ${comp.description} (i=${comp.i})`)
   .join("\n")}
 
-Actions should reflect the results of the interactions the system has executed before: 
+The action plan should reflect the results of the interactions the system has executed before: 
 ${systemContext}
 
 Please skip those actions that have been executed before and try different ways to achieve the user's objective.

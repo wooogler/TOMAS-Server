@@ -461,8 +461,10 @@ export async function parsingItemAgent({
 
 export async function parsingAgent({
   screenHtml,
+  screenDescription,
 }: {
   screenHtml: string;
+  screenDescription: string;
 }): Promise<ActionComponent[]> {
   const possibleInteractions = parsingPossibleInteractions(screenHtml).sort(
     comparePossibleInteractions
@@ -488,6 +490,7 @@ export async function parsingAgent({
               componentHtml: simplifyHtml(componentHtml, true) || "",
               screenHtml: simplifyHtml(screenHtml, true),
               actionType: interaction.actionType,
+              screenDescription: 
             });
 
       return {
