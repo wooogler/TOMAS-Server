@@ -182,7 +182,7 @@ export const getComponentInfo = async ({
 This is the HTML code of the screen:
 ${screenHtml}
 
-This is the HTML code of the element:
+This is the HTML code of the element. Ignore value or state of the element.
 ${componentHtml}
 
 Output following JSON format in plain text. Never provide additional context.
@@ -195,20 +195,12 @@ Output following JSON format in plain text. Never provide additional context.
   },
   description: <describe the action based on the context starting with '${editActionType(
     actionType
-  )} '>
+  )}'>
 }`,
   };
 
-  const componentHtmlPrompt: Prompt = {
-    role: "HUMAN",
-    content: componentHtml,
-  };
-
   try {
-    const componentJson = await getAiResponse([
-      extractComponentSystemPrompt,
-      componentHtmlPrompt,
-    ]);
+    const componentJson = await getAiResponse([extractComponentSystemPrompt]);
     const componentObj = JSON.parse(componentJson);
     return componentObj as ComponentInfo;
   } catch (error) {
@@ -579,7 +571,7 @@ You need to create a natural language question to ask the user to confirm whethe
         component.actionType === "input" ? " and value" : ""
       }.
 
-Do not mention the UI elements like button, link, and text field when you make the question.
+Do not mention the way to interact the UI element inside your question.
 
 Action: ${replaceClickWithSelect(component.description || "")}
 ${component.actionType === "input" ? `Value: ${actionValue}` : ""}`,
