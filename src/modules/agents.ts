@@ -21,7 +21,6 @@ export interface taskList {
 
 import { createAIChat } from "./chat/chat.service";
 export async function planningAgent(
-  userObjective: string,
   focusedSection: ScreenResult,
   userContext: string,
   systemContext: string

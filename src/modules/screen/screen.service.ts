@@ -116,7 +116,6 @@ export async function navigate(input: NavigateInput) {
       const systemContext = await getSystemContext(actionLogs);
       // Get task list
       const taskList = await planningAgent(
-        userObjective,
         focusSection,
         userContext,
         systemContext

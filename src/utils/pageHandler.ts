@@ -196,6 +196,10 @@ export class PageHandler {
     const page = await this.getPage();
     const element = await this.getElement(selector);
     const screen = await trackModalChanges(page, async () => {
+      await page.$eval(
+        selector,
+        (input) => ((input as HTMLInputElement).value = "")
+      );
       await element.type(text);
     });
     if (parsing === false) {

@@ -485,6 +485,7 @@ export async function parsingAgent({
               componentHtml: simplifyHtml(componentHtml, true) || "",
               screenHtml: simplifyHtml(screenHtml, true),
               actionType: interaction.actionType,
+              screenDescription,
             })
           : await getComponentInfo({
               componentHtml: simplifyHtml(componentHtml, true) || "",

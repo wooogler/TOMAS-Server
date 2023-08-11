@@ -30,7 +30,7 @@ const chat16k = new ChatOpenAI({
 const chat4 = new ChatOpenAI({
   openAIApiKey: process.env.OPENAI_API_KEY,
   modelName: "gpt-4",
-  temperature: 0,
+  temperature: 0.2,
   maxTokens: 4096,
 });
 
@@ -301,10 +301,12 @@ export const getSelectInfo = async ({
   componentHtml,
   screenHtml,
   actionType,
+  screenDescription,
 }: {
   componentHtml: string;
   screenHtml: string;
   actionType: ActionType;
+  screenDescription: string;
 }) => {
   const extractComponentSystemPrompt: Prompt = {
     role: "SYSTEM",
@@ -312,7 +314,7 @@ export const getSelectInfo = async ({
     
 The action of user is selecting one of the elements in the screen.
 
-This is the HTML code of the screen:
+This is the HTML code of the screen: ${screenDescription}
 ${screenHtml}
 
 This is the HTML code of the element:

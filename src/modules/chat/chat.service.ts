@@ -106,8 +106,12 @@ async function planningAndAsk(): Promise<AnswerResponse | undefined> {
     const actionComponents = focusSection.actionComponents;
 
     const systemContext = await getSystemContext(actionLogs);
+    console.log(
+      focusSection.type,
+      focusSection.id,
+      focusSection.screenDescription
+    );
     const taskList = await planningAgent(
-      "",
       focusSection,
       userContext,
       actionLogs.length !== 0 ? systemContext : "No action history"
@@ -153,11 +157,11 @@ async function planningAndAsk(): Promise<AnswerResponse | undefined> {
           const options = await page.select(`[i="${component.i}"]`);
           await createAIChat({
             content: `${question}
-            ${options.actionComponents
-              .map((comp, i) => {
-                return `${i + 1}. ${comp.description}`;
-              })
-              .join("\n")}`,
+${options.actionComponents
+  .map((comp, i) => {
+    return `${i + 1}. ${comp.description}`;
+  })
+  .join("\n")}`,
           });
           return { component, type: `questionForSelect` };
         } else {
