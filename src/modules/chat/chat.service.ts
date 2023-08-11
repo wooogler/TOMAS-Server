@@ -53,7 +53,11 @@ export async function createAIChat(input: CreateHumanChatInput) {
 }
 
 export function getChats() {
-  return prisma.chat.findMany();
+  return prisma.chat.findMany({
+    orderBy: {
+      createdAt: "asc",
+    },
+  });
 }
 
 export async function navigate(
@@ -127,16 +131,20 @@ async function planningAndAsk(): Promise<AnswerResponse | undefined> {
           } else {
             const confirmationQuestion = await makeQuestionForConfirmation(
               component,
-              actionValue,
-              screenDescription
+              screenDescription,
+              actionValue
             );
             await createAIChat({ content: confirmationQuestion });
             return { component, type: "requestConfirmation", actionValue };
           }
         } else if (component.actionType === "select") {
+          const question = await makeQuestionForActionValue(
+            screenDescription,
+            component.description
+          );
           const options = await page.select(`[i="${component.i}"]`);
           await createAIChat({
-            content: `Which one do you want?
+            content: `${question}
 
 Possible options could be:
 ${options.actionComponents.map(
@@ -147,7 +155,6 @@ ${options.actionComponents.map(
         } else {
           const confirmationQuestion = await makeQuestionForConfirmation(
             component,
-            "",
             screenDescription
           );
           await createAIChat({ content: confirmationQuestion });
@@ -197,8 +204,8 @@ export async function answerForInput(
       console.log("actionValue is " + actionValue);
       const confirmationQuestion = await makeQuestionForConfirmation(
         component,
-        actionValue,
-        screenDescription
+        screenDescription,
+        actionValue
       );
       await createAIChat({ content: confirmationQuestion });
       return { component, type: "requestConfirmation", actionValue };
@@ -238,8 +245,8 @@ export async function answerForSelect(input: AnswerInput) {
   if (selectedItem) {
     const confirmationQuestion = await makeQuestionForConfirmation(
       selectedItem,
-      selectedItem.description || "",
-      screenDescription
+      screenDescription,
+      selectedItem.description || ""
     );
     await createAIChat({ content: confirmationQuestion });
     return {

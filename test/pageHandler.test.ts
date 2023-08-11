@@ -1,5 +1,3 @@
-import { parsingAgent, simplifyHtml } from "../src/utils/htmlHandler";
-import { makeQuestionForConfirmation } from "../src/utils/langchainHandler";
 import { PageHandler, ScreenResult } from "../src/utils/pageHandler";
 
 describe("pageHandler", () => {

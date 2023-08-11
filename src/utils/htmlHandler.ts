@@ -401,8 +401,10 @@ function comparePossibleInteractions(
 
 export async function parsingItemAgent({
   screenHtml,
+  pageDescription,
 }: {
   screenHtml: string;
+  pageDescription: string;
 }): Promise<ActionComponent[]> {
   const dom = new JSDOM(screenHtml);
   const body = dom.window.document.body;
@@ -423,6 +425,7 @@ export async function parsingItemAgent({
         itemDescription = await getSimpleItemDescription({
           itemHtml: simplifyHtml(comp.outerHTML, true),
           screenHtml: simplifyHtml(screenHtml, true),
+          pageDescription,
         });
         if (index === 0) {
           firstDescription = itemDescription || "";
@@ -438,6 +441,7 @@ export async function parsingItemAgent({
           itemHtml: simplifyHtml(comp.outerHTML, true),
           screenHtml: simplifyHtml(screenHtml, true),
           prevDescription: index === 0 ? firstDescription : undefined,
+          pageDescription,
         });
         if (index === 0) {
           firstDescription = itemDescription || "";

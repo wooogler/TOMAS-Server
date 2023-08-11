@@ -273,6 +273,7 @@ export class PageHandler {
     );
     const itemComponents = await parsingItemAgent({
       screenHtml: element?.innerHTML || "",
+      pageDescription,
     });
     return {
       type: "section",
@@ -481,10 +482,6 @@ export async function trackModalChanges(
   const initialModals = await findModals(page, initialHiddenElementIs);
   const initialUrl = page.url();
 
-  // Perform the given action
-  const navigationPromise = page.waitForNavigation({
-    waitUntil: "networkidle0",
-  });
   await action();
   if (page.url() !== initialUrl) {
     // await navigationPromise;

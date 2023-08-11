@@ -229,14 +229,19 @@ function removeBeforeAndIncludingRepresents(sentence: string): string {
 export const getSimpleItemDescription = async ({
   itemHtml,
   screenHtml,
+  pageDescription,
 }: {
   itemHtml: string;
   screenHtml: string;
+  pageDescription: string;
 }) => {
   const describeItemPrompt: Prompt = {
     role: "SYSTEM",
     content: `
 Summarize the content of an item in the list.
+
+This is the description of the page where the list is located:
+${pageDescription}
 
 This is the HTML code of the list:
 ${screenHtml}
@@ -244,7 +249,7 @@ ${screenHtml}
 This is the HTML code of the item:
 ${itemHtml}
 
-What does the item in the list represent? Describe in one sentence, including the word "represents". Don't mention the HTML tags.
+What does the item in the list represent? Describe in one sentence, including the word "represents". Don't mention about the UI element of the item.
 `,
   };
 
@@ -260,10 +265,12 @@ What does the item in the list represent? Describe in one sentence, including th
 export const getComplexItemDescription = async ({
   itemHtml,
   screenHtml,
+  pageDescription,
   prevDescription,
 }: {
   itemHtml: string;
   screenHtml: string;
+  pageDescription: string;
   prevDescription?: string;
 }) => {
   const describeItemPrompt: Prompt = {
@@ -273,6 +280,9 @@ Describe an item in the list as a noun phrase with modifiers${
       prevDescription && ` with reference to the previous item's description`
     }. The description must include all the information in the item. The item is given in HTML code below.
 ${prevDescription && `Previous description: ${prevDescription}`}
+
+This is the description of the page where the list is located:
+${pageDescription}
 
 This is the HTML code of the list:
 ${screenHtml}
@@ -418,7 +428,7 @@ export async function makeQuestionForActionValue(
 You are looking at a webpage.
 The description of the webpage: ${pageDescription}
 
-You need to create a natural language question to ask the user to achieve a given action.
+You need to create a natural language question to ask the user before doing the given action.
 Action:
 ${componentDescription}
 `,
@@ -435,29 +445,30 @@ export async function findInputTextValue(
   const inputComponentPrompt: Prompt = {
     role: "SYSTEM",
     content: `
-          You are the AI assistant who sees the abstraction of part of the user's web page. Based on the user's context, you have to decide what to input in the given component abstraction on the web page. If you cannot decide what content to fill in the input box, please explain why you can't. Don't assume general context; only refer to the given user's context.
-    
-          Description of the web page:
-          ${pageDescription}
-    
-          Component description:
-          ${componentDescription}
-          
-          User's context:
-          ${userContext}
-    
-          Output needs to follow one of the JSON formats in plain text. Never provide additional context.
-          {
-            reason: <the reason why you need to input certain content>,
-            value: <the text that is most relevant for the given component>
-          }
-          OR
-          {
-            reason: <the reason why you cannot decide what content to input>,
-            value: null
-          }
+You are the AI assistant who sees the abstraction of part of the user's web page. Based on the user's context, you have to decide what to input in the given component abstraction on the web page. If you cannot decide what content to fill in the input box, please explain why you can't. Don't assume general context; only refer to the given user's context.
+
+Description of the web page:
+${pageDescription}
+
+Component description:
+${componentDescription}
+
+User's context:
+${userContext}
+
+Output needs to follow one of the JSON formats in plain text. Never provide additional context.
+{
+  reason: <the reason why you need to input certain content>,
+  value: <the text that is most relevant for the given component>
+}
+OR
+{
+  reason: <the reason why you cannot decide what content to input>,
+  value: null
+}
         `,
   };
+  console.log("inputComponentPrompt: ", inputComponentPrompt.content);
   return await getAiResponse([inputComponentPrompt]);
 }
 
@@ -477,7 +488,6 @@ export async function findSelectValue(
             Component description:
             ${componentDescription}
             
-            User's context:
             ${userContext}
       
             Output needs to follow one of the JSON formats in plain text. Never provide additional context.
@@ -492,10 +502,18 @@ export async function findSelectValue(
             }
           `,
   };
-  return await getAiResponse([inputComponentPrompt]);
+  const response = await getAiResponse([inputComponentPrompt]);
+  console.log(response);
+  return response;
 }
 
-export async function makeQuestionForConfirmation(
+const logPrompts = (prompts: Prompt[]) => {
+  prompts.forEach((prompt) => {
+    console.log(prompt.content);
+  });
+};
+
+export async function makeQuestionForConfirmationOriginal(
   component: ActionComponent,
   actionValue: string,
   screenDescription: string
@@ -530,6 +548,45 @@ export async function makeQuestionForConfirmation(
         `,
     },
   ];
+
+  logPrompts(makeConfirmationPrompts);
+  const confirmation = await getAiResponse(makeConfirmationPrompts);
+  return confirmation;
+}
+
+function replaceClickWithSelect(sentence: string) {
+  if (sentence.startsWith("Click ")) {
+    return "Select" + sentence.slice(5);
+  }
+  return sentence;
+}
+
+export async function makeQuestionForConfirmation(
+  component: ActionComponent,
+  screenDescription: string,
+  actionValue?: string
+) {
+  const makeConfirmationPrompts: Prompt[] = [
+    {
+      role: "SYSTEM",
+      content: `
+You are looking at a webpage
+
+The description of the webpage:
+${screenDescription}
+    
+You need to create a natural language question to ask the user to confirm whether they will do the given action${
+        component.actionType === "input" ? " and value" : ""
+      }.
+
+Do not mention the UI elements like button, link, and text field when you make the question.
+
+Action: ${replaceClickWithSelect(component.description || "")}
+${component.actionType === "input" ? `Value: ${actionValue}` : ""}`,
+    },
+  ];
+
+  logPrompts(makeConfirmationPrompts);
   const confirmation = await getAiResponse(makeConfirmationPrompts);
   return confirmation;
 }
