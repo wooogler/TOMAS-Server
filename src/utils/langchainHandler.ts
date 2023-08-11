@@ -170,19 +170,23 @@ export const getComponentInfo = async ({
   componentHtml,
   screenHtml,
   actionType,
+  screenDescription,
 }: {
   componentHtml: string;
   screenHtml: string;
   actionType: ActionType;
+  screenDescription;
 }) => {
   const extractComponentSystemPrompt: Prompt = {
     role: "SYSTEM",
     content: `You are a web developer. You need to explain the context when the user interacts with a given HTML element and the action for the user to interact with the element.
 
-This is the HTML code of the screen:
+This is the HTML code of the screen: ${screenDescription}
 ${screenHtml}
 
-This is the HTML code of the element. Ignore value or state of the element.
+This is the HTML code of the element. ${
+      actionType !== "select" ? "Ignore value or state of the element." : ""
+    }
 ${componentHtml}
 
 Output following JSON format in plain text. Never provide additional context.
@@ -570,7 +574,7 @@ You need to create a natural language question to ask the user to confirm whethe
         component.actionType === "input" ? " and value" : ""
       }.
 
-Do not mention the way to interact the UI element inside your question.
+The user cannot see the webpage, so please do not mention any details about the webpage or the component.
 
 Action: ${replaceClickWithSelect(component.description || "")}
 ${component.actionType === "input" ? `Value: ${actionValue}` : ""}`,
@@ -647,24 +651,34 @@ export async function getSystemContext(systemLogs: SystemLog[]) {
       });
     }
   });
-  console.log(actionHistory);
+  // console.log(actionHistory);
 
-  const makeSystemContextPrompt: Prompt = {
-    role: "SYSTEM",
-    content: `Based on the history of the system's actions, please describe the actions the system have done in natural language.
+  //   const makeSystemContextPrompt: Prompt = {
+  //     role: "SYSTEM",
+  //     content: `Based on the history of the system's actions, please describe the actions the system have done in natural language.
 
-Action History:
-${actionHistory.map((item) => {
-  if (item.type === "action") {
-    return ` - ${item.description}\n`;
-  } else {
-    return `In ${item.type}: ${item.description}\n`;
-  }
-})}
-`,
-  };
-  console.log(makeSystemContextPrompt.content);
+  // Action History:
+  // ${actionHistory.map((item) => {
+  //   if (item.type !== "action") {
+  //     return `In ${item.type}: ${item.description}\n`;
+  //   } else {
+  //     return ` - ${item.description}\n`;
+  //   }
+  // })}
+  // `,
+  //   };
+  //   console.log(makeSystemContextPrompt.content);
 
-  const systemContext = await getAiResponse([makeSystemContextPrompt]);
+  //   const systemContext = await getAiResponse([makeSystemContextPrompt]);
+
+  const systemContext = actionHistory
+    .map((item) => {
+      if (item.type !== "action") {
+        return `In the ${item.type}: ${item.description}`;
+      } else {
+        return ` - ${item.description}`;
+      }
+    })
+    .join("\n");
   return systemContext;
 }
