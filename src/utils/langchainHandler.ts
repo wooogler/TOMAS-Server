@@ -496,7 +496,8 @@ export async function findSelectValue(
 
 export async function makeQuestionForConfirmation(
   component: ActionComponent,
-  actionValue: string
+  actionValue: string,
+  screenDescription: string
 ) {
   const makeConfirmationPrompts: Prompt[] = [
     {
@@ -507,7 +508,7 @@ export async function makeQuestionForConfirmation(
           Now you need to create a human natural language question to confirm the user's aim, without specifying which element to operate or using web terms. Don't assume general context; only refer to the given context. Don't mention the component in your question. Confirm the aim of the value.
     
           The description of the webpage:
-          The purpose of the body HTML is to display the content of a webpage for Greyhound, a bus travel company.
+          ${screenDescription}
     
           Action template:
           {
