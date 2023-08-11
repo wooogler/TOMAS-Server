@@ -183,7 +183,8 @@ Execution Agent:
   if (component.actionType != "select") {
     const confirmationQuestion = await makeQuestionForConfirmation(
       component,
-      actionValue
+      actionValue,
+      screenDescription
     );
     // Add confirmation question to database. TODO: Get the answer.
     createAIChat({ content: confirmationQuestion });
