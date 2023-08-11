@@ -213,11 +213,31 @@ export async function answerForSelect(input: AnswerInput) {
   await createHumanChat(input);
   const component = input.component;
   const options = await page.select(`[i="${component.i}"]`);
-  const selectedItem = options.actionComponents[parseInt(input.content) - 1];
+
+  const selectedIndex = parseInt(input.content) - 1;
+  if (
+    isNaN(selectedIndex) ||
+    selectedIndex < 0 ||
+    selectedIndex >= options.actionComponents.length
+  ) {
+    const actionDescription = await getActionHistory(
+      component,
+      "Action Failed"
+    );
+    actionLogs.push({
+      type: focusSection.type,
+      id: focusSection.id,
+      screenDescription: focusSection.screenDescription,
+      actionDescription,
+    });
+    return await planningAndAsk();
+  }
+
+  const selectedItem = options.actionComponents[selectedIndex];
   const screenDescription = focusSection.screenDescription;
   if (selectedItem) {
     const confirmationQuestion = await makeQuestionForConfirmation(
-      component,
+      selectedItem,
       selectedItem.description || "",
       screenDescription
     );

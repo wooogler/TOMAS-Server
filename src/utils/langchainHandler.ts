@@ -423,6 +423,7 @@ Action:
 ${componentDescription}
 `,
   };
+  console.log("makeQuestionPrompt: ", makeQuestionPrompt.content);
   return await getAiResponse([makeQuestionPrompt]);
 }
 
