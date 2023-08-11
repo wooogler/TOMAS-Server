@@ -175,7 +175,7 @@ export const getComponentInfo = async ({
   componentHtml: string;
   screenHtml: string;
   actionType: ActionType;
-  screenDescription;
+  screenDescription: string;
 }) => {
   const extractComponentSystemPrompt: Prompt = {
     role: "SYSTEM",

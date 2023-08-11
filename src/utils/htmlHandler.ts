@@ -490,7 +490,7 @@ export async function parsingAgent({
               componentHtml: simplifyHtml(componentHtml, true) || "",
               screenHtml: simplifyHtml(screenHtml, true),
               actionType: interaction.actionType,
-              screenDescription: 
+              screenDescription,
             });
 
       return {
