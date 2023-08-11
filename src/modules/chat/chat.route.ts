@@ -4,6 +4,7 @@ import {
   answerForSelectHandler,
   confirmHandler,
   createHumanChatHandler,
+  deleteChatsHandler,
   firstOrderHandler,
   getChatsHandler,
   navigateHandler,
@@ -98,6 +99,8 @@ async function chatRoutes(server: FastifyInstance) {
     },
     getChatsHandler
   );
+
+  server.delete("/", deleteChatsHandler);
 }
 
 export default chatRoutes;

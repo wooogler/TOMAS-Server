@@ -166,7 +166,7 @@ export async function answerForInput(
   input: AnswerInput
 ): Promise<AnswerResponse> {
   console.log("answerForInput");
-  createHumanChat(input);
+  await createHumanChat(input);
   const chats = await getChats();
   const userContext = await getUserContext(chats);
   const screenDescription = focusSection.screenDescription;
@@ -207,7 +207,7 @@ export async function answerForInput(
 
 export async function answerForSelect(input: AnswerInput) {
   console.log("answerForSelect");
-  createHumanChat(input);
+  await createHumanChat(input);
   const component = input.component;
   const options = await page.select(`[i="${component.i}"]`);
   const selectedItem = options.actionComponents[parseInt(input.content) - 1];
@@ -229,7 +229,7 @@ export async function confirm(
   input: ConfirmInput
 ): Promise<AnswerResponse | undefined> {
   console.log("confirm");
-  createHumanChat(input);
+  await createHumanChat(input);
   const component = input.component;
   if (input.content === "yes") {
     if (component) {
@@ -295,4 +295,16 @@ export async function confirm(
     });
   }
   return await planningAndAsk();
+}
+
+export async function deleteChats() {
+  await prisma.chat.deleteMany();
+}
+
+export async function closePage() {
+  await page.close();
+}
+
+export async function deleteLogs() {
+  actionLogs = [];
 }

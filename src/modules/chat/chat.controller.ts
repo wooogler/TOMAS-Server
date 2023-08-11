@@ -1,4 +1,4 @@
-import { FastifyRequest } from "fastify";
+import { FastifyReply, FastifyRequest } from "fastify";
 import {
   AnswerInput,
   ConfirmInput,
@@ -13,6 +13,9 @@ import {
   getChats,
   navigate,
   confirm,
+  deleteChats,
+  closePage,
+  deleteLogs,
 } from "./chat.service";
 
 export async function createHumanChatHandler(
@@ -60,4 +63,14 @@ export async function confirmHandler(
 ) {
   const answerResponse = await confirm(request.body);
   return answerResponse;
+}
+
+export async function deleteChatsHandler(
+  request: FastifyRequest,
+  reply: FastifyReply
+) {
+  await deleteChats();
+  await closePage();
+  await deleteLogs();
+  reply.code(200).send();
 }
