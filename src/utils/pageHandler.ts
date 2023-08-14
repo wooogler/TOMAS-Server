@@ -167,6 +167,8 @@ export class PageHandler {
         screenHtml: screen.html,
         screenDescription: modalDescription,
       });
+
+      console.log(actionComponents.map((comp) => comp.actionType));
       return {
         type: "modal",
         screenDescription: modalDescription,

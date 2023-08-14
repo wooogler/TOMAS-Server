@@ -175,7 +175,7 @@ export const simplifyHtml = (
   return rootElement.innerHTML.replace(/\s\s+/g, "");
 };
 
-const COMPLEX_TAG_LIST = ["img", "a"];
+const COMPLEX_TAG_LIST = ["img", "a", "button", "input", "select"];
 const MIN_COMPLEX_TAG_COUNT = 12;
 
 function isComplex(element: Element): boolean {
@@ -264,7 +264,6 @@ function createActionType(interactiveElement: Element): ActionType {
       break;
     case "button":
     case "a":
-    case "div":
       return "click";
     case "select":
     case "table":
@@ -274,6 +273,10 @@ function createActionType(interactiveElement: Element): ActionType {
       return "select";
     case "textarea":
       return "input";
+    case "div":
+      if (interactiveElement.getAttribute("clickable") === "true")
+        return "click";
+      else return "select";
     // case "ul":
     // case "ol":
     //   const listItems = interactiveElement.querySelectorAll("li");

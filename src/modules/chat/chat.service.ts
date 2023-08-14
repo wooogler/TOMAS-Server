@@ -11,6 +11,7 @@ import {
   ConfirmInput,
   CreateHumanChatInput,
   NavigateInput,
+  OptionResponse,
   navigateResponse,
 } from "./chat.schema";
 import {
@@ -87,7 +88,7 @@ export async function navigate(
 
 export async function firstOrder(
   input: CreateHumanChatInput
-): Promise<AnswerResponse> {
+): Promise<AnswerResponse | OptionResponse> {
   console.log("firstOrder");
   await createHumanChat(input);
   const response = await planningAndAsk();
@@ -98,7 +99,9 @@ export async function firstOrder(
   }
 }
 
-async function planningAndAsk(): Promise<AnswerResponse | undefined> {
+async function planningAndAsk(): Promise<
+  AnswerResponse | OptionResponse | undefined
+> {
   console.log("planningAndAsk");
   try {
     const chats = await getChats();
@@ -163,7 +166,10 @@ ${options.actionComponents
   })
   .join("\n")}`,
           });
-          return { component, type: `questionForSelect` };
+          return {
+            components: options.actionComponents,
+            type: `questionForSelect`,
+          };
         } else {
           const confirmationQuestion = await makeQuestionForConfirmation(
             component,
@@ -271,7 +277,7 @@ export async function answerForSelect(input: AnswerInput) {
 
 export async function confirm(
   input: ConfirmInput
-): Promise<AnswerResponse | undefined> {
+): Promise<AnswerResponse | OptionResponse | undefined> {
   console.log("confirm");
   await createHumanChat(input);
   const component = input.component;

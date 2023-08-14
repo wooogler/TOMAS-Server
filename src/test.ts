@@ -25,12 +25,14 @@ ${screen.actionComponents
   logScreenResult(
     await pageHandler.navigate("https://www.greyhound.com", false)
   );
-  logScreenResult(await pageHandler.click("#searchInputMobile-from", false));
-  logScreenResult(
-    await pageHandler.inputText("#searchInput-from", "South Bend", false)
-  );
-  logScreenResult(await pageHandler.click('[i="1113"]', true));
-  await new Promise((r) => setTimeout(r, 300000));
+
+  logScreenResult(await pageHandler.click("#dateInput-from", true));
+  // logScreenResult(await pageHandler.click("#searchInputMobile-from", false));
+  // logScreenResult(
+  //   await pageHandler.inputText("#searchInput-from", "South Bend", false)
+  // );
+  // logScreenResult(await pageHandler.click('[i="1113"]', true));
+  // await new Promise((r) => setTimeout(r, 300000));
 
   // logScreenResult(await pageHandler.click(".hcr-fieldset-7-6-0", true));
   // logScreenResult(await pageHandler.select(".hcr-fieldset-7-6-0", true));

@@ -166,7 +166,7 @@ const editActionType = (actionType: ActionType) => {
   return actionName;
 };
 
-export const getComponentInfo = async ({
+export const getComponentInfoOriginal = async ({
   componentHtml,
   screenHtml,
   actionType,
@@ -207,6 +207,154 @@ Output following JSON format in plain text. Never provide additional context.
     const componentJson = await getAiResponse([extractComponentSystemPrompt]);
     const componentObj = JSON.parse(componentJson);
     return componentObj as ComponentInfo;
+  } catch (error) {
+    console.error("Error parsing JSON:", error);
+  }
+};
+
+export const getComponentInfo = async ({
+  componentHtml,
+  screenHtml,
+  actionType,
+  screenDescription,
+}: {
+  componentHtml: string;
+  screenHtml: string;
+  actionType: ActionType;
+  screenDescription: string;
+}) => {
+  const extractComponentSystemPrompt: Prompt = {
+    role: "SYSTEM",
+    content: `Describe the action a user can take by interacting with a given element on the current screen, starting with '${editActionType(
+      actionType
+    )} '
+This is the description of the screen where the element is located:
+${screenDescription}
+
+This is the HTML code of the screen
+${screenHtml}
+
+This is the HTML code of the element:
+${componentHtml}
+
+Please ignore the value or state of the element when you describe the action.
+`,
+  };
+
+  try {
+    const componentDescription = await getAiResponse([
+      extractComponentSystemPrompt,
+    ]);
+    // const componentObj = JSON.parse(componentJson);
+    return {
+      context: "",
+      action: {
+        type: actionType,
+        description: "",
+      },
+      description: componentDescription,
+    } as ComponentInfo;
+  } catch (error) {
+    console.error("Error parsing JSON:", error);
+  }
+};
+
+export const getSelectInfoOriginal = async ({
+  componentHtml,
+  screenHtml,
+  actionType,
+  screenDescription,
+}: {
+  componentHtml: string;
+  screenHtml: string;
+  actionType: ActionType;
+  screenDescription: string;
+}) => {
+  const extractComponentSystemPrompt: Prompt = {
+    role: "SYSTEM",
+    content: `You are a web developer. You need to explain the context when the user see the screen and the action for the user to interact with the element.
+    
+The action of user is selecting one of the elements in the screen.
+
+This is the HTML code of the screen: ${screenDescription}
+${screenHtml}
+
+This is the HTML code of the element:
+${componentHtml}
+
+Output following JSON format in plain text. Never provide additional context.
+
+{
+  context : <the context when the user interacts with the element>,
+  action: {
+    type: ${editActionType(actionType)},
+    description: <description of the action>
+  },
+  description: <describe the action based on the context starting with '${editActionType(
+    actionType
+  )} one'>
+}`,
+  };
+
+  const componentHtmlPrompt: Prompt = {
+    role: "HUMAN",
+    content: componentHtml,
+  };
+
+  try {
+    const componentJson = await getAiResponse([
+      extractComponentSystemPrompt,
+      componentHtmlPrompt,
+    ]);
+    const componentObj = JSON.parse(componentJson);
+    return componentObj as ComponentInfo;
+  } catch (error) {
+    console.error("Error parsing JSON:", error);
+  }
+};
+
+export const getSelectInfo = async ({
+  componentHtml,
+  screenHtml,
+  actionType,
+  screenDescription,
+}: {
+  componentHtml: string;
+  screenHtml: string;
+  actionType: ActionType;
+  screenDescription: string;
+}) => {
+  const extractComponentSystemPrompt: Prompt = {
+    role: "SYSTEM",
+    content: `
+A user will select one item from the given list in the current screen and observe it closely.
+
+Describe the action the user can take, starting with '${editActionType(
+      actionType
+    )} one'
+
+This is the description of the screen where the element is located:
+${screenDescription}
+
+This is the HTML code of the screen:
+${screenHtml}
+
+This is the HTML code of the list:
+${componentHtml}`,
+  };
+
+  try {
+    const componentDescription = await getAiResponse([
+      extractComponentSystemPrompt,
+    ]);
+    return {
+      context: "",
+      action: {
+        type: actionType,
+        description: "",
+      },
+      description: componentDescription,
+    } as ComponentInfo;
   } catch (error) {
     console.error("Error parsing JSON:", error);
   }
@@ -297,60 +445,6 @@ Do provide information, not the purpose of the HTML element.
   }
 };
 
-export const getSelectInfo = async ({
-  componentHtml,
-  screenHtml,
-  actionType,
-  screenDescription,
-}: {
-  componentHtml: string;
-  screenHtml: string;
-  actionType: ActionType;
-  screenDescription: string;
-}) => {
-  const extractComponentSystemPrompt: Prompt = {
-    role: "SYSTEM",
-    content: `You are a web developer. You need to explain the context when the user see the screen and the action for the user to interact with the element.
-    
-The action of user is selecting one of the elements in the screen.
-
-This is the HTML code of the screen: ${screenDescription}
-${screenHtml}
-
-This is the HTML code of the element:
-${componentHtml}
-
-Output following JSON format in plain text. Never provide additional context.
-
-{
-  context : <the context when the user interacts with the element>,
-  action: {
-    type: ${editActionType(actionType)},
-    description: <description of the action>
-  },
-  description: <describe the action based on the context starting with '${editActionType(
-    actionType
-  )} one'>
-}`,
-  };
-
-  const componentHtmlPrompt: Prompt = {
-    role: "HUMAN",
-    content: componentHtml,
-  };
-
-  try {
-    const componentJson = await getAiResponse([
-      extractComponentSystemPrompt,
-      componentHtmlPrompt,
-    ]);
-    const componentObj = JSON.parse(componentJson);
-    return componentObj as ComponentInfo;
-  } catch (error) {
-    console.error("Error parsing JSON:", error);
-  }
-};
-
 interface SuggestedInteraction {
   type: string;
   elementI: string;
@@ -429,6 +523,8 @@ The description of the webpage: ${pageDescription}
 You need to create a natural language question to ask the user before doing the given action.
 Action:
 ${componentDescription}
+
+Please avoid the jargons, mechanical terms, and the terms that are too specific to the webpage.
 `,
   };
   console.log("makeQuestionPrompt: ", makeQuestionPrompt.content);
@@ -579,7 +675,9 @@ You need to create a natural language question to ask the user to confirm whethe
 The user cannot see the webpage, so please do not mention any details about the webpage or the component.
 
 Action: ${replaceClickWithSelect(component.description || "")}
-${component.actionType === "input" ? `Value: ${actionValue}` : ""}`,
+${component.actionType === "input" ? `Value: ${actionValue}` : ""}
+
+Please avoid the jargons, mechanical terms, and the terms that are too specific to the webpage.`,
     },
   ];
 
