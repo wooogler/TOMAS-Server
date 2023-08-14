@@ -227,7 +227,7 @@ export const getComponentInfo = async ({
     role: "SYSTEM",
     content: `Describe the action a user can take by interacting with a given element on the current screen, starting with '${editActionType(
       actionType
-    )} '
+    )} ' without mentioning the appearance of the element.
 This is the description of the screen where the element is located:
 ${screenDescription}
 
@@ -237,9 +237,11 @@ ${screenHtml}
 This is the HTML code of the element:
 ${componentHtml}
 
-Please ignore the value or state of the element when you describe the action.
+Don't mention how the elements appears.
 `,
   };
+
+  console.log(extractComponentSystemPrompt.content);
 
   try {
     const componentDescription = await getAiResponse([

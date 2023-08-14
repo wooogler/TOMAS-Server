@@ -237,14 +237,42 @@ export async function answerForSelect(input: AnswerInput) {
   console.log("answerForSelect");
   await createHumanChat(input);
   const component = input.component;
-  const options = await page.select(`[i="${component.i}"]`);
+  // const options = await page.select(`[i="${component.i}"]`);
 
-  const selectedIndex = parseInt(input.content) - 1;
-  if (
-    isNaN(selectedIndex) ||
-    selectedIndex < 0 ||
-    selectedIndex >= options.actionComponents.length
-  ) {
+  // const selectedIndex = parseInt(input.content) - 1;
+  // if (
+  //   isNaN(selectedIndex) ||
+  //   selectedIndex < 0 ||
+  //   selectedIndex >= options.actionComponents.length
+  // ) {
+  //   const actionDescription = await getActionHistory(
+  //     component,
+  //     "Action Failed"
+  //   );
+  //   actionLogs.push({
+  //     type: focusSection.type,
+  //     id: focusSection.id,
+  //     screenDescription: focusSection.screenDescription,
+  //     actionDescription,
+  //   });
+  //   return await planningAndAsk();
+  // }
+
+  // const selectedItem = options.actionComponents[selectedIndex];
+  const screenDescription = focusSection.screenDescription;
+  if (component) {
+    const confirmationQuestion = await makeQuestionForConfirmation(
+      component,
+      screenDescription,
+      component.description || ""
+    );
+    await createAIChat({ content: confirmationQuestion });
+    return {
+      component,
+      type: "requestConfirmation",
+      actionValue: component.i + "---" + component.description,
+    };
+  } else {
     const actionDescription = await getActionHistory(
       component,
       "Action Failed"
@@ -256,22 +284,6 @@ export async function answerForSelect(input: AnswerInput) {
       actionDescription,
     });
     return await planningAndAsk();
-  }
-
-  const selectedItem = options.actionComponents[selectedIndex];
-  const screenDescription = focusSection.screenDescription;
-  if (selectedItem) {
-    const confirmationQuestion = await makeQuestionForConfirmation(
-      selectedItem,
-      screenDescription,
-      selectedItem.description || ""
-    );
-    await createAIChat({ content: confirmationQuestion });
-    return {
-      component: selectedItem,
-      type: "requestConfirmation",
-      actionValue: selectedItem.i + "---" + selectedItem.description,
-    };
   }
 }
 
