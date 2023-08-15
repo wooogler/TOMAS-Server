@@ -458,7 +458,6 @@ export async function parsingItemAgent({
             html: comp.outerHTML,
           };
         }
-
       default:
         itemDescription = await getComplexItemDescription({
           itemHtml: simplifyHtml(comp.outerHTML, true),

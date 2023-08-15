@@ -365,25 +365,27 @@ export const getSelectInfo = async ({
     screenDescription,
   });
 
+  const listString = components
+    .map(
+      (component) => `- ${component.description?.split(" ").slice(1).join(" ")}`
+    )
+    .join("\n");
+
   const extractComponentSystemPrompt: Prompt = {
     role: "SYSTEM",
-    content: `
-A user will select one from the given list in the current screen.
-
-Describe the action the user can take in one single sentence, starting with '${editActionType(
+    content: `Describe the action the user can take in one single sentence, starting with '${editActionType(
       actionType
-    )} one '
+    )} one'
 
-List:
-${components
-  .map(
-    (component) => `- ${component.description?.split(" ").slice(1).join(" ")}`
-  )
-  .join("\n")}
+List in the screen:
+${listString}
 
 The description of the screen where the element is located:
 ${screenDescription}`,
   };
+
+  // console.log(listString);
+  // console.log("");
 
   try {
     const componentDescription = await getAiResponse([
