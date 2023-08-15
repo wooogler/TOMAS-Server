@@ -58,10 +58,11 @@ ${questions.join("\n")}
   };
 
   logScreenResult(
-    await pageHandler.navigate("https://www.greyhound.com", false)
+    await pageHandler.navigate("https://www.greyhound.com", true),
+    true
   );
-  logScreenResult(await pageHandler.click("#dateInput-from", true), true);
-  logScreenResult(await pageHandler.select(".hcr-clndr-7-6-0.wnaY8", true));
+  // logScreenResult(await pageHandler.click("#dateInput-from", true), true);
+  // logScreenResult(await pageHandler.select(".hcr-clndr-7-6-0.wnaY8", true));
   // logScreenResult(await pageHandler.click("#searchInputMobile-from", false));
   // logScreenResult(
   //   await pageHandler.inputText("#searchInput-from", "South Bend", false)

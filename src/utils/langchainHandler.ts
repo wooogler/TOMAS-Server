@@ -346,24 +346,26 @@ export const getSelectInfo = async ({
   actionType: ActionType;
   screenDescription: string;
 }) => {
-  const components = await parsingItemAgent({ screenHtml, screenDescription });
-
   const extractComponentSystemPrompt: Prompt = {
     role: "SYSTEM",
     content: `
-A user will select one item from the given list in the current screen.
+A user will select one item from the given list in the current screen and observe it closely.
 
 Describe the action the user can take, starting with '${editActionType(
       actionType
-    )} one' in a sentence.
+    )} one'
 
-List:
-${components.map((comp) => ` - ${comp.description}`).join("\n")}
-
-Description of the screen where the element is located:
+This is the description of the screen where the element is located:
 ${screenDescription}
-`,
+
+This is the HTML code of the screen:
+${screenHtml}
+
+This is the HTML code of the list:
+${componentHtml}`,
   };
+
+  console.log(extractComponentSystemPrompt.content);
 
   try {
     const componentDescription = await getAiResponse([
