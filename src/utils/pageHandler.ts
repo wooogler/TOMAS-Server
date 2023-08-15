@@ -285,7 +285,7 @@ export class PageHandler {
       pageDescription
     );
     const itemComponents = await parsingItemAgent({
-      screenHtml: element?.innerHTML || "",
+      screenHtml: element?.outerHTML || "",
       screenDescription: sectionDescription,
     });
     return {

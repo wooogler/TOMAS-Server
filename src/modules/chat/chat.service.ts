@@ -109,11 +109,6 @@ async function planningAndAsk(): Promise<
     const actionComponents = focusSection.actionComponents;
 
     const systemContext = await getSystemContext(actionLogs);
-    console.log(
-      focusSection.type,
-      focusSection.id,
-      focusSection.screenDescription
-    );
     const taskList = await planningAgent(
       focusSection,
       userContext,

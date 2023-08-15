@@ -58,10 +58,9 @@ ${questions.join("\n")}
   };
 
   logScreenResult(
-    await pageHandler.navigate("https://www.greyhound.com", true),
-    true
+    await pageHandler.navigate("https://www.greyhound.com", true)
   );
-  // logScreenResult(await pageHandler.click("#dateInput-from", true), true);
+  // logScreenResult(await pageHandler.click("#dateInput-from", true));
   // logScreenResult(await pageHandler.select(".hcr-clndr-7-6-0.wnaY8", true));
   // logScreenResult(await pageHandler.click("#searchInputMobile-from", false));
   // logScreenResult(

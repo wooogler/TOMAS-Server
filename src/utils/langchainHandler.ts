@@ -114,17 +114,38 @@ export const getSectionDescription = async (
 ) => {
   const describeSectionSystemPrompt: Prompt = {
     role: "SYSTEM",
-    content: `Given the HTML code, summarize the general purpose of the list in the web page it represents.
-    
-Consider the description on the webpage where the list is located: ${pageDescription}
+    content: `Summarize the purpose of the section.
 
-HTML code:
-${html}`,
+HTML of the section:
+${html}
+    
+The description on the webpage where the section is located: ${pageDescription}
+`,
   };
 
   const sectionDescription = await getAiResponse([describeSectionSystemPrompt]);
 
   return sectionDescription;
+};
+
+export const getListDescription = async (
+  html: string,
+  pageDescription: string
+) => {
+  const describeListSystemPrompt: Prompt = {
+    role: "SYSTEM",
+    content: `Summarize the purpose of the list.
+
+HTML of the list:
+${html}
+    
+The description on the webpage where the list is located: ${pageDescription}
+`,
+  };
+
+  const listDescription = await getAiResponse([describeListSystemPrompt]);
+
+  return listDescription;
 };
 
 export const makeConversationPrompt = (chats: Chat[]): Prompt => ({
@@ -294,60 +315,6 @@ export const getSelectInfoOriginal = async ({
 }) => {
   const extractComponentSystemPrompt: Prompt = {
     role: "SYSTEM",
-    content: `You are a web developer. You need to explain the context when the user see the screen and the action for the user to interact with the element.
-    
-The action of user is selecting one of the elements in the screen.
-
-This is the HTML code of the screen: ${screenDescription}
-${screenHtml}
-
-This is the HTML code of the element:
-${componentHtml}
-
-Output following JSON format in plain text. Never provide additional context.
-
-{
-  context : <the context when the user interacts with the element>,
-  action: {
-    type: ${editActionType(actionType)},
-    description: <description of the action>
-  },
-  description: <describe the action based on the context starting with '${editActionType(
-    actionType
-  )} one'>
-}`,
-  };
-
-  const componentHtmlPrompt: Prompt = {
-    role: "HUMAN",
-    content: componentHtml,
-  };
-
-  try {
-    const componentJson = await getAiResponse([
-      extractComponentSystemPrompt,
-      componentHtmlPrompt,
-    ]);
-    const componentObj = JSON.parse(componentJson);
-    return componentObj as ComponentInfo;
-  } catch (error) {
-    console.error("Error parsing JSON:", error);
-  }
-};
-
-export const getSelectInfo = async ({
-  componentHtml,
-  screenHtml,
-  actionType,
-  screenDescription,
-}: {
-  componentHtml: string;
-  screenHtml: string;
-  actionType: ActionType;
-  screenDescription: string;
-}) => {
-  const extractComponentSystemPrompt: Prompt = {
-    role: "SYSTEM",
     content: `
 A user will select one item from the given list in the current screen and observe it closely.
 
@@ -365,7 +332,58 @@ This is the HTML code of the list:
 ${componentHtml}`,
   };
 
-  console.log(extractComponentSystemPrompt.content);
+  try {
+    const componentDescription = await getAiResponse([
+      extractComponentSystemPrompt,
+    ]);
+    return {
+      context: "",
+      action: {
+        type: actionType,
+        description: "",
+      },
+      description: componentDescription,
+    } as ComponentInfo;
+  } catch (error) {
+    console.error("Error parsing JSON:", error);
+  }
+};
+
+export const getSelectInfo = async ({
+  componentHtml,
+  screenHtml,
+  actionType,
+  screenDescription,
+}: {
+  componentHtml: string;
+  screenHtml: string;
+  actionType: ActionType;
+  screenDescription: string;
+}) => {
+  const components = await parsingItemAgent({
+    screenHtml: componentHtml,
+    screenDescription,
+  });
+
+  const extractComponentSystemPrompt: Prompt = {
+    role: "SYSTEM",
+    content: `
+A user will select one from the given list in the current screen.
+
+Describe the action the user can take in one single sentence, starting with '${editActionType(
+      actionType
+    )} one '
+
+List:
+${components
+  .map(
+    (component) => `- ${component.description?.split(" ").slice(1).join(" ")}`
+  )
+  .join("\n")}
+
+The description of the screen where the element is located:
+${screenDescription}`,
+  };
 
   try {
     const componentDescription = await getAiResponse([
@@ -385,7 +403,7 @@ ${componentHtml}`,
 };
 
 function removeBeforeAndIncludingRepresents(sentence: string): string {
-  const keyword = "represents ";
+  const keyword = "It is ";
   const index = sentence.indexOf(keyword);
 
   if (index !== -1) {
@@ -398,24 +416,28 @@ export const getSimpleItemDescription = async ({
   itemHtml,
   screenHtml,
   screenDescription,
+  prevDescription,
 }: {
   itemHtml: string;
   screenHtml: string;
   screenDescription: string;
+  prevDescription?: string;
 }) => {
   const describeItemPrompt: Prompt = {
     role: "SYSTEM",
     content: `
-Summarize the content in one sentence including the word "represents".
+Summarize an item in the list in one sentence starting "It is " ${
+      prevDescription
+        ? ` with reference to the previous item's description`
+        : ""
+    }
+${prevDescription ? `Previous description: ${prevDescription}` : ""}
 
 HTML of the item:
 ${itemHtml}
 
-Description of the screen where the item is located:
+Description of the list:
 ${screenDescription}
-
-Surrounding HTML of the element:
-${extractSurroundingHtml(screenHtml, itemHtml)}
 `,
   };
 
@@ -442,21 +464,18 @@ export const getComplexItemDescription = async ({
   const describeItemPrompt: Prompt = {
     role: "SYSTEM",
     content: `
-Describe an item in the list as a noun phrase with modifiers${
-      prevDescription && ` with reference to the previous item's description`
-    }. The description must include all the information in the item. The item is given in HTML code below.
-${prevDescription && `Previous description: ${prevDescription}`}
+Describe an item in the list in one sentence starting "It is " ${
+      prevDescription
+        ? ` with reference to the previous item's description`
+        : ""
+    }. The description must include all the information in the item.
+${prevDescription ? `Previous description: ${prevDescription}` : ""}
 
 HTML of the item:
 ${itemHtml}
 
-Description of the screen where the list is located:
+Description of the list:
 ${screenDescription}
-
-HTML of the list:
-${screenHtml}
-
-Do provide information, not the purpose of the HTML element.
 `,
   };
 

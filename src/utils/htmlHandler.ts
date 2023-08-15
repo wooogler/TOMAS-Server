@@ -2,6 +2,8 @@ import { JSDOM } from "jsdom";
 import {
   getComplexItemDescription,
   getComponentInfo,
+  getListDescription,
+  getSectionDescription,
   getSelectInfo,
   getSimpleItemDescription,
 } from "./langchainHandler";
@@ -410,8 +412,15 @@ export async function parsingItemAgent({
   screenDescription: string;
 }): Promise<ActionComponent[]> {
   const dom = new JSDOM(screenHtml);
-  const body = dom.window.document.body;
-  const components = Array.from(body.children);
+  const listDescription = await getListDescription(
+    screenHtml,
+    screenDescription
+  );
+  const rootElement = dom.window.document.body.firstElementChild;
+  if (!rootElement) {
+    return [];
+  }
+  const components = Array.from(rootElement.children);
   let firstDescription: string;
 
   const itemComponentsPromises = components.map<
@@ -428,7 +437,8 @@ export async function parsingItemAgent({
         itemDescription = await getSimpleItemDescription({
           itemHtml: simplifyHtml(comp.outerHTML, true),
           screenHtml: simplifyHtml(screenHtml, true),
-          screenDescription,
+          screenDescription: listDescription,
+          prevDescription: index === 0 ? firstDescription : undefined,
         });
         if (index === 0) {
           firstDescription = itemDescription || "";
@@ -454,7 +464,7 @@ export async function parsingItemAgent({
           itemHtml: simplifyHtml(comp.outerHTML, true),
           screenHtml: simplifyHtml(screenHtml, true),
           prevDescription: index === 0 ? firstDescription : undefined,
-          screenDescription,
+          screenDescription: listDescription,
         });
         if (index === 0) {
           firstDescription = itemDescription || "";
@@ -495,14 +505,14 @@ export async function parsingAgent({
       const componentInfo =
         actionType === "select"
           ? await getSelectInfo({
-              componentHtml: simplifyHtml(componentHtml, true) || "",
-              screenHtml: simplifyHtml(screenHtml, true),
+              componentHtml: simplifyHtml(componentHtml, false) || "",
+              screenHtml: simplifyHtml(screenHtml, false),
               actionType: interaction.actionType,
               screenDescription,
             })
           : await getComponentInfo({
-              componentHtml: simplifyHtml(componentHtml, true) || "",
-              screenHtml: simplifyHtml(screenHtml, true),
+              componentHtml: simplifyHtml(componentHtml, false) || "",
+              screenHtml: simplifyHtml(screenHtml, false),
               actionType: interaction.actionType,
               screenDescription,
             });
