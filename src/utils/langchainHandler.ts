@@ -5,7 +5,7 @@ import {
   HumanChatMessage,
   SystemChatMessage,
 } from "langchain/schema";
-import { ActionType } from "./htmlHandler";
+import { ActionType, parsingItemAgent } from "./htmlHandler";
 import { ActionComponent } from "./pageHandler";
 
 export type Prompt = {
@@ -212,6 +212,28 @@ Output following JSON format in plain text. Never provide additional context.
   }
 };
 
+function extractSurroundingHtml(
+  htmlString: string,
+  target: string,
+  range = 1000
+) {
+  const startIndex = htmlString.indexOf(target);
+  if (startIndex === -1) {
+    return null;
+  }
+
+  const endIndex = startIndex + target.length;
+
+  const beforeTarget = htmlString.substring(
+    Math.max(0, startIndex - range),
+    startIndex
+  );
+
+  const afterTarget = htmlString.substring(endIndex, endIndex + range);
+
+  return "..." + beforeTarget + target + afterTarget + "...";
+}
+
 export const getComponentInfo = async ({
   componentHtml,
   screenHtml,
@@ -225,23 +247,21 @@ export const getComponentInfo = async ({
 }) => {
   const extractComponentSystemPrompt: Prompt = {
     role: "SYSTEM",
-    content: `Describe the action a user can take by interacting with a given element on the current screen, starting with '${editActionType(
+    content: `Describe the action that the user can take with its purpose, starting with '${editActionType(
       actionType
-    )} ' without mentioning the appearance of the element.
-This is the description of the screen where the element is located:
-${screenDescription}
+    )} ' in a sentence.
 
-This is the HTML code of the screen
-${screenHtml}
-
-This is the HTML code of the element:
+HTML of the element:
 ${componentHtml}
 
-Don't mention how the elements appears.
+Description of the screen where the element is located:
+${screenDescription}
+
+Surrounding HTML of the element:
+${extractSurroundingHtml(screenHtml, componentHtml)}
 `,
   };
-
-  console.log(extractComponentSystemPrompt.content);
+  // console.log(extractComponentSystemPrompt.content);
 
   try {
     const componentDescription = await getAiResponse([
@@ -326,23 +346,23 @@ export const getSelectInfo = async ({
   actionType: ActionType;
   screenDescription: string;
 }) => {
+  const components = await parsingItemAgent({ screenHtml, screenDescription });
+
   const extractComponentSystemPrompt: Prompt = {
     role: "SYSTEM",
     content: `
-A user will select one item from the given list in the current screen and observe it closely.
+A user will select one item from the given list in the current screen.
 
 Describe the action the user can take, starting with '${editActionType(
       actionType
-    )} one'
+    )} one' in a sentence.
 
-This is the description of the screen where the element is located:
+List:
+${components.map((comp) => ` - ${comp.description}`).join("\n")}
+
+Description of the screen where the element is located:
 ${screenDescription}
-
-This is the HTML code of the screen:
-${screenHtml}
-
-This is the HTML code of the list:
-${componentHtml}`,
+`,
   };
 
   try {
@@ -375,27 +395,25 @@ function removeBeforeAndIncludingRepresents(sentence: string): string {
 export const getSimpleItemDescription = async ({
   itemHtml,
   screenHtml,
-  pageDescription,
+  screenDescription,
 }: {
   itemHtml: string;
   screenHtml: string;
-  pageDescription: string;
+  screenDescription: string;
 }) => {
   const describeItemPrompt: Prompt = {
     role: "SYSTEM",
     content: `
-Summarize the content of an item in the list.
+Summarize the content in one sentence including the word "represents".
 
-This is the description of the page where the list is located:
-${pageDescription}
-
-This is the HTML code of the list:
-${screenHtml}
-
-This is the HTML code of the item:
+HTML of the item:
 ${itemHtml}
 
-What does the item in the list represent? Describe in one sentence, including the word "represents". Don't mention about the UI element of the item.
+Description of the screen where the item is located:
+${screenDescription}
+
+Surrounding HTML of the element:
+${extractSurroundingHtml(screenHtml, itemHtml)}
 `,
   };
 
@@ -411,12 +429,12 @@ What does the item in the list represent? Describe in one sentence, including th
 export const getComplexItemDescription = async ({
   itemHtml,
   screenHtml,
-  pageDescription,
+  screenDescription,
   prevDescription,
 }: {
   itemHtml: string;
   screenHtml: string;
-  pageDescription: string;
+  screenDescription: string;
   prevDescription?: string;
 }) => {
   const describeItemPrompt: Prompt = {
@@ -427,14 +445,14 @@ Describe an item in the list as a noun phrase with modifiers${
     }. The description must include all the information in the item. The item is given in HTML code below.
 ${prevDescription && `Previous description: ${prevDescription}`}
 
-This is the description of the page where the list is located:
-${pageDescription}
-
-This is the HTML code of the list:
-${screenHtml}
-
-This is the HTML code of the item:
+HTML of the item:
 ${itemHtml}
+
+Description of the screen where the list is located:
+${screenDescription}
+
+HTML of the list:
+${screenHtml}
 
 Do provide information, not the purpose of the HTML element.
 `,
@@ -513,23 +531,20 @@ export async function getUserContext(chats: Chat[]) {
 }
 
 export async function makeQuestionForActionValue(
-  pageDescription: string,
+  screenDescription: string,
   componentDescription: string | undefined
 ) {
   const makeQuestionPrompt: Prompt = {
     role: "SYSTEM",
-    content: `
-You are looking at a webpage.
-The description of the webpage: ${pageDescription}
+    content: `Create a natural language question to ask to the user before doing the given action on the screen.
 
-You need to create a natural language question to ask the user before doing the given action.
-Action:
-${componentDescription}
+Action: ${componentDescription}
+
+The description of the screen:  ${screenDescription}
 
 Please avoid the jargons, mechanical terms, and the terms that are too specific to the webpage.
 `,
   };
-  console.log("makeQuestionPrompt: ", makeQuestionPrompt.content);
   return await getAiResponse([makeQuestionPrompt]);
 }
 
@@ -602,12 +617,6 @@ export async function findSelectValue(
   return response;
 }
 
-const logPrompts = (prompts: Prompt[]) => {
-  prompts.forEach((prompt) => {
-    console.log(prompt.content);
-  });
-};
-
 export async function makeQuestionForConfirmationOriginal(
   component: ActionComponent,
   actionValue: string,
@@ -643,8 +652,6 @@ export async function makeQuestionForConfirmationOriginal(
         `,
     },
   ];
-
-  logPrompts(makeConfirmationPrompts);
   const confirmation = await getAiResponse(makeConfirmationPrompts);
   return confirmation;
 }
@@ -656,7 +663,7 @@ function replaceClickWithSelect(sentence: string) {
   return sentence;
 }
 
-export async function makeQuestionForConfirmation(
+export async function makeQuestionForConfirmation2(
   component: ActionComponent,
   screenDescription: string,
   actionValue?: string
@@ -665,10 +672,8 @@ export async function makeQuestionForConfirmation(
     {
       role: "SYSTEM",
       content: `
-You are looking at a webpage
-
-The description of the webpage:
-${screenDescription}
+You are looking at a webpage.
+The description of the webpage:  ${screenDescription}
     
 You need to create a natural language question to ask the user to confirm whether they will do the given action${
         component.actionType === "input" ? " and value" : ""
@@ -683,7 +688,31 @@ Please avoid the jargons, mechanical terms, and the terms that are too specific 
     },
   ];
 
-  logPrompts(makeConfirmationPrompts);
+  const confirmation = await getAiResponse(makeConfirmationPrompts);
+  return confirmation;
+}
+
+export async function makeQuestionForConfirmation(
+  component: ActionComponent,
+  screenDescription: string,
+  actionValue?: string
+) {
+  const makeConfirmationPrompts: Prompt[] = [
+    {
+      role: "SYSTEM",
+      content: `Create a concise natural language question to ask whether the user wants to do the given action${
+        component.actionType === "input" ? " with value" : ""
+      }, without the action.
+
+Action: ${replaceClickWithSelect(component.description || "")}
+${component.actionType === "input" ? `Value: ${actionValue}` : ""}
+
+The description of the screen:  ${screenDescription}
+
+Please avoid the jargons, mechanical terms, and the terms that are specific to the webpage.`,
+    },
+  ];
+
   const confirmation = await getAiResponse(makeConfirmationPrompts);
   return confirmation;
 }
@@ -696,9 +725,9 @@ export async function getActionHistory(
   const actionType = actionComponent.actionType;
   if (actionType === "click") {
     if (actionValue === "yes") {
-      actionDone = "Do Click";
+      actionDone = "Do click";
     } else {
-      actionDone = "Don't Click";
+      actionDone = "Don't click";
     }
   } else {
     actionDone = actionValue;

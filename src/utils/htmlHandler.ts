@@ -404,10 +404,10 @@ function comparePossibleInteractions(
 
 export async function parsingItemAgent({
   screenHtml,
-  pageDescription,
+  screenDescription,
 }: {
   screenHtml: string;
-  pageDescription: string;
+  screenDescription: string;
 }): Promise<ActionComponent[]> {
   const dom = new JSDOM(screenHtml);
   const body = dom.window.document.body;
@@ -428,23 +428,33 @@ export async function parsingItemAgent({
         itemDescription = await getSimpleItemDescription({
           itemHtml: simplifyHtml(comp.outerHTML, true),
           screenHtml: simplifyHtml(screenHtml, true),
-          pageDescription,
+          screenDescription,
         });
         if (index === 0) {
           firstDescription = itemDescription || "";
         }
-        return {
-          i: possibleInteractions[0].i,
-          actionType: "click",
-          description: "Click " + itemDescription,
-          html: comp.outerHTML,
-        };
+        if (possibleInteractions[0].actionType === "click") {
+          return {
+            i: possibleInteractions[0].i,
+            actionType: "click",
+            description: "Click " + itemDescription,
+            html: comp.outerHTML,
+          };
+        } else {
+          return {
+            i: possibleInteractions[0].i,
+            actionType: "select",
+            description: "Select " + itemDescription,
+            html: comp.outerHTML,
+          };
+        }
+
       default:
         itemDescription = await getComplexItemDescription({
           itemHtml: simplifyHtml(comp.outerHTML, true),
           screenHtml: simplifyHtml(screenHtml, true),
           prevDescription: index === 0 ? firstDescription : undefined,
-          pageDescription,
+          screenDescription,
         });
         if (index === 0) {
           firstDescription = itemDescription || "";

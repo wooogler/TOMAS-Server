@@ -1,4 +1,10 @@
 import { PageHandler, ScreenResult } from "../src/utils/pageHandler";
+import dotenv from "dotenv";
+import {
+  makeQuestionForActionValue,
+  makeQuestionForConfirmation,
+} from "./utils/langchainHandler";
+dotenv.config();
 
 // describe("pageHandler", () => {
 //   const pageHandler = new PageHandler();
@@ -6,27 +12,56 @@ import { PageHandler, ScreenResult } from "../src/utils/pageHandler";
 //   beforeAll(async () => {
 //     await pageHandler.initialize();
 //   }, 10000);
+
 async function main() {
   const pageHandler = new PageHandler();
   await pageHandler.initialize();
-  const logScreenResult = (screen: ScreenResult) => {
+  const logScreenResult = async (
+    screen: ScreenResult,
+    isQuestion: boolean = false
+  ) => {
+    const actionComponentsDescriptions = screen.actionComponents.map(
+      (comp) =>
+        `- ${comp.description} (action: ${comp.actionType}) (i=${comp.i})`
+    );
+
     console.log(`
 id: ${screen.id}
 type: ${screen.type}
 description: ${screen.screenDescription}
 ActionComponents: 
-${screen.actionComponents
-  .map((comp) => `- ${comp.description} (i=${comp.i})`)
-  .join("\n")}
+${actionComponentsDescriptions.join("\n")}
+-------------------
+    `);
+    if (isQuestion) {
+      const questions = await Promise.all(
+        screen.actionComponents.map(async (comp) => {
+          if (comp.actionType === "click") {
+            return `- ${await makeQuestionForConfirmation(
+              comp,
+              screen.screenDescription
+            )} (i=${comp.i})`;
+          } else {
+            return `- ${await makeQuestionForActionValue(
+              screen.screenDescription,
+              comp.description
+            )} (i=${comp.i})`;
+          }
+        })
+      );
+
+      console.log(`Questions:
+${questions.join("\n")}
 -------------------------------------------------------
     `);
+    }
   };
 
   logScreenResult(
     await pageHandler.navigate("https://www.greyhound.com", false)
   );
-
-  logScreenResult(await pageHandler.click("#dateInput-from", true));
+  logScreenResult(await pageHandler.click("#dateInput-from", true), true);
+  logScreenResult(await pageHandler.select(".hcr-clndr-7-6-0.wnaY8", true));
   // logScreenResult(await pageHandler.click("#searchInputMobile-from", false));
   // logScreenResult(
   //   await pageHandler.inputText("#searchInput-from", "South Bend", false)

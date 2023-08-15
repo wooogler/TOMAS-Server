@@ -1,5 +1,6 @@
 import { JSDOM } from "jsdom";
 import puppeteer, { Browser, Page } from "puppeteer";
+import dotenv from "dotenv";
 import {
   ActionType,
   parsingAgent,
@@ -33,6 +34,7 @@ export class PageHandler {
   private page: Page | null = null;
 
   async initialize() {
+    dotenv.config();
     this.browser = await puppeteer.launch({ headless: false });
     const context = await this.browser?.createIncognitoBrowserContext();
     this.page = await context.newPage();
@@ -133,7 +135,6 @@ export class PageHandler {
     const screen = await trackModalChanges(page, async () => {
       await element.click();
     });
-    console.log(screen.modalI);
 
     if (parsing === false) {
       if (screen.modalI) {
@@ -168,7 +169,6 @@ export class PageHandler {
         screenDescription: modalDescription,
       });
 
-      console.log(actionComponents.map((comp) => comp.actionType));
       return {
         type: "modal",
         screenDescription: modalDescription,
@@ -286,7 +286,7 @@ export class PageHandler {
     );
     const itemComponents = await parsingItemAgent({
       screenHtml: element?.innerHTML || "",
-      pageDescription,
+      screenDescription: sectionDescription,
     });
     return {
       type: "section",
