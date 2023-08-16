@@ -181,7 +181,7 @@ export interface ComponentInfo {
 const capitalizeFirstCharacter = (str: string) =>
   str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 
-const editActionType = (actionType: ActionType) => {
+export const editActionType = (actionType: ActionType) => {
   const action = actionType === "focus" ? "select" : actionType;
   const actionName = capitalizeFirstCharacter(action);
   return actionName;
@@ -384,9 +384,6 @@ The description of the screen where the element is located:
 ${screenDescription}`,
   };
 
-  // console.log(listString);
-  // console.log("");
-
   try {
     const componentDescription = await getAiResponse([
       extractComponentSystemPrompt,
@@ -482,7 +479,9 @@ ${screenDescription}
   };
 
   try {
-    return await getAiResponse([describeItemPrompt]);
+    return removeBeforeAndIncludingRepresents(
+      await getAiResponse([describeItemPrompt])
+    );
   } catch (error) {
     console.error("Error in loading item info: ", error);
   }

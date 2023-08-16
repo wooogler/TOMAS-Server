@@ -154,12 +154,7 @@ async function planningAndAsk(): Promise<
           );
           const options = await page.select(`[i="${component.i}"]`);
           await createAIChat({
-            content: `${question}
-${options.actionComponents
-  .map((comp, i) => {
-    return `${i + 1}. ${comp.description}`;
-  })
-  .join("\n")}`,
+            content: `${question}`,
           });
           return {
             components: options.actionComponents,

@@ -58,7 +58,7 @@ ${questions.join("\n")}
   };
 
   logScreenResult(
-    await pageHandler.navigate("https://www.greyhound.com", true)
+    await pageHandler.navigate("https://www.greyhound.com", false)
   );
   logScreenResult(
     await pageHandler.click(".hcr-btn-7-6-0.hcr-btn--primary-7-6-0.lKKy1", true)

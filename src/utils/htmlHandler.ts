@@ -1,5 +1,6 @@
 import { JSDOM } from "jsdom";
 import {
+  editActionType,
   getComplexItemDescription,
   getComponentInfo,
   getListDescription,
@@ -300,6 +301,18 @@ export interface PossibleInteractions {
   i: string;
 }
 
+const INFO_TAG_LIST = ["img", "a", "button", "input", "select"];
+
+export function countingInfoElements(html: string): number {
+  const dom = new JSDOM(html);
+  const body = dom.window.document.body;
+  let count = 0;
+  for (const tag of INFO_TAG_LIST) {
+    count += body.querySelectorAll(tag).length;
+  }
+  return count;
+}
+
 export function parsingPossibleInteractions(
   html: string
 ): PossibleInteractions[] {
@@ -428,46 +441,46 @@ export async function parsingItemAgent({
   >(async (comp, index) => {
     const iAttr = comp.getAttribute("i");
     const possibleInteractions = parsingPossibleInteractions(comp.outerHTML);
+    if (possibleInteractions.length === 1) {
+    }
     let itemDescription: string | undefined;
+
+    if ((comp.textContent || "").length <= 30) {
+      itemDescription = await getSimpleItemDescription({
+        itemHtml: simplifyHtml(comp.outerHTML, true),
+        screenHtml: simplifyHtml(screenHtml, true),
+        screenDescription: listDescription,
+        prevDescription: index === 0 ? firstDescription : undefined,
+      });
+    } else {
+      itemDescription = await getComplexItemDescription({
+        itemHtml: simplifyHtml(comp.outerHTML, true),
+        screenHtml: simplifyHtml(screenHtml, true),
+        prevDescription: index === 0 ? firstDescription : undefined,
+        screenDescription: listDescription,
+      });
+    }
+
+    if (index === 0) {
+      firstDescription = itemDescription || "";
+    }
 
     switch (possibleInteractions.length) {
       case 0:
         return null;
       case 1:
-        itemDescription = await getSimpleItemDescription({
-          itemHtml: simplifyHtml(comp.outerHTML, true),
-          screenHtml: simplifyHtml(screenHtml, true),
-          screenDescription: listDescription,
-          prevDescription: index === 0 ? firstDescription : undefined,
-        });
         if (index === 0) {
           firstDescription = itemDescription || "";
         }
-        if (possibleInteractions[0].actionType === "click") {
-          return {
-            i: possibleInteractions[0].i,
-            actionType: "click",
-            description: "Click " + itemDescription,
-            html: comp.outerHTML,
-          };
-        } else {
-          return {
-            i: possibleInteractions[0].i,
-            actionType: "select",
-            description: "Select " + itemDescription,
-            html: comp.outerHTML,
-          };
-        }
+        return {
+          i: possibleInteractions[0].i,
+          actionType: possibleInteractions[0].actionType,
+          description: `${editActionType(
+            possibleInteractions[0].actionType
+          )} ${itemDescription}`,
+          html: comp.outerHTML,
+        };
       default:
-        itemDescription = await getComplexItemDescription({
-          itemHtml: simplifyHtml(comp.outerHTML, true),
-          screenHtml: simplifyHtml(screenHtml, true),
-          prevDescription: index === 0 ? firstDescription : undefined,
-          screenDescription: listDescription,
-        });
-        if (index === 0) {
-          firstDescription = itemDescription || "";
-        }
         return {
           i: iAttr || "",
           actionType: "select",
