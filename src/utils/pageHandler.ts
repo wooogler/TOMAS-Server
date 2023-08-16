@@ -1,6 +1,6 @@
+import dotenv from "dotenv";
 import { JSDOM } from "jsdom";
 import puppeteer, { Browser, Page } from "puppeteer";
-import dotenv from "dotenv";
 import {
   ActionType,
   parsingAgent,
@@ -278,6 +278,7 @@ export class PageHandler {
         )}`,
       };
     }
+
     const pageSimpleHtml = simplifyHtml(await page.content(), true);
     const pageDescription = await getPageDescription(pageSimpleHtml);
     const sectionDescription = await getSectionDescription(

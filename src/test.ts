@@ -1,9 +1,11 @@
-import { PageHandler, ScreenResult } from "../src/utils/pageHandler";
 import dotenv from "dotenv";
+import { PageHandler, ScreenResult } from "../src/utils/pageHandler";
 import {
   makeQuestionForActionValue,
   makeQuestionForConfirmation,
 } from "./utils/langchainHandler";
+
+import { convertSelectResultIntoTable } from "../src/modules/chat/chat.service";
 dotenv.config();
 
 // describe("pageHandler", () => {
@@ -63,6 +65,13 @@ ${questions.join("\n")}
   logScreenResult(
     await pageHandler.click(".hcr-btn-7-6-0.hcr-btn--primary-7-6-0.lKKy1", true)
   );
+  const selectRes = await pageHandler.select(
+    "#main-content > div > div > div > div.SearchResults__main___zj81o.search-results-main > div > div.ResultsList__container___JnkEA.ResultsList__animDone___I7PYN > div.ResultsList__resultsListPanel___Mr5mf.ResultsList__floatingFilter___autlh > figure:nth-child(3) > ul",
+    true
+  );
+  logScreenResult(selectRes);
+  const table = await convertSelectResultIntoTable(selectRes);
+  console.log(table);
   // logScreenResult(await pageHandler.click("#dateInput-from", true));
   // logScreenResult(await pageHandler.select(".hcr-clndr-7-6-0.wnaY8", true));
   // logScreenResult(await pageHandler.click("#searchInputMobile-from", false));
@@ -74,5 +83,6 @@ ${questions.join("\n")}
 
   // logScreenResult(await pageHandler.click(".hcr-fieldset-7-6-0", true));
   // logScreenResult(await pageHandler.select(".hcr-fieldset-7-6-0", true));
+  console.log("Done");
 }
 main();

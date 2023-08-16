@@ -27,6 +27,8 @@ import {
   getUserContext,
   makeQuestionForActionValue,
   makeQuestionForConfirmation,
+  getUsefulAttrFromList,
+  getListFromSelectResult,
 } from "../../utils/langchainHandler";
 import { planningAgent } from "../agents";
 import { ActionType } from "../../utils/htmlHandler";
@@ -84,6 +86,29 @@ export async function navigate(
     console.error("Failed to navigate to the webpage.", error);
     throw error;
   }
+}
+
+export async function convertSelectResultIntoTable(selectResult: ScreenResult) {
+  const attrList = await getUsefulAttrFromList(selectResult);
+  let jsList = [];
+  for (const comp of selectResult.actionComponents) {
+    const list = getListFromSelectResult(
+      comp,
+      selectResult.screenDescription,
+      attrList
+    );
+    jsList.push(list);
+  }
+
+  const jsList2 = await Promise.all(jsList)
+    .then((resolvedLists) => {
+      console.log(resolvedLists);
+      return resolvedLists;
+    })
+    .catch((error) => {
+      console.error("An error occurred:", error);
+    });
+  return jsList2;
 }
 
 export async function firstOrder(
