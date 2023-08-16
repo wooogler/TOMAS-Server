@@ -60,20 +60,20 @@ ${questions.join("\n")}
   };
 
   logScreenResult(
-    await pageHandler.navigate("https://www.greyhound.com", false)
+    await pageHandler.navigate("https://www.greyhound.com", true)
   );
-  logScreenResult(
-    await pageHandler.click(
-      ".hcr-btn-7-6-0.hcr-btn--primary-7-6-0.lKKy1",
-      false
-    )
-  );
-  const list = await pageHandler.select(
-    ".ResultsList__resultsList___eGsLK",
-    false,
-    true
-  );
-  logScreenResult(list);
+  // logScreenResult(
+  //   await pageHandler.click(
+  //     ".hcr-btn-7-6-0.hcr-btn--primary-7-6-0.lKKy1",
+  //     false
+  //   )
+  // );
+  // const list = await pageHandler.select(
+  //   ".ResultsList__resultsList___eGsLK",
+  //   false,
+  //   true
+  // );
+  // logScreenResult(list);
   // logScreenResult(
   //   await pageHandler.select(`[i="${list.actionComponents[0].i}"]`, true, true)
   // );

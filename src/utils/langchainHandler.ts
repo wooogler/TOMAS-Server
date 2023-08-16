@@ -344,7 +344,7 @@ ${screenDescription}`,
 
   const modifyActionPrompt: Prompt = {
     role: "HUMAN",
-    content: `Please reflect the contents of items inside the list in the action.`,
+    content: `Please don't use the default value inside elements to describe the action, and remove the wording to identify each element. For example, 'Click the button to ' is allowed, but 'Click the "Change" button with/labeled ~' is not allowed.`,
   };
 
   const componentDescription = await getAiResponse([
