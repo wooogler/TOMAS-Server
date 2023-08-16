@@ -187,52 +187,6 @@ export const editActionType = (actionType: ActionType) => {
   return actionName;
 };
 
-export const getComponentInfoOriginal = async ({
-  componentHtml,
-  screenHtml,
-  actionType,
-  screenDescription,
-}: {
-  componentHtml: string;
-  screenHtml: string;
-  actionType: ActionType;
-  screenDescription: string;
-}) => {
-  const extractComponentSystemPrompt: Prompt = {
-    role: "SYSTEM",
-    content: `You are a web developer. You need to explain the context when the user interacts with a given HTML element and the action for the user to interact with the element.
-
-This is the HTML code of the screen: ${screenDescription}
-${screenHtml}
-
-This is the HTML code of the element. ${
-      actionType !== "select" ? "Ignore value or state of the element." : ""
-    }
-${componentHtml}
-
-Output following JSON format in plain text. Never provide additional context.
-
-{
-  context : <the context when the user interacts with the element>,
-  action: {
-    type: ${editActionType(actionType)},
-    description: <description of the action>
-  },
-  description: <describe the action based on the context starting with '${editActionType(
-    actionType
-  )}'>
-}`,
-  };
-
-  try {
-    const componentJson = await getAiResponse([extractComponentSystemPrompt]);
-    const componentObj = JSON.parse(componentJson);
-    return componentObj as ComponentInfo;
-  } catch (error) {
-    console.error("Error parsing JSON:", error);
-  }
-};
-
 function extractSurroundingHtml(
   htmlString: string,
   target: string,
@@ -290,7 +244,7 @@ ${extractSurroundingHtml(screenHtml, componentHtml)}
 
   const modifyActionPrompt: Prompt = {
     role: "HUMAN",
-    content: `Please reflect the purpose of the element in the action, not the values inside elements. For example, "Click the button to search..." is correct, but "Click the 'Search' button..." is not.`,
+    content: `Please don't use the default value inside elements to describe the action because the user can change its value.`,
   };
 
   const componentDescription = await getAiResponse([
@@ -344,7 +298,7 @@ ${screenDescription}`,
 
   const modifyActionPrompt: Prompt = {
     role: "HUMAN",
-    content: `Please don't use the default value inside elements to describe the action, and remove the wording to identify each element. For example, 'Click the button to ' is allowed, but 'Click the "Change" button with/labeled ~' is not allowed.`,
+    content: `Please don't use the default value inside the element to describe the action because the user can change its value.`,
   };
 
   const componentDescription = await getAiResponse([
