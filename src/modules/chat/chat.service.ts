@@ -88,15 +88,17 @@ export async function navigate(
   }
 }
 
-export async function convertSelectResultIntoTable(selectResult: ScreenResult) {
-  const attrList = await getUsefulAttrFromList(selectResult);
+export async function convertSelectResultIntoTable(
+  actionComponents: ActionComponent[],
+  screenDescription: string
+) {
+  const attrList = await getUsefulAttrFromList(
+    actionComponents,
+    screenDescription
+  );
   let jsList = [];
-  for (const comp of selectResult.actionComponents) {
-    const list = getListFromSelectResult(
-      comp,
-      selectResult.screenDescription,
-      attrList
-    );
+  for (const comp of actionComponents) {
+    const list = getListFromSelectResult(comp, screenDescription, attrList);
     jsList.push(list);
   }
 

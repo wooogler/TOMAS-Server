@@ -62,28 +62,19 @@ ${questions.join("\n")}
   logScreenResult(
     await pageHandler.navigate("https://www.greyhound.com", true)
   );
-  // logScreenResult(
-  //   await pageHandler.click(
-  //     ".hcr-btn-7-6-0.hcr-btn--primary-7-6-0.lKKy1",
-  //     false
-  //   )
-  // );
-  // const list = await pageHandler.select(
-  //   ".ResultsList__resultsList___eGsLK",
-  //   false,
-  //   true
-  // );
-  // logScreenResult(list);
-  // logScreenResult(
-  //   await pageHandler.select(`[i="${list.actionComponents[0].i}"]`, true, true)
-  // );
-
-  // logScreenResult(
-  //   await pageHandler.select(
-  //     "ul.ResultsList__resultsList___eGsLK > li.nth-child(4)",
-  //     true
-  //   )
-  // );
+  logScreenResult(
+    await pageHandler.click(".hcr-btn-7-6-0.hcr-btn--primary-7-6-0.lKKy1", true)
+  );
+  const selectRes = await pageHandler.select(
+    "#main-content > div > div > div > div.SearchResults__main___zj81o.search-results-main > div > div.ResultsList__container___JnkEA.ResultsList__animDone___I7PYN > div.ResultsList__resultsListPanel___Mr5mf.ResultsList__floatingFilter___autlh > figure:nth-child(3) > ul",
+    true
+  );
+  logScreenResult(selectRes);
+  const table = await convertSelectResultIntoTable(
+    selectRes.actionComponents,
+    selectRes.screenDescription
+  );
+  console.log(table);
   // logScreenResult(await pageHandler.click("#dateInput-from", true));
 
   // logScreenResult(await pageHandler.click("#searchInputMobile-from", false));

@@ -1,4 +1,4 @@
-import { Action, Chat } from "@prisma/client";
+import { Chat } from "@prisma/client";
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import {
   AIChatMessage,
@@ -6,7 +6,7 @@ import {
   SystemChatMessage,
 } from "langchain/schema";
 import { ActionType, parsingItemAgent } from "./htmlHandler";
-import { ActionComponent, ScreenResult } from "./pageHandler";
+import { ActionComponent } from "./pageHandler";
 
 export type Prompt = {
   role: "SYSTEM" | "HUMAN" | "AI";
@@ -655,8 +655,11 @@ export async function getSystemContext(systemLogs: SystemLog[]) {
   return systemContext;
 }
 
-export async function getUsefulAttrFromList(selectResult: ScreenResult) {
-  const optionList = selectResult.actionComponents
+export async function getUsefulAttrFromList(
+  actionComponents: ActionComponent[],
+  screenDescription: string
+) {
+  const optionList = actionComponents
     .map((item) => {
       return `"i": ${item.i}, "description": ${item.description}, "html": ${item.html}`;
     })
@@ -666,10 +669,11 @@ export async function getUsefulAttrFromList(selectResult: ScreenResult) {
       role: "SYSTEM",
       content: `
               You are the AI assistant who sees a list of items in webpage. For each item, there's a description and full html.
-              As a database developer, we want to create a table for those items to keep all useful information for user, and help user to select from those items.
+              As a database developer, we want to create a table for those items to keep all useful information in html for user, and help user to select from those items.
               Please help us to choose which attributes to keep.
               Remember, our ultimate goal is to help the user to make their decision from those options based on the attribute we keep. 
-              The description of the webpage:${selectResult.screenDescription}
+              Only keep the name of attributes. You do not have to keep an example of the attribute value.
+              The description of the webpage:${screenDescription}
               The output should be like:
 - <attr1>
 - <attr2>
@@ -713,8 +717,10 @@ export async function getListFromSelectResult(
 
             The json should be in the following format:
             {
+                "i": <value of i>
                 <attr1>: <value1>,
-                <attr2>: <value2>,
+                <attr2>: <value2>, 
+                <attr3>: [<value3_1>, <value3_2>...]
                 ...
             }
 
