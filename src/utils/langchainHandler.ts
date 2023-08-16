@@ -244,7 +244,7 @@ ${extractSurroundingHtml(screenHtml, componentHtml)}
 
   const modifyActionPrompt: Prompt = {
     role: "HUMAN",
-    content: `Please don't use the default value inside elements to describe the action because the user can change its value.`,
+    content: `Don't use the default value inside elements for the action because the user can change its value, and remove the wording to identify each element. For example, 'Click the button to ' is allowed, but 'Click the "Change" button with/labeled ~' is not allowed.`,
   };
 
   const componentDescription = await getAiResponse([
@@ -298,7 +298,7 @@ ${screenDescription}`,
 
   const modifyActionPrompt: Prompt = {
     role: "HUMAN",
-    content: `Please don't use the default value inside the element to describe the action because the user can change its value.`,
+    content: `Don't use the default value inside the element to describe the action because the user can change its value.`,
   };
 
   const componentDescription = await getAiResponse([
@@ -707,26 +707,27 @@ export async function getListFromSelectResult(
     {
       role: "SYSTEM",
       content: `
-            You are the AI assistant who sees an option in a list from webpage. For this option, there's a description and full html.
-      
-            Please find all value of corresponding attributes in attribute list for this option.
+You are the AI assistant who sees an option in a list from webpage. For this option, there's a description and full html.
 
-            The attrList is: ${attrList.map((item) => `"${item}"`).join(", ")}
+Please find all value of corresponding attributes in attribute list for this option.
 
-            Output your result in JSON format.
+The attrList is: ${attrList.map((item) => `"${item}"`).join(", ")}
 
-            The json should be in the following format:
-            {
-                "i": <value of i>
-                <attr1>: <value1>,
-                <attr2>: <value2>, 
-                <attr3>: [<value3_1>, <value3_2>...]
-                ...
-            }
+Output your result in JSON format.
 
-            The description of the webpage:
-            ${screenDescription}
-          `,
+The json should be in the following format:
+{
+    "i": <value of i>,
+    "description": <description>,
+    <attr1>: <value1>,
+    <attr2>: <value2>, 
+    <attr3>: [<value3_1>, <value3_2>...]
+    ...
+}
+
+The description of the webpage:
+${screenDescription}
+`,
     },
     {
       role: "HUMAN",
@@ -737,5 +738,12 @@ export async function getListFromSelectResult(
     },
   ];
   const confirmation = await getAiResponse(makeListPrompts);
-  return confirmation;
+  try {
+    return JSON.parse(confirmation) as {
+      i: string;
+      description: string;
+    } & Record<string, string | string[]>;
+  } catch (error) {
+    console.log("error in parsing json: ", error);
+  }
 }
