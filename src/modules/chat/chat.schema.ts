@@ -55,10 +55,16 @@ const answerResponseSchema = z.object({
   actionValue: z.string().optional(),
 });
 
+const datumSchema = z
+  .object({
+    i: z.string(),
+    description: z.string(),
+  })
+  .and(z.record(z.union([z.string(), z.array(z.string())])));
+
 const optionResponseSchema = z.object({
-  components: z.array(ActionComponentSchema),
+  data: z.array(datumSchema),
   type: z.string(),
-  actionValue: z.string().optional(),
 });
 
 export type CreateHumanChatInput = z.infer<typeof createHumanChatSchema>;

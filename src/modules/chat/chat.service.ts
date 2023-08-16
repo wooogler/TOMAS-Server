@@ -91,26 +91,29 @@ export async function navigate(
 export async function convertSelectResultIntoTable(
   actionComponents: ActionComponent[],
   screenDescription: string
-) {
+): Promise<
+  ({ i: string; description: string } & Record<string, string | string[]>)[]
+> {
   const attrList = await getUsefulAttrFromList(
     actionComponents,
     screenDescription
   );
-  let jsList = [];
-  for (const comp of actionComponents) {
-    const list = getListFromSelectResult(comp, screenDescription, attrList);
-    jsList.push(list);
-  }
 
-  const jsList2 = await Promise.all(jsList)
-    .then((resolvedLists) => {
-      console.log(resolvedLists);
-      return resolvedLists;
-    })
-    .catch((error) => {
-      console.error("An error occurred:", error);
-    });
-  return jsList2;
+  try {
+    const jsList = await Promise.all(
+      actionComponents.map((comp) =>
+        getListFromSelectResult(comp, screenDescription, attrList)
+      )
+    );
+
+    return jsList.filter(Boolean) as ({
+      i: string;
+      description: string;
+    } & Record<string, string | string[]>)[];
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
 }
 
 export async function firstOrder(
@@ -184,7 +187,10 @@ async function planningAndAsk(): Promise<
             content: `${question}`,
           });
           return {
-            components: options.actionComponents,
+            data: await convertSelectResultIntoTable(
+              options.actionComponents,
+              screenDescription
+            ),
             type: `questionForSelect`,
           };
         } else {
