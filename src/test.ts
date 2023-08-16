@@ -70,7 +70,10 @@ ${questions.join("\n")}
     true
   );
   logScreenResult(selectRes);
-  const table = await convertSelectResultIntoTable(selectRes);
+  const table = await convertSelectResultIntoTable(
+    selectRes.actionComponents,
+    selectRes.screenDescription
+  );
   console.log(table);
   // logScreenResult(await pageHandler.click("#dateInput-from", true));
   // logScreenResult(await pageHandler.select(".hcr-clndr-7-6-0.wnaY8", true));
