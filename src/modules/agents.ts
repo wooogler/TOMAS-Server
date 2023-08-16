@@ -33,7 +33,7 @@ You are the AI that creates a plan to interact with the main web page based on t
 Actions should be selected in order to achieve what the user wants based on the user's context. 
 ${userContext}
 
-You need to plan the action sequence using the following possible actions in the part of the current screen. 
+You need to plan the most efficient action sequence using the following possible actions in the part of the current screen. 
 Description of the current screen: ${focusedSection.screenDescription}
 Possible actions:
 ${focusedSection.actionComponents

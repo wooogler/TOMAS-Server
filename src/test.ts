@@ -61,10 +61,29 @@ ${questions.join("\n")}
     await pageHandler.navigate("https://www.greyhound.com", false)
   );
   logScreenResult(
-    await pageHandler.click(".hcr-btn-7-6-0.hcr-btn--primary-7-6-0.lKKy1", true)
+    await pageHandler.click(
+      ".hcr-btn-7-6-0.hcr-btn--primary-7-6-0.lKKy1",
+      false
+    )
   );
+  const list = await pageHandler.select(
+    ".ResultsList__resultsList___eGsLK",
+    false,
+    true
+  );
+  logScreenResult(list);
+  // logScreenResult(
+  //   await pageHandler.select(`[i="${list.actionComponents[0].i}"]`, true, true)
+  // );
+
+  // logScreenResult(
+  //   await pageHandler.select(
+  //     "ul.ResultsList__resultsList___eGsLK > li.nth-child(4)",
+  //     true
+  //   )
+  // );
   // logScreenResult(await pageHandler.click("#dateInput-from", true));
-  // logScreenResult(await pageHandler.select(".hcr-clndr-7-6-0.wnaY8", true));
+
   // logScreenResult(await pageHandler.click("#searchInputMobile-from", false));
   // logScreenResult(
   //   await pageHandler.inputText("#searchInput-from", "South Bend", false)

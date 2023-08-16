@@ -260,6 +260,7 @@ export class PageHandler {
   //select one item in the list
   async select(
     selector: string,
+    isFocus: boolean = false,
     parsing: boolean = true
   ): Promise<ScreenResult> {
     const page = await this.getPage();
@@ -287,6 +288,7 @@ export class PageHandler {
     const itemComponents = await parsingItemAgent({
       screenHtml: element?.outerHTML || "",
       screenDescription: sectionDescription,
+      isFocus,
     });
     return {
       type: "section",
