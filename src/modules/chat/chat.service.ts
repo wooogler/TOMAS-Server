@@ -252,30 +252,11 @@ export async function answerForInput(
 
 export async function answerForSelect(input: AnswerInput) {
   console.log("answerForSelect");
-  await createHumanChat(input);
+  await createHumanChat({
+    ...input,
+    content: input.content.split(" ").slice(1).join(" "),
+  });
   const component = input.component;
-  // const options = await page.select(`[i="${component.i}"]`);
-
-  // const selectedIndex = parseInt(input.content) - 1;
-  // if (
-  //   isNaN(selectedIndex) ||
-  //   selectedIndex < 0 ||
-  //   selectedIndex >= options.actionComponents.length
-  // ) {
-  //   const actionDescription = await getActionHistory(
-  //     component,
-  //     "Action Failed"
-  //   );
-  //   actionLogs.push({
-  //     type: focusSection.type,
-  //     id: focusSection.id,
-  //     screenDescription: focusSection.screenDescription,
-  //     actionDescription,
-  //   });
-  //   return await planningAndAsk();
-  // }
-
-  // const selectedItem = options.actionComponents[selectedIndex];
   const screenDescription = focusSection.screenDescription;
   if (component) {
     const confirmationQuestion = await makeQuestionForConfirmation(
@@ -285,7 +266,11 @@ export async function answerForSelect(input: AnswerInput) {
     );
     await createAIChat({ content: confirmationQuestion });
     return {
-      component,
+      component: {
+        ...component,
+        actionType:
+          component.actionType === "select" ? "focus" : component.actionType,
+      },
       type: "requestConfirmation",
       actionValue: component.i + "---" + component.description,
     };
@@ -359,6 +344,15 @@ export async function confirm(
         //   actionDescription,
         // });
         focusSection = await page.select(`[i="${iAttr}"]`);
+      } else if (component.actionType === "focus") {
+        if (!input.actionValue) {
+          throw new Error("No action value for select");
+        }
+        console.log("confirm for focus");
+        const selected = input.actionValue.split("---");
+        const iAttr = selected[0];
+        const description = selected[1];
+        focusSection = await page.select(`[i="${iAttr}"]`, true);
       }
     }
   } else {

@@ -60,7 +60,7 @@ ${questions.join("\n")}
   };
 
   logScreenResult(
-    await pageHandler.navigate("https://www.greyhound.com", false)
+    await pageHandler.navigate("https://www.greyhound.com", true)
   );
   logScreenResult(
     await pageHandler.click(".hcr-btn-7-6-0.hcr-btn--primary-7-6-0.lKKy1", true)
@@ -76,7 +76,7 @@ ${questions.join("\n")}
   );
   console.log(table);
   // logScreenResult(await pageHandler.click("#dateInput-from", true));
-  // logScreenResult(await pageHandler.select(".hcr-clndr-7-6-0.wnaY8", true));
+
   // logScreenResult(await pageHandler.click("#searchInputMobile-from", false));
   // logScreenResult(
   //   await pageHandler.inputText("#searchInput-from", "South Bend", false)

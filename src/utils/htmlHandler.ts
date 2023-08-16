@@ -1,12 +1,10 @@
 import { JSDOM } from "jsdom";
 import {
   editActionType,
-  getComplexItemDescription,
   getComponentInfo,
+  getItemDescription,
   getListDescription,
-  getSectionDescription,
   getSelectInfo,
-  getSimpleItemDescription,
 } from "./langchainHandler";
 import { ActionComponent } from "./pageHandler";
 
@@ -420,9 +418,11 @@ function comparePossibleInteractions(
 export async function parsingItemAgent({
   screenHtml,
   screenDescription,
+  isFocus = false,
 }: {
   screenHtml: string;
   screenDescription: string;
+  isFocus?: boolean;
 }): Promise<ActionComponent[]> {
   const dom = new JSDOM(screenHtml);
   const listDescription = await getListDescription(
@@ -434,64 +434,55 @@ export async function parsingItemAgent({
     return [];
   }
   const components = Array.from(rootElement.children);
-  let firstDescription: string;
 
-  const itemComponentsPromises = components.map<
-    Promise<ActionComponent | null>
-  >(async (comp, index) => {
-    const iAttr = comp.getAttribute("i");
-    const possibleInteractions = parsingPossibleInteractions(comp.outerHTML);
-    if (possibleInteractions.length === 1) {
-    }
-    let itemDescription: string | undefined;
+  const itemComponentsPromises = components.map<Promise<ActionComponent[]>>(
+    async (comp, index) => {
+      const iAttr = comp.getAttribute("i");
+      const possibleInteractions = parsingPossibleInteractions(comp.outerHTML);
 
-    if ((comp.textContent || "").length <= 30) {
-      itemDescription = await getSimpleItemDescription({
+      const itemDescription = await getItemDescription({
         itemHtml: simplifyHtml(comp.outerHTML, true),
         screenHtml: simplifyHtml(screenHtml, true),
         screenDescription: listDescription,
-        prevDescription: index === 0 ? firstDescription : undefined,
       });
-    } else {
-      itemDescription = await getComplexItemDescription({
-        itemHtml: simplifyHtml(comp.outerHTML, true),
-        screenHtml: simplifyHtml(screenHtml, true),
-        prevDescription: index === 0 ? firstDescription : undefined,
-        screenDescription: listDescription,
-      });
-    }
 
-    if (index === 0) {
-      firstDescription = itemDescription || "";
+      switch (possibleInteractions.length) {
+        case 0:
+          return [];
+        case 1:
+          return [
+            {
+              i: possibleInteractions[0].i,
+              actionType: possibleInteractions[0].actionType,
+              description: `${editActionType(
+                possibleInteractions[0].actionType
+              )} ${itemDescription}`,
+              html: comp.outerHTML,
+            },
+          ];
+        default:
+          if (isFocus) {
+            const components = await parsingAgent({
+              screenHtml: comp.outerHTML,
+              screenDescription: itemDescription || "",
+            });
+            return components;
+          } else {
+            return [
+              {
+                i: iAttr || "",
+                actionType: "select",
+                description: "Select " + itemDescription,
+                html: comp.outerHTML,
+              },
+            ];
+          }
+      }
     }
-
-    switch (possibleInteractions.length) {
-      case 0:
-        return null;
-      case 1:
-        if (index === 0) {
-          firstDescription = itemDescription || "";
-        }
-        return {
-          i: possibleInteractions[0].i,
-          actionType: possibleInteractions[0].actionType,
-          description: `${editActionType(
-            possibleInteractions[0].actionType
-          )} ${itemDescription}`,
-          html: comp.outerHTML,
-        };
-      default:
-        return {
-          i: iAttr || "",
-          actionType: "select",
-          description: "Select " + itemDescription,
-          html: comp.outerHTML,
-        };
-    }
-  });
+  );
 
   const itemComponents = await Promise.all(itemComponentsPromises);
-  return itemComponents.filter((item) => item !== null) as ActionComponent[];
+  return itemComponents.flat();
 }
 
 export async function parsingAgent({
@@ -514,7 +505,7 @@ export async function parsingAgent({
       const actionType = interaction.actionType;
       const componentHtml =
         body.querySelector(`[i="${iAttr}"]`)?.outerHTML || "";
-      const componentInfo =
+      const componentDescription =
         actionType === "select"
           ? await getSelectInfo({
               componentHtml: simplifyHtml(componentHtml, false) || "",
@@ -532,7 +523,7 @@ export async function parsingAgent({
       return {
         i: iAttr,
         actionType: interaction.actionType,
-        description: componentInfo?.description,
+        description: componentDescription,
         html: componentHtml,
       };
     }

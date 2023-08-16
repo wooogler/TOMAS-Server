@@ -34,7 +34,7 @@ const chat4 = new ChatOpenAI({
   maxTokens: 4096,
 });
 
-const MAX_CHARACTERS_16K = 30000;
+const MAX_CHARACTERS = 30000;
 
 export const getAiResponse = async (
   prompts: Prompt[],
@@ -42,7 +42,7 @@ export const getAiResponse = async (
 ) => {
   const promptMessages = prompts.map((prompt) => {
     const promptContent =
-      prompt.content.slice(0, MAX_CHARACTERS_16K) +
+      prompt.content.slice(0, MAX_CHARACTERS) +
       "... [Content trimmed due to token limits]";
     if (prompt.role === "HUMAN") {
       return new HumanChatMessage(promptContent);
@@ -282,71 +282,24 @@ Surrounding HTML of the element:
 ${extractSurroundingHtml(screenHtml, componentHtml)}
 `,
   };
-  // console.log(extractComponentSystemPrompt.content);
 
-  try {
-    const componentDescription = await getAiResponse([
-      extractComponentSystemPrompt,
-    ]);
-    // const componentObj = JSON.parse(componentJson);
-    return {
-      context: "",
-      action: {
-        type: actionType,
-        description: "",
-      },
-      description: componentDescription,
-    } as ComponentInfo;
-  } catch (error) {
-    console.error("Error parsing JSON:", error);
-  }
-};
-
-export const getSelectInfoOriginal = async ({
-  componentHtml,
-  screenHtml,
-  actionType,
-  screenDescription,
-}: {
-  componentHtml: string;
-  screenHtml: string;
-  actionType: ActionType;
-  screenDescription: string;
-}) => {
-  const extractComponentSystemPrompt: Prompt = {
-    role: "SYSTEM",
-    content: `
-A user will select one item from the given list in the current screen and observe it closely.
-
-Describe the action the user can take, starting with '${editActionType(
-      actionType
-    )} one'
-
-This is the description of the screen where the element is located:
-${screenDescription}
-
-This is the HTML code of the screen:
-${screenHtml}
-
-This is the HTML code of the list:
-${componentHtml}`,
+  const firstActionPrompt: Prompt = {
+    role: "AI",
+    content: await getAiResponse([extractComponentSystemPrompt]),
   };
 
-  try {
-    const componentDescription = await getAiResponse([
-      extractComponentSystemPrompt,
-    ]);
-    return {
-      context: "",
-      action: {
-        type: actionType,
-        description: "",
-      },
-      description: componentDescription,
-    } as ComponentInfo;
-  } catch (error) {
-    console.error("Error parsing JSON:", error);
-  }
+  const modifyActionPrompt: Prompt = {
+    role: "HUMAN",
+    content: `Please reflect the purpose of the element in the action, not the values inside elements. For example, "Click the button to search..." is correct, but "Click the 'Search' button..." is not.`,
+  };
+
+  const componentDescription = await getAiResponse([
+    extractComponentSystemPrompt,
+    firstActionPrompt,
+    modifyActionPrompt,
+  ]);
+
+  return componentDescription;
 };
 
 export const getSelectInfo = async ({
@@ -384,21 +337,22 @@ The description of the screen where the element is located:
 ${screenDescription}`,
   };
 
-  try {
-    const componentDescription = await getAiResponse([
-      extractComponentSystemPrompt,
-    ]);
-    return {
-      context: "",
-      action: {
-        type: actionType,
-        description: "",
-      },
-      description: componentDescription,
-    } as ComponentInfo;
-  } catch (error) {
-    console.error("Error parsing JSON:", error);
-  }
+  const firstActionPrompt: Prompt = {
+    role: "AI",
+    content: await getAiResponse([extractComponentSystemPrompt]),
+  };
+
+  const modifyActionPrompt: Prompt = {
+    role: "HUMAN",
+    content: `Please don't use the default value inside elements to describe the action, and remove the wording to identify each element. For example, 'Click the button to ' is allowed, but 'Click the "Change" button with/labeled ~' is not allowed.`,
+  };
+
+  const componentDescription = await getAiResponse([
+    extractComponentSystemPrompt,
+    firstActionPrompt,
+    modifyActionPrompt,
+  ]);
+  return componentDescription;
 };
 
 function removeBeforeAndIncludingRepresents(sentence: string): string {
@@ -411,64 +365,19 @@ function removeBeforeAndIncludingRepresents(sentence: string): string {
   return sentence; // 만약 "represents"가 문장에 없다면 원래 문장을 반환
 }
 
-export const getSimpleItemDescription = async ({
+export const getItemDescription = async ({
   itemHtml,
   screenHtml,
   screenDescription,
-  prevDescription,
 }: {
   itemHtml: string;
   screenHtml: string;
   screenDescription: string;
-  prevDescription?: string;
 }) => {
   const describeItemPrompt: Prompt = {
     role: "SYSTEM",
     content: `
-Summarize an item in the list in one sentence starting "It is " ${
-      prevDescription
-        ? ` with reference to the previous item's description`
-        : ""
-    }
-${prevDescription ? `Previous description: ${prevDescription}` : ""}
-
-HTML of the item:
-${itemHtml}
-
-Description of the list:
-${screenDescription}
-`,
-  };
-
-  try {
-    return removeBeforeAndIncludingRepresents(
-      await getAiResponse([describeItemPrompt])
-    );
-  } catch (error) {
-    console.error("Error in loading item info: ", error);
-  }
-};
-
-export const getComplexItemDescription = async ({
-  itemHtml,
-  screenHtml,
-  screenDescription,
-  prevDescription,
-}: {
-  itemHtml: string;
-  screenHtml: string;
-  screenDescription: string;
-  prevDescription?: string;
-}) => {
-  const describeItemPrompt: Prompt = {
-    role: "SYSTEM",
-    content: `
-Describe an item in the list in one sentence starting "It is " ${
-      prevDescription
-        ? ` with reference to the previous item's description`
-        : ""
-    }. The description must include all the information in the item.
-${prevDescription ? `Previous description: ${prevDescription}` : ""}
+Describe an item in the list in one sentence starting "It is ". The description must include all the information in the item.
 
 HTML of the item:
 ${itemHtml}
@@ -562,12 +471,26 @@ export async function makeQuestionForActionValue(
 
 Action: ${componentDescription}
 
-The description of the screen:  ${screenDescription}
-
-Please avoid the jargons, mechanical terms, and the terms that are too specific to the webpage.
+The description of the screen: ${screenDescription}
 `,
   };
-  return await getAiResponse([makeQuestionPrompt]);
+
+  const firstQuestionPrompt: Prompt = {
+    role: "AI",
+    content: await getAiResponse([makeQuestionPrompt]),
+  };
+
+  const modifyQuestionPrompt: Prompt = {
+    role: "HUMAN",
+    content:
+      "The user does not see the screen and is unfamiliar with technology, so please do not mention the action on the screen, and avoid the jargon, mechanical terms, and terms that are too specific to the webpage.",
+  };
+
+  return await getAiResponse([
+    makeQuestionPrompt,
+    firstQuestionPrompt,
+    modifyQuestionPrompt,
+  ]);
 }
 
 export async function findInputTextValue(
@@ -612,70 +535,31 @@ export async function findSelectValue(
   const inputComponentPrompt: Prompt = {
     role: "SYSTEM",
     content: `
-            You are the AI assistant who sees the abstraction of part of the user's web page. Based on the user's context, you have to decide what to input in the given component abstraction on the web page. If you cannot decide what content to fill in the input box, please explain why you can't. Don't assume general context; only refer to the given user's context.
-      
-            Description of the web page:
-            ${pageDescription}
-      
-            Component description:
-            ${componentDescription}
-            
-            ${userContext}
-      
-            Output needs to follow one of the JSON formats in plain text. Never provide additional context.
-            {
-              reason: <the reason why you need to input certain content>,
-              value: <the text that is most relevant for the given component>
-            }
-            OR
-            {
-              reason: <the reason why you cannot decide what content to input>,
-              value: null
-            }
+You are the AI assistant who sees the abstraction of part of the user's web page. Based on the user's context, you have to decide what to input in the given component abstraction on the web page. If you cannot decide what content to fill in the input box, please explain why you can't. Don't assume general context; only refer to the given user's context.
+
+Description of the web page:
+${pageDescription}
+
+Component description:
+${componentDescription}
+
+${userContext}
+
+Output needs to follow one of the JSON formats in plain text. Never provide additional context.
+{
+  reason: <the reason why you need to input certain content>,
+  value: <the text that is most relevant for the given component>
+}
+OR
+{
+  reason: <the reason why you cannot decide what content to input>,
+  value: null
+}
           `,
   };
   const response = await getAiResponse([inputComponentPrompt]);
   console.log(response);
   return response;
-}
-
-export async function makeQuestionForConfirmationOriginal(
-  component: ActionComponent,
-  actionValue: string,
-  screenDescription: string
-) {
-  const makeConfirmationPrompts: Prompt[] = [
-    {
-      role: "SYSTEM",
-      content: `
-          You are the AI assistant who sees the abstraction of part of the user's web page. You have decided what to do for the given component abstraction on the web page based on the user's context
-    
-          Now you need to create a human natural language question to confirm the user's aim, without specifying which element to operate or using web terms. Don't assume general context; only refer to the given context. Don't mention the component in your question. Confirm the aim of the value.
-    
-          The description of the webpage:
-          ${screenDescription}
-    
-          Action template:
-          {
-            "type":  <The definition of the given action>,
-            "description": <The description of the specific action component>,
-            "value": <(Optional) The value to be filled in the component>
-          }
-        `,
-    },
-    {
-      role: "HUMAN",
-      content: `
-          {
-            "type": ${component.actionType},
-            "description": ${component.description},
-            ${component.actionType === "click" ? "" : `"value": ${actionValue}`}
-          }
-        `,
-    },
-  ];
-  const confirmation = await getAiResponse(makeConfirmationPrompts);
-  return confirmation;
 }
 
 function replaceClickWithSelect(sentence: string) {
@@ -685,58 +569,39 @@ function replaceClickWithSelect(sentence: string) {
   return sentence;
 }
 
-export async function makeQuestionForConfirmation2(
-  component: ActionComponent,
-  screenDescription: string,
-  actionValue?: string
-) {
-  const makeConfirmationPrompts: Prompt[] = [
-    {
-      role: "SYSTEM",
-      content: `
-You are looking at a webpage.
-The description of the webpage:  ${screenDescription}
-    
-You need to create a natural language question to ask the user to confirm whether they will do the given action${
-        component.actionType === "input" ? " and value" : ""
-      }.
-
-The user cannot see the webpage, so please do not mention any details about the webpage or the component.
-
-Action: ${replaceClickWithSelect(component.description || "")}
-${component.actionType === "input" ? `Value: ${actionValue}` : ""}
-
-Please avoid the jargons, mechanical terms, and the terms that are too specific to the webpage.`,
-    },
-  ];
-
-  const confirmation = await getAiResponse(makeConfirmationPrompts);
-  return confirmation;
-}
-
 export async function makeQuestionForConfirmation(
   component: ActionComponent,
   screenDescription: string,
   actionValue?: string
 ) {
-  const makeConfirmationPrompts: Prompt[] = [
-    {
-      role: "SYSTEM",
-      content: `Create a concise natural language question to ask whether the user wants to do the given action${
-        component.actionType === "input" ? " with value" : ""
-      }, without the action.
+  const makeConfirmationPrompt: Prompt = {
+    role: "SYSTEM",
+    content: `Create a natural language question to ask whether the user wants to do the given action${
+      component.actionType === "input" ? " with value" : ""
+    }.
 
 Action: ${replaceClickWithSelect(component.description || "")}
 ${component.actionType === "input" ? `Value: ${actionValue}` : ""}
 
-The description of the screen:  ${screenDescription}
+The description of the screen: ${screenDescription}`,
+  };
 
-Please avoid the jargons, mechanical terms, and the terms that are specific to the webpage.`,
-    },
-  ];
+  const firstConfirmationPrompt: Prompt = {
+    role: "AI",
+    content: await getAiResponse([makeConfirmationPrompt]),
+  };
 
-  const confirmation = await getAiResponse(makeConfirmationPrompts);
-  return confirmation;
+  const modifyConfirmationPrompt: Prompt = {
+    role: "HUMAN",
+    content:
+      "The user does not see the screen and is unfamiliar with technology, so please do not mention the action on the screen, and avoid the jargon, mechanical terms, and terms that are too specific to the webpage.",
+  };
+
+  return await getAiResponse([
+    makeConfirmationPrompt,
+    firstConfirmationPrompt,
+    modifyConfirmationPrompt,
+  ]);
 }
 
 export async function getActionHistory(
