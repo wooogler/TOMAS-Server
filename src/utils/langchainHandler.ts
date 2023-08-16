@@ -1,4 +1,4 @@
-import { Chat } from "@prisma/client";
+import { Action, Chat } from "@prisma/client";
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import {
   AIChatMessage,
@@ -6,7 +6,7 @@ import {
   SystemChatMessage,
 } from "langchain/schema";
 import { ActionType, parsingItemAgent } from "./htmlHandler";
-import { ActionComponent } from "./pageHandler";
+import { ActionComponent, ScreenResult } from "./pageHandler";
 
 export type Prompt = {
   role: "SYSTEM" | "HUMAN" | "AI";
@@ -699,4 +699,83 @@ export async function getSystemContext(systemLogs: SystemLog[]) {
     })
     .join("\n");
   return systemContext;
+}
+
+export async function getUsefulAttrFromList(selectResult: ScreenResult) {
+  const optionList = selectResult.actionComponents
+    .map((item) => {
+      return `"i": ${item.i}, "description": ${item.description}, "html": ${item.html}`;
+    })
+    .join("\n");
+  const makeListPrompts: Prompt[] = [
+    {
+      role: "SYSTEM",
+      content: `
+              You are the AI assistant who sees a list of items in webpage. For each item, there's a description and full html.
+              As a database developer, we want to create a table for those items to keep all useful information for user, and help user to select from those items.
+              Please help us to choose which attributes to keep.
+              Remember, our ultimate goal is to help the user to make their decision from those options based on the attribute we keep. 
+              The description of the webpage:${selectResult.screenDescription}
+              The output should be like:
+- <attr1>
+- <attr2>
+- ...
+
+               Please do not include any other information in the output.
+              
+            `,
+    },
+    {
+      role: "HUMAN",
+      content: `
+              options: ${optionList}
+            `,
+    },
+  ];
+  const confirmation = await getAiResponse(makeListPrompts);
+  const array = confirmation
+    .split("\n")
+    .filter((item) => item.startsWith("-"))
+    .map((item) => item.replace(/^- */, "").trim());
+  return array;
+}
+
+export async function getListFromSelectResult(
+  option: ActionComponent,
+  screenDescription: string,
+  attrList: string[]
+) {
+  const makeListPrompts: Prompt[] = [
+    {
+      role: "SYSTEM",
+      content: `
+            You are the AI assistant who sees an option in a list from webpage. For this option, there's a description and full html.
+      
+            Please find all value of corresponding attributes in attribute list for this option.
+
+            The attrList is: ${attrList.map((item) => `"${item}"`).join(", ")}
+
+            Output your result in JSON format.
+
+            The json should be in the following format:
+            {
+                <attr1>: <value1>,
+                <attr2>: <value2>,
+                ...
+            }
+
+            The description of the webpage:
+            ${screenDescription}
+          `,
+    },
+    {
+      role: "HUMAN",
+      content: `
+            option html: ${option.html}
+            option description: ${option.description}
+          `,
+    },
+  ];
+  const confirmation = await getAiResponse(makeListPrompts);
+  return confirmation;
 }

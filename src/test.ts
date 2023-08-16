@@ -1,9 +1,11 @@
-import { PageHandler, ScreenResult } from "../src/utils/pageHandler";
 import dotenv from "dotenv";
+import { PageHandler, ScreenResult } from "../src/utils/pageHandler";
 import {
   makeQuestionForActionValue,
   makeQuestionForConfirmation,
 } from "./utils/langchainHandler";
+
+import { convertSelectResultIntoTable } from "../src/modules/chat/chat.service";
 dotenv.config();
 
 // describe("pageHandler", () => {
@@ -93,5 +95,6 @@ ${questions.join("\n")}
 
   // logScreenResult(await pageHandler.click(".hcr-fieldset-7-6-0", true));
   // logScreenResult(await pageHandler.select(".hcr-fieldset-7-6-0", true));
+  console.log("Done");
 }
 main();
