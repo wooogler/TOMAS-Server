@@ -1,0 +1,557 @@
+[
+  {
+    "data": {
+      "Trip": "Direct trip from Thu, Aug 17 at 1:20 pm till Thu, Aug 17 at 7:30 pm",
+      "Price": "$88.99",
+      "Vehicle Operator": "FlixBus",
+      "Departure Time": "1:20 pm",
+      "Duration": "6:10 hrs",
+      "Arrival Time": "7:30 pm",
+      "Departure Stop": "Downey (Stonewood Center)",
+      "Arrival Stop": "Las Vegas Strip (Las Vegas Blvd)",
+      "Connection Details": "Direct trip by Bus",
+      "Vehicle Capacity": "Almost full",
+      "Amenities": [
+        "Wifi",
+        "Socket"
+      ]
+    },
+    "i": "176",
+    "description": "a direct trip from Thu, Aug 17 at 1:20 pm till Thu, Aug 17 at 7:30 pm for $88.99 with FlixBus, departing from Downey (Stonewood Center) and arriving at Las Vegas Strip (Las Vegas Blvd), with a duration of 6:10 hrs and amenities including WiFi and power sockets."
+  },
+  {
+    "data": {
+      "Trip": "Direct trip from Thu, Aug 17 at 1:20 pm till Thu, Aug 17 at 7:55 pm",
+      "Price": "$88.99",
+      "Vehicle Operator": "FlixBus",
+      "Departure Time": "1:20 pm",
+      "Duration": "6:35 hrs",
+      "Arrival Time": "7:55 pm",
+      "Departure Stop": "Downey (Stonewood Center)",
+      "Arrival Stop": "Downtown Las Vegas (1st St)",
+      "Connection Details": "Direct trip by Bus",
+      "Vehicle Capacity": "Almost full",
+      "Amenities": [
+        "Wifi",
+        "Socket"
+      ]
+    },
+    "i": "255",
+    "description": "a direct trip from Thu, Aug 17 at 1:20 pm till Thu, Aug 17 at 7:55 pm for $88.99 with FlixBus, departing from Downey (Stonewood Center) and arriving at Downtown Las Vegas (1st St), with a duration of 6:35 hrs and amenities including WiFi and power sockets."
+  },
+  {
+    "data": {
+      "Trip": "Direct trip from Thu, Aug 17 at 1:20 pm till Thu, Aug 17 at 8:20 pm",
+      "Price": "$88.99",
+      "Vehicle Operator": "FlixBus",
+      "Departure Time": "1:20 pm",
+      "Duration": "7:00 hrs",
+      "Arrival Time": "8:20 pm",
+      "Departure Stop": "Downey (Stonewood Center)",
+      "Arrival Stop": "Henderson (Galleria at Sunset)",
+      "Connection Details": "Direct trip by Bus",
+      "Vehicle Capacity": "Almost full",
+      "Amenities": [
+        "Wifi",
+        "Socket"
+      ]
+    },
+    "i": "334",
+    "description": "a direct trip from Thu, Aug 17 at 1:20 pm till Thu, Aug 17 at 8:20 pm for $88.99 with FlixBus, departing from Downey (Stonewood Center) and arriving at Henderson (Galleria at Sunset), with a duration of 7:00 hrs and amenities including WiFi and power sockets."
+  },
+  {
+    "data": {
+      "Trip": "Direct trip from Thu, Aug 17 at 2:00 pm till Thu, Aug 17 at 7:30 pm",
+      "Price": "$47.99",
+      "Vehicle Operator": "FlixBus",
+      "Departure Time": "2:00 pm",
+      "Duration": "5:30 hrs",
+      "Arrival Time": "7:30 pm",
+      "Departure Stop": "Downtown LA (FlixBus Lot)",
+      "Arrival Stop": "Las Vegas Strip (Las Vegas Blvd)",
+      "Connection Details": "Direct trip by Bus",
+      "Vehicle Capacity": "Almost full",
+      "Amenities": [
+        "Wifi",
+        "Socket"
+      ]
+    },
+    "i": "413",
+    "description": "a direct trip from Downtown LA (FlixBus Lot) to Las Vegas Strip (Las Vegas Blvd) departing at 2:00 pm and arriving at 7:30 pm, with a duration of 5 hours and 30 minutes, operated by FlixBus, and priced at $47.99."
+  },
+  {
+    "data": {
+      "Trip": "Direct trip from Thu, Aug 17 at 2:00 pm till Thu, Aug 17 at 7:55 pm",
+      "Price": "$47.99",
+      "Vehicle Operator": "FlixBus",
+      "Departure Time": "2:00 pm",
+      "Duration": "5:55 hrs",
+      "Arrival Time": "7:55 pm",
+      "Departure Stop": "Downtown LA (FlixBus Lot)",
+      "Arrival Stop": "Downtown Las Vegas (1st St)",
+      "Connection Details": "Direct trip by Bus",
+      "Vehicle Capacity": "Almost full",
+      "Amenities": [
+        "Wifi",
+        "Socket"
+      ]
+    },
+    "i": "492",
+    "description": "a direct trip from Downtown LA (FlixBus Lot) to Downtown Las Vegas (1st St) departing at 2:00 pm and arriving at 7:55 pm, with a duration of 5 hours and 55 minutes, operated by FlixBus, and priced at $47.99."
+  },
+  {
+    "data": {
+      "Trip": "Direct trip from Thu, Aug 17 at 2:00 pm till Thu, Aug 17 at 8:20 pm",
+      "Price": "$52.99",
+      "Vehicle Operator": "FlixBus",
+      "Departure Time": "2:00 pm",
+      "Duration": "6:20 hrs",
+      "Arrival Time": "8:20 pm",
+      "Departure Stop": "Downtown LA (FlixBus Lot)",
+      "Arrival Stop": "Henderson (Galleria at Sunset)",
+      "Connection Details": "Direct trip by Bus",
+      "Vehicle Capacity": "Almost full",
+      "Amenities": [
+        "Wifi",
+        "Socket"
+      ]
+    },
+    "i": "571",
+    "description": "a direct trip from Downtown LA (FlixBus Lot) to Henderson (Galleria at Sunset) departing at 2:00 pm and arriving at 8:20 pm, with a duration of 6 hours and 20 minutes, operated by FlixBus, and priced at $52.99."
+  },
+  {
+    "data": {
+      "Trip": "Direct trip from Thu, Aug 17 at 3:00 pm till Thu, Aug 17 at 9:00 pm",
+      "Price": "$47.99",
+      "Vehicle Operator": "FlixBus",
+      "Departure Time": "3:00 pm",
+      "Duration": "6:00 hrs",
+      "Arrival Time": "9:00 pm",
+      "Departure Stop": "Downtown LA (FlixBus Lot)",
+      "Arrival Stop": "Las Vegas Strip (Las Vegas Blvd)",
+      "Connection Details": "Direct trip by Bus",
+      "Amenities": [
+        "Wifi",
+        "Socket"
+      ]
+    },
+    "i": "650",
+    "description": "a direct trip from Downtown LA (FlixBus Lot) to Las Vegas Strip (Las Vegas Blvd) departing at 3:00 pm and arriving at 9:00 pm, with a duration of 6:00 hrs, operated by FlixBus, and priced at $47.99."
+  },
+  {
+    "data": {
+      "Trip": "Direct trip from Thu, Aug 17 at 3:00 pm till Thu, Aug 17 at 9:25 pm",
+      "Price": "$47.99",
+      "Vehicle Operator": "FlixBus",
+      "Departure Time": "3:00 pm",
+      "Duration": "6:25 hrs",
+      "Arrival Time": "9:25 pm",
+      "Departure Stop": "Downtown LA (FlixBus Lot)",
+      "Arrival Stop": "Downtown Las Vegas (1st St)",
+      "Connection Details": "Direct trip by Bus",
+      "Amenities": [
+        "Wifi",
+        "Socket"
+      ]
+    },
+    "i": "721",
+    "description": "a direct trip from Downtown LA (FlixBus Lot) to Downtown Las Vegas (1st St) departing at 3:00 pm and arriving at 9:25 pm, with a duration of 6 hours and 25 minutes, operated by FlixBus, and priced at $47.99."
+  },
+  {
+    "data": {
+      "Trip": "Direct trip from Thu, Aug 17 at 3:10 pm till Thu, Aug 17 at 10:10 pm",
+      "Price": "$47.99",
+      "Vehicle Operator": "FlixBus",
+      "Departure Time": "3:10 pm",
+      "Duration": "7:00 hrs",
+      "Arrival Time": "10:10 pm",
+      "Departure Stop": "Hollywood / Highland (LA)",
+      "Arrival Stop": "Las Vegas Strip (Las Vegas Blvd)",
+      "Connection Details": "Direct trip by Bus",
+      "Amenities": [
+        "Wifi",
+        "Socket"
+      ]
+    },
+    "i": "792",
+    "description": "a direct trip from Hollywood / Highland (LA) to Las Vegas Strip (Las Vegas Blvd) departing at 3:10 pm and arriving at 10:10 pm, with a duration of 7:00 hrs, operated by FlixBus, and priced at $47.99."
+  },
+  {
+    "data": {
+      "Trip": "Direct trip from Thu, Aug 17 at 3:10 pm till Thu, Aug 17 at 10:35 pm",
+      "Price": "$47.99",
+      "Vehicle Operator": "FlixBus",
+      "Departure Time": "3:10 pm",
+      "Duration": "7:25 hrs",
+      "Arrival Time": "10:35 pm",
+      "Departure Stop": "Hollywood / Highland (LA)",
+      "Arrival Stop": "Downtown Las Vegas (1st St)",
+      "Connection Details": "Direct trip by Bus",
+      "Amenities": [
+        "Wifi",
+        "Socket"
+      ]
+    },
+    "i": "863",
+    "description": "a direct trip from Hollywood / Highland (LA) to Downtown Las Vegas (1st St) departing at 3:10 pm and arriving at 10:35 pm, with a duration of 7 hours and 25 minutes, operated by FlixBus, and priced at $47.99."
+  },
+  {
+    "data": {
+      "Trip": "Direct trip from Thu, Aug 17 at 4:00 pm till Thu, Aug 17 at 10:10 pm",
+      "Price": "$47.99",
+      "Vehicle Operator": "FlixBus",
+      "Departure Time": "4:00 pm",
+      "Duration": "6:10 hrs",
+      "Arrival Time": "10:10 pm",
+      "Departure Stop": "Downtown LA (FlixBus Lot)",
+      "Arrival Stop": "Las Vegas Strip (Las Vegas Blvd)",
+      "Connection Details": "Direct trip by Bus",
+      "Amenities": [
+        "Wifi",
+        "Socket"
+      ]
+    },
+    "i": "934",
+    "description": "a direct trip from Downtown LA (FlixBus Lot) to Las Vegas Strip (Las Vegas Blvd) departing at 4:00 pm and arriving at 10:10 pm, with a duration of 6 hours and 10 minutes, operated by FlixBus, and priced at $47.99."
+  },
+  {
+    "data": {
+      "Trip": "Direct trip from Thu, Aug 17 at 4:00 pm till Thu, Aug 17 at 10:35 pm",
+      "Price": "$47.99",
+      "Vehicle Operator": "FlixBus",
+      "Departure Time": "4:00 pm",
+      "Duration": "6:35 hrs",
+      "Arrival Time": "10:35 pm",
+      "Departure Stop": "Downtown LA (FlixBus Lot)",
+      "Arrival Stop": "Downtown Las Vegas (1st St)",
+      "Connection Details": "Direct trip by Bus",
+      "Vehicle Capacity": "Almost full",
+      "Amenities": [
+        "Wifi",
+        "Socket"
+      ]
+    },
+    "i": "1005",
+    "description": "a direct trip from Downtown LA (FlixBus Lot) to Downtown Las Vegas (1st St) departing at 4:00 pm and arriving at 10:35 pm, with a duration of 6 hours and 35 minutes, operated by FlixBus, and priced at $47.99."
+  },
+  {
+    "data": {
+      "Trip": "Direct trip from Thu, Aug 17 at 4:25 pm till Thu, Aug 17 at 10:00 pm",
+      "Price": "$59.99",
+      "Vehicle Operator": "Greyhound",
+      "Departure Time": "4:25 pm",
+      "Duration": "5:35 hrs",
+      "Arrival Time": "10:00 pm",
+      "Departure Stop": "Los Angeles Union Station",
+      "Arrival Stop": "South Strip",
+      "Connection Details": "Direct trip by Bus",
+      "Amenities": [
+        "Wifi",
+        "Entertainment",
+        "Socket"
+      ]
+    },
+    "i": "1136",
+    "description": "a direct trip from Los Angeles Union Station to South Strip departing at 4:25 pm and arriving at 10:00 pm, with a duration of 5 hours and 35 minutes, operated by Greyhound, and priced at $59.99."
+  },
+  {
+    "data": {
+      "Trip": "Direct trip from Thu, Aug 17 at 5:25 pm till Thu, Aug 17 at 11:20 pm",
+      "Price": "$47.99",
+      "Vehicle Operator": "FlixBus",
+      "Departure Time": "5:25 pm",
+      "Duration": "5:55 hrs",
+      "Arrival Time": "11:20 pm",
+      "Departure Stop": "USC (Hope/Jefferson)",
+      "Arrival Stop": "Las Vegas Strip (Las Vegas Blvd)",
+      "Connection Details": "Direct trip by Bus",
+      "Amenities": [
+        "Wifi",
+        "Socket"
+      ]
+    },
+    "i": "1211",
+    "description": "a direct trip from Thu, Aug 17 at 5:25 pm till Thu, Aug 17 at 11:20 pm for $47.99 with FlixBus, departing from USC (Hope/Jefferson) and arriving at Las Vegas Strip (Las Vegas Blvd), with a duration of 5:55 hrs and amenities including WiFi and power sockets."
+  },
+  {
+    "data": {
+      "Trip": "Direct trip from Thu, Aug 17 at 5:25 pm till Thu, Aug 17 at 11:45 pm",
+      "Price": "$47.99",
+      "Vehicle Operator": "FlixBus",
+      "Departure Time": "5:25 pm",
+      "Duration": "6:20 hrs",
+      "Arrival Time": "11:45 pm",
+      "Departure Stop": "USC (Hope/Jefferson)",
+      "Arrival Stop": "Downtown Las Vegas (1st St)",
+      "Connection Details": "Direct trip by Bus",
+      "Vehicle Capacity": "Almost full",
+      "Amenities": [
+        "Wifi",
+        "Socket"
+      ]
+    },
+    "i": "1282",
+    "description": "a direct trip from Los Angeles, CA to Las Vegas, NV on Thursday, August 17th departing at 5:25 pm and arriving at 11:45 pm, with a duration of 6 hours and 20 minutes, operated by FlixBus, and priced at $47.99."
+  },
+  {
+    "data": {
+      "Trip": "Direct trip from Thu, Aug 17 at 6:00 pm till Thu, Aug 17 at 11:20 pm",
+      "Price": "$47.99",
+      "Vehicle Operator": "FlixBus",
+      "Departure Time": "6:00 pm",
+      "Duration": "5:20 hrs",
+      "Arrival Time": "11:20 pm",
+      "Departure Stop": "Downtown LA (FlixBus Lot)",
+      "Arrival Stop": "Las Vegas Strip (Las Vegas Blvd)",
+      "Connection Details": "Direct trip by Bus",
+      "Amenities": [
+        "Wifi",
+        "Socket"
+      ]
+    },
+    "i": "1353",
+    "description": "a direct trip from Downtown LA (FlixBus Lot) to Las Vegas Strip (Las Vegas Blvd) departing at 6:00 pm and arriving at 11:20 pm, with a duration of 5 hours and 20 minutes, operated by FlixBus, and priced at $47.99."
+  },
+  {
+    "data": {
+      "Trip": "Direct trip from Thu, Aug 17 at 6:00 pm till Thu, Aug 17 at 11:45 pm",
+      "Price": "$47.99",
+      "Vehicle Operator": "FlixBus",
+      "Departure Time": "6:00 pm",
+      "Duration": "5:45 hrs",
+      "Arrival Time": "11:45 pm",
+      "Departure Stop": "Downtown LA (FlixBus Lot)",
+      "Arrival Stop": "Downtown Las Vegas (1st St)",
+      "Connection Details": "Direct trip by Bus",
+      "Amenities": [
+        "Wifi",
+        "Socket"
+      ]
+    },
+    "i": "1424",
+    "description": "a direct trip from Downtown LA (FlixBus Lot) to Downtown Las Vegas (1st St) departing at 6:00 pm and arriving at 11:45 pm on Thursday, August 17th, with a duration of 5 hours and 45 minutes, operated by FlixBus, and priced at $47.99."
+  },
+  {
+    "data": {
+      "Trip": "Direct trip from Thu, Aug 17 at 6:40 pm till Fri, Aug 18 at 12:45 am",
+      "Price": "$88.99",
+      "Vehicle Operator": "Greyhound",
+      "Departure Time": "6:40 pm",
+      "Duration": "6:05 hrs",
+      "Arrival Time": "12:45 am +1 day",
+      "Departure Stop": "Los Angeles Union Station",
+      "Arrival Stop": "South Strip",
+      "Seats Left": "2 seats left at this price",
+      "Connection Details": "Direct trip by Bus",
+      "Vehicle Capacity": "Almost full",
+      "Amenities": [
+        "Wifi",
+        "Entertainment",
+        "Socket"
+      ]
+    },
+    "i": "1495",
+    "description": "a direct trip from Los Angeles Union Station to South Strip departing on Thursday, August 17th at 6:40 pm and arriving on Friday, August 18th at 12:45 am, with a duration of 6 hours and 5 minutes, offered by Greyhound for $88.99, and there are 2 seats left at this price."
+  },
+  {
+    "data": {
+      "Trip": "Direct trip from Thu, Aug 17 at 7:00 pm till Thu, Aug 17 at 11:59 pm",
+      "Price": "$47.99",
+      "Vehicle Operator": "FlixBus",
+      "Departure Time": "7:00 pm",
+      "Duration": "4:59 hrs",
+      "Arrival Time": "11:59 pm",
+      "Departure Stop": "Downtown LA (FlixBus Lot)",
+      "Arrival Stop": "Las Vegas Strip (Las Vegas Blvd)",
+      "Connection Details": "Direct trip by Bus",
+      "Vehicle Capacity": "Almost full",
+      "Amenities": [
+        "Wifi",
+        "Socket"
+      ]
+    },
+    "i": "1581",
+    "description": "a direct trip from Downtown LA (FlixBus Lot) to Las Vegas Strip (Las Vegas Blvd) departing at 7:00 pm and arriving at 11:59 pm on Thursday, August 17th, with a duration of 4 hours and 59 minutes, operated by FlixBus, and priced at $47.99."
+  },
+  {
+    "data": {
+      "Trip": "Direct trip from Thu, Aug 17 at 7:00 pm till Fri, Aug 18 at 12:20 am",
+      "Price": "$47.99",
+      "Vehicle Operator": "FlixBus",
+      "Departure Time": "7:00 pm",
+      "Duration": "5:20 hrs",
+      "Arrival Time": "12:20 am +1 day",
+      "Departure Stop": "Downtown LA (FlixBus Lot)",
+      "Arrival Stop": "Downtown Las Vegas (1st St)",
+      "Seats Left": "2 seats left at this price",
+      "Connection Details": "Direct trip by Bus",
+      "Vehicle Capacity": "Almost full",
+      "Amenities": [
+        "Wifi",
+        "Socket"
+      ]
+    },
+    "i": "1660",
+    "description": "a direct trip from Thu, Aug 17 at 7:00 pm till Fri, Aug 18 at 12:20 am for $47.99 with FlixBus, departing from Downtown LA (FlixBus Lot) and arriving at Downtown Las Vegas (1st St), with a duration of 5:20 hrs and 2 seats left at this price."
+  },
+  {
+    "data": {
+      "Trip": "Direct trip from Thu, Aug 17 at 9:00 pm till Fri, Aug 18 at 2:25 am",
+      "Price": "$52.99",
+      "Vehicle Operator": "FlixBus",
+      "Departure Time": "9:00 pm",
+      "Duration": "5:25 hrs",
+      "Arrival Time": "2:25 am +1 day",
+      "Departure Stop": "UCLA (Gayley/Strathmore)",
+      "Arrival Stop": "Las Vegas Strip (Las Vegas Blvd)",
+      "Connection Details": "Direct trip by Bus",
+      "Vehicle Capacity": "Almost full",
+      "Amenities": [
+        "Wifi",
+        "Socket"
+      ]
+    },
+    "i": "1742",
+    "description": "a direct trip from UCLA (Gayley/Strathmore) to Las Vegas Strip (Las Vegas Blvd) departing on Thursday, August 17th at 9:00 pm and arriving on Friday, August 18th at 2:25 am, with a duration of 5 hours and 25 minutes, operated by FlixBus, and priced at $52.99."
+  },
+  {
+    "data": {
+      "Trip": "Direct trip from Thu, Aug 17 at 9:00 pm till Fri, Aug 18 at 2:45 am",
+      "Price": "$52.99",
+      "Vehicle Operator": "FlixBus",
+      "Departure Time": "9:00 pm",
+      "Duration": "5:45 hrs",
+      "Arrival Time": "2:45 am +1 day",
+      "Departure Stop": "UCLA (Gayley/Strathmore)",
+      "Arrival Stop": "Downtown Las Vegas (1st St)",
+      "Connection Details": "Direct trip by Bus",
+      "Vehicle Capacity": "Almost full",
+      "Amenities": [
+        "Wifi",
+        "Socket"
+      ]
+    },
+    "i": "1814",
+    "description": "a direct trip from UCLA (Gayley/Strathmore) in Los Angeles, CA to Downtown Las Vegas (1st St) in Las Vegas, NV departing at 9:00 pm on Thursday, August 17th and arriving at 2:45 am on Friday, August 18th, with a duration of 5 hours and 45 minutes, operated by FlixBus, and priced at $52.99."
+  },
+  {
+    "data": {
+      "Trip": "Direct trip from Thu, Aug 17 at 9:40 pm till Fri, Aug 18 at 2:25 am",
+      "Price": "$47.99",
+      "Vehicle Operator": "FlixBus",
+      "Departure Time": "9:40 pm",
+      "Duration": "4:45 hrs",
+      "Arrival Time": "2:25 am +1 day",
+      "Departure Stop": "Downtown LA (FlixBus Lot)",
+      "Arrival Stop": "Las Vegas Strip (Las Vegas Blvd)",
+      "Connection Details": "Direct trip by Bus",
+      "Vehicle Capacity": "Almost full",
+      "Amenities": [
+        "Wifi",
+        "Socket"
+      ]
+    },
+    "i": "1886",
+    "description": "a direct trip from Thu, Aug 17 at 9:40 pm till Fri, Aug 18 at 2:25 am for $47.99 with FlixBus, departing from Downtown LA (FlixBus Lot) and arriving at Las Vegas Strip (Las Vegas Blvd), with a duration of 4:45 hrs and amenities including WiFi and power sockets."
+  },
+  {
+    "data": {
+      "Trip": "Direct trip from Thu, Aug 17 at 9:40 pm till Fri, Aug 18 at 2:45 am",
+      "Price": "$47.99",
+      "Vehicle Operator": "FlixBus",
+      "Departure Time": "9:40 pm",
+      "Duration": "5:05 hrs",
+      "Arrival Time": "2:45 am +1 day",
+      "Departure Stop": "Downtown LA (FlixBus Lot)",
+      "Arrival Stop": "Downtown Las Vegas (1st St)",
+      "Connection Details": "Direct trip by Bus",
+      "Vehicle Capacity": "Almost full",
+      "Amenities": [
+        "Wifi",
+        "Socket"
+      ]
+    },
+    "i": "1960",
+    "description": "a direct trip from Thu, Aug 17 at 9:40 pm till Fri, Aug 18 at 2:45 am for $47.99 with FlixBus, departing from Downtown LA (FlixBus Lot) and arriving at Downtown Las Vegas (1st St), with a duration of 5:05 hrs and amenities including WiFi and power sockets."
+  },
+  {
+    "data": {
+      "Trip": "Direct trip from Thu, Aug 17 at 11:50 pm till Fri, Aug 18 at 4:50 am",
+      "Price": "$47.99",
+      "Vehicle Operator": "Greyhound",
+      "Departure Time": "11:50 pm",
+      "Duration": "5:00 hrs",
+      "Arrival Time": "4:50 am +1 day",
+      "Departure Stop": "Los Angeles Union Station",
+      "Arrival Stop": "South Strip",
+      "Connection Details": "Direct trip by Bus",
+      "Amenities": [
+        "Wifi",
+        "Entertainment",
+        "Socket"
+      ]
+    },
+    "i": "2032",
+    "description": "a direct trip from Los Angeles Union Station to South Strip departing on Thursday, August 17th at 11:50 pm and arriving on Friday, August 18th at 4:50 am, with a duration of 5 hours and a price of $47.99, operated by Greyhound."
+  },
+  {
+    "data": {
+      "Trip": "Direct trip from Thu, Aug 17 at 11:55 pm till Fri, Aug 18 at 5:55 am",
+      "Price": "$52.99",
+      "Vehicle Operator": "FlixBus",
+      "Departure Time": "11:55 pm",
+      "Duration": "6:00 hrs",
+      "Arrival Time": "5:55 am +1 day",
+      "Departure Stop": "UCLA (Gayley/Strathmore)",
+      "Arrival Stop": "Las Vegas Strip (Las Vegas Blvd)",
+      "Connection Details": "Direct trip by Bus",
+      "Vehicle Capacity": "Almost full",
+      "Amenities": [
+        "Wifi",
+        "Socket"
+      ]
+    },
+    "i": "2108",
+    "description": "a direct trip from UCLA (Gayley/Strathmore) to Las Vegas Strip (Las Vegas Blvd) departing on Thursday, August 17th at 11:55 pm and arriving on Friday, August 18th at 5:55 am, with a duration of 6:00 hrs, operated by FlixBus, and priced at $52.99."
+  },
+  {
+    "data": {
+      "Trip": "Direct trip from Thu, Aug 17 at 11:55 pm till Fri, Aug 18 at 6:20 am",
+      "Price": "$52.99",
+      "Vehicle Operator": "FlixBus",
+      "Departure Time": "11:55 pm",
+      "Duration": "6:25 hrs",
+      "Arrival Time": "6:20 am +1 day",
+      "Departure Stop": "UCLA (Gayley/Strathmore)",
+      "Arrival Stop": "Downtown Las Vegas (1st St)",
+      "Connection Details": "Direct trip by Bus",
+      "Vehicle Capacity": "Almost full",
+      "Amenities": [
+        "Wifi",
+        "Socket"
+      ]
+    },
+    "i": "2180",
+    "description": "a direct trip from UCLA (Gayley/Strathmore) to Downtown Las Vegas (1st St) departing on Thursday, August 17th at 11:55 pm and arriving on Friday, August 18th at 6:20 am, with a duration of 6 hours and 25 minutes, operated by FlixBus, and priced at $52.99."
+  },
+  {
+    "data": {
+      "Trip": "Direct trip from Thu, Aug 17 at 11:55 pm till Fri, Aug 18 at 6:50 am",
+      "Price": "$59.99",
+      "Vehicle Operator": "FlixBus",
+      "Departure Time": "11:55 pm",
+      "Duration": "6:55 hrs",
+      "Arrival Time": "6:50 am +1 day",
+      "Departure Stop": "UCLA (Gayley/Strathmore)",
+      "Arrival Stop": "Henderson (Galleria at Sunset)",
+      "Connection Details": "Direct trip by Bus",
+      "Vehicle Capacity": "Almost full",
+      "Amenities": [
+        "Wifi",
+        "Socket"
+      ]
+    },
+    "i": "2252",
+    "description": "a direct trip from UCLA (Gayley/Strathmore) to Henderson (Galleria at Sunset) departing on Thursday, August 17th at 11:55 pm and arriving on Friday, August 18th at 6:50 am, with a duration of 6 hours and 55 minutes, operated by FlixBus, and priced at $59.99."
+  }
+]
