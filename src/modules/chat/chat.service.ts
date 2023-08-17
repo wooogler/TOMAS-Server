@@ -11,7 +11,8 @@ import {
   ConfirmInput,
   CreateHumanChatInput,
   NavigateInput,
-  OptionResponse,
+  SelectInput,
+  SelectResponse,
   navigateResponse,
 } from "./chat.schema";
 import {
@@ -30,6 +31,7 @@ import {
   getUsefulAttrFromList,
   getListFromSelectResult,
   getDataFromHTML,
+  makeQuestionForSelectConfirmation,
 } from "../../utils/langchainHandler";
 import { planningAgent } from "../agents";
 import { ActionType } from "../../utils/htmlHandler";
@@ -119,7 +121,7 @@ export async function convertSelectResultIntoTable(
 
 export async function firstOrder(
   input: CreateHumanChatInput
-): Promise<AnswerResponse | OptionResponse> {
+): Promise<AnswerResponse | SelectResponse> {
   console.log("firstOrder");
   await createHumanChat(input);
   const response = await planningAndAsk();
@@ -131,7 +133,7 @@ export async function firstOrder(
 }
 
 async function planningAndAsk(): Promise<
-  AnswerResponse | OptionResponse | undefined
+  AnswerResponse | SelectResponse | undefined
 > {
   console.log("planningAndAsk");
   try {
@@ -254,7 +256,9 @@ export async function answerForInput(
   }
 }
 
-export async function answerForSelect(input: AnswerInput) {
+export async function answerForSelect(
+  input: SelectInput
+): Promise<AnswerResponse> {
   console.log("answerForSelect");
   await createHumanChat({
     ...input,
@@ -262,40 +266,27 @@ export async function answerForSelect(input: AnswerInput) {
   });
   const component = input.component;
   const screenDescription = focusSection.screenDescription;
-  if (component) {
-    const confirmationQuestion = await makeQuestionForConfirmation(
-      component,
-      screenDescription,
-      component.description || ""
-    );
-    await createAIChat({ content: confirmationQuestion });
-    return {
-      component: {
-        ...component,
-        actionType:
-          component.actionType === "select" ? "focus" : component.actionType,
-      },
-      type: "requestConfirmation",
-      actionValue: component.i + "---" + component.description,
-    };
-  } else {
-    const actionDescription = await getActionHistory(
-      component,
-      "Action Failed"
-    );
-    actionLogs.push({
-      type: focusSection.type,
-      id: focusSection.id,
-      screenDescription: focusSection.screenDescription,
-      actionDescription,
-    });
-    return await planningAndAsk();
-  }
+  const confirmationQuestion = await makeQuestionForSelectConfirmation(
+    component.description || "",
+    screenDescription,
+    input.content
+  );
+  await createAIChat({ content: confirmationQuestion });
+  return {
+    component: {
+      i: component.i,
+      description: component.description,
+      html: "",
+      actionType: typeof component.data === "string" ? "click" : "focus",
+    },
+    type: "requestConfirmation",
+    actionValue: component.i + "---" + component.description,
+  };
 }
 
 export async function confirm(
   input: ConfirmInput
-): Promise<AnswerResponse | OptionResponse | undefined> {
+): Promise<AnswerResponse | SelectResponse | undefined> {
   console.log("confirm");
   await createHumanChat(input);
   const component = input.component;

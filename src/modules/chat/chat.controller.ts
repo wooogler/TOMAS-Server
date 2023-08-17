@@ -4,6 +4,7 @@ import {
   ConfirmInput,
   CreateHumanChatInput,
   NavigateInput,
+  SelectInput,
 } from "./chat.schema";
 import {
   answerForInput,
@@ -58,7 +59,7 @@ export async function answerForInputHandler(
 }
 
 export async function answerForSelectHandler(
-  request: FastifyRequest<{ Body: AnswerInput }>
+  request: FastifyRequest<{ Body: SelectInput }>
 ) {
   const answerResponse = await answerForSelect(request.body);
   return answerResponse;

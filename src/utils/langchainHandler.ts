@@ -495,6 +495,39 @@ The description of the screen: ${screenDescription}`,
   ]);
 }
 
+export async function makeQuestionForSelectConfirmation(
+  componentDescription: string,
+  screenDescription: string,
+  actionValue?: string
+) {
+  const makeConfirmationPrompt: Prompt = {
+    role: "SYSTEM",
+    content: `Create a natural language question to ask whether the user wants to do the given action with value
+
+Action: Select ${componentDescription}
+Value: ${actionValue}
+
+The description of the screen: ${screenDescription}`,
+  };
+
+  const firstConfirmationPrompt: Prompt = {
+    role: "AI",
+    content: await getAiResponse([makeConfirmationPrompt]),
+  };
+
+  const modifyConfirmationPrompt: Prompt = {
+    role: "HUMAN",
+    content:
+      "The user does not see the screen and is unfamiliar with technology, so please do not mention the element and the action on the screen, and avoid the jargon, mechanical terms, and terms that are too specific to the webpage.",
+  };
+
+  return await getAiResponse([
+    makeConfirmationPrompt,
+    firstConfirmationPrompt,
+    modifyConfirmationPrompt,
+  ]);
+}
+
 export async function findInputTextValue(
   pageDescription: string,
   componentDescription: string | undefined,
