@@ -262,7 +262,7 @@ export async function answerForSelect(
   console.log("answerForSelect");
   await createHumanChat({
     ...input,
-    content: input.content.split(" ").slice(1).join(" "),
+    content: input.content,
   });
   const component = input.component;
   const screenDescription = focusSection.screenDescription;

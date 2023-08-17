@@ -243,9 +243,14 @@ ${extractSurroundingHtml(screenHtml, componentHtml)}
     content: await getAiResponse([extractComponentSystemPrompt]),
   };
 
+  // const modifyActionPrompt: Prompt = {
+  //   role: "HUMAN",
+  //   content: `Don't use the default value inside elements for the action and remove its attributes to identify each element. For example, 'Click the button to ' is allowed, but 'Click the "Change" button with/labeled ~' is not allowed.`,
+  // };
+
   const modifyActionPrompt: Prompt = {
     role: "HUMAN",
-    content: `Don't use the default value inside elements for the action and remove its attributes to identify each element. For example, 'Click the button to ' is allowed, but 'Click the "Change" button with/labeled ~' is not allowed.`,
+    content: `Don't refer to the default value inside elements to describe the action.`,
   };
 
   // const modifyActionPrompt: Prompt = {
@@ -255,8 +260,8 @@ ${extractSurroundingHtml(screenHtml, componentHtml)}
 
   const componentDescription = await getAiResponse([
     extractComponentSystemPrompt,
-    // firstActionPrompt,
-    // modifyActionPrompt,
+    firstActionPrompt,
+    modifyActionPrompt,
   ]);
 
   return componentDescription;
@@ -853,10 +858,7 @@ ${simpleItemHtml}`,
     return {
       data: item,
       i: actionComponents[index].i,
-      description: actionComponents[index].description
-        ?.split(" ")
-        .slice(1)
-        .join(" "),
+      description: actionComponents[index].description,
     };
   });
   return data;
