@@ -96,6 +96,7 @@ export const { schemas: chatSchemas, $ref } = buildJsonSchemas(
     answerInputSchema,
     confirmSchema,
     selectResponseSchema,
+    selectInputSchema,
   },
   {
     $id: "ChatSchema",

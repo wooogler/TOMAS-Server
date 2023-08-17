@@ -32,7 +32,9 @@ async function chatRoutes(server: FastifyInstance) {
       schema: {
         body: $ref("createHumanChatSchema"),
         response: {
-          201: $ref("answerResponseSchema"),
+          201: {
+            oneOf: [$ref("answerResponseSchema"), $ref("selectResponseSchema")],
+          },
         },
       },
     },
@@ -43,7 +45,7 @@ async function chatRoutes(server: FastifyInstance) {
     "/answer/input",
     {
       schema: {
-        body: $ref("answerSchema"),
+        body: $ref("answerInputSchema"),
         response: {
           201: $ref("answerResponseSchema"),
         },
@@ -56,7 +58,7 @@ async function chatRoutes(server: FastifyInstance) {
     "/answer/select",
     {
       schema: {
-        body: $ref("answerSchema"),
+        body: $ref("selectInputSchema"),
         response: {
           201: $ref("answerResponseSchema"),
         },
