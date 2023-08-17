@@ -260,7 +260,7 @@ export class PageHandler {
   //select one item in the list
   async select(
     selector: string,
-    isFocus: boolean = false,
+    isFocus: boolean = false, // focus on the selected item
     parsing: boolean = true
   ): Promise<ScreenResult> {
     const page = await this.getPage();

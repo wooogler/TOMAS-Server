@@ -55,15 +55,14 @@ const answerResponseSchema = z.object({
   actionValue: z.string().optional(),
 });
 
-const datumSchema = z
-  .object({
-    i: z.string(),
-    description: z.string(),
-  })
-  .and(z.record(z.union([z.string(), z.array(z.string())])));
+const datumSchema = z.object({
+  i: z.string(),
+  description: z.string().optional(),
+  data: z.any(),
+});
 
 const optionResponseSchema = z.object({
-  data: z.array(datumSchema),
+  components: z.array(datumSchema),
   type: z.string(),
 });
 

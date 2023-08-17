@@ -29,6 +29,7 @@ import {
   makeQuestionForConfirmation,
   getUsefulAttrFromList,
   getListFromSelectResult,
+  getDataFromHTML,
 } from "../../utils/langchainHandler";
 import { planningAgent } from "../agents";
 import { ActionType } from "../../utils/htmlHandler";
@@ -187,10 +188,7 @@ async function planningAndAsk(): Promise<
             content: `${question}`,
           });
           return {
-            data: await convertSelectResultIntoTable(
-              options.actionComponents,
-              screenDescription
-            ),
+            components: await getDataFromHTML(options),
             type: `questionForSelect`,
           };
         } else {

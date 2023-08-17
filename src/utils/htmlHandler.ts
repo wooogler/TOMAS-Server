@@ -113,6 +113,37 @@ const simplifyNestedStructure = (
   );
 };
 
+export const simplifyItemHtml = (html: string) => {
+  const dom = new JSDOM(html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, ""));
+  const document = dom.window.document;
+  const rootElement = document.body;
+
+  if (rootElement) {
+    removeSpecificTags(rootElement, ["path"]);
+    const attributesToKeep = [
+      "href",
+      "type",
+      "aria-label",
+      "role",
+      "checked",
+      "aria-expanded",
+      "aria-controls",
+      "readonly",
+      "role",
+      "alt",
+      "class",
+    ];
+    removeAttributes(rootElement, attributesToKeep, []);
+    removeEmptyElements(rootElement, ["input", "button", "label", "a"]);
+    simplifyNestedStructure(
+      rootElement,
+      ["div", "span"],
+      ["button", "input", "a", "select", "textarea"]
+    );
+  }
+  return rootElement.innerHTML.replace(/\s\s+/g, "");
+};
+
 export const simplifyHtml = (
   html: string,
   removeI: boolean = true,
@@ -441,8 +472,8 @@ export async function parsingItemAgent({
       const possibleInteractions = parsingPossibleInteractions(comp.outerHTML);
 
       const itemDescription = await getItemDescription({
-        itemHtml: simplifyHtml(comp.outerHTML, true),
-        screenHtml: simplifyHtml(screenHtml, true),
+        itemHtml: comp.outerHTML,
+        screenHtml: screenHtml,
         screenDescription: listDescription,
       });
 

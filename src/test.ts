@@ -1,11 +1,13 @@
 import dotenv from "dotenv";
 import { PageHandler, ScreenResult } from "../src/utils/pageHandler";
 import {
+  getDataFromHTML,
   makeQuestionForActionValue,
   makeQuestionForConfirmation,
 } from "./utils/langchainHandler";
 
 import { convertSelectResultIntoTable } from "../src/modules/chat/chat.service";
+import { simplifyHtml, simplifyItemHtml } from "./utils/htmlHandler";
 dotenv.config();
 
 // describe("pageHandler", () => {
@@ -23,8 +25,7 @@ async function main() {
     isQuestion: boolean = false
   ) => {
     const actionComponentsDescriptions = screen.actionComponents.map(
-      (comp) =>
-        `- ${comp.description} (action: ${comp.actionType}) (i=${comp.i})`
+      (comp) => `- ${comp.description} (i=${comp.i})`
     );
 
     console.log(`
@@ -60,32 +61,50 @@ ${questions.join("\n")}
   };
 
   logScreenResult(
-    await pageHandler.navigate("https://www.greyhound.com", true)
+    await pageHandler.navigate("https://www.greyhound.com", false)
   );
-  logScreenResult(
-    await pageHandler.click(".hcr-btn-7-6-0.hcr-btn--primary-7-6-0.lKKy1", true)
-  );
-  const selectRes = await pageHandler.select(
-    "#main-content > div > div > div > div.SearchResults__main___zj81o.search-results-main > div > div.ResultsList__container___JnkEA.ResultsList__animDone___I7PYN > div.ResultsList__resultsListPanel___Mr5mf.ResultsList__floatingFilter___autlh > figure:nth-child(3) > ul",
-    true
-  );
-  logScreenResult(selectRes);
-  const table = await convertSelectResultIntoTable(
-    selectRes.actionComponents,
-    selectRes.screenDescription
-  );
-  console.log(table);
+
+  // const screen = await pageHandler.select(
+  //   ".hcr-fieldset-7-6-0.OEcMX.Th_RO",
+  //   false,
+  //   true
+  // );
+
+  // logScreenResult(
+  //   await pageHandler.click(
+  //     ".hcr-btn-7-6-0.hcr-btn--primary-7-6-0.lKKy1",
+  //     false
+  //   )
+  // );
+
+  // const screen = await pageHandler.select(
+  //   ".ResultsList__resultsList___eGsLK",
+  //   false,
+  //   true
+  // );
+
+  // const table = await convertSelectResultIntoTable(
+  //   selectRes.actionComponents,
+  //   selectRes.screenDescription
+  // );
+  // console.log(table);
   // logScreenResult(await pageHandler.click("#dateInput-from", true));
 
-  // logScreenResult(await pageHandler.click("#searchInputMobile-from", false));
-  // logScreenResult(
-  //   await pageHandler.inputText("#searchInput-from", "South Bend", false)
-  // );
+  logScreenResult(await pageHandler.click("#searchInputMobile-from", false));
+  await pageHandler.inputText("#searchInput-from", "South Bend", false);
+
+  const screen = await pageHandler.select(
+    ".hcr-autocomplete__list-7-6-0",
+    false,
+    true
+  );
   // logScreenResult(await pageHandler.click('[i="1113"]', true));
   // await new Promise((r) => setTimeout(r, 300000));
 
   // logScreenResult(await pageHandler.click(".hcr-fieldset-7-6-0", true));
   // logScreenResult(await pageHandler.select(".hcr-fieldset-7-6-0", true));
+
+  console.log(await getDataFromHTML(screen));
   console.log("Done");
 }
 main();

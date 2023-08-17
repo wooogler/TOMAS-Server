@@ -5,8 +5,9 @@ import {
   HumanChatMessage,
   SystemChatMessage,
 } from "langchain/schema";
-import { ActionType, parsingItemAgent } from "./htmlHandler";
-import { ActionComponent } from "./pageHandler";
+import { ActionType, parsingItemAgent, simplifyItemHtml } from "./htmlHandler";
+import { ActionComponent, ScreenResult } from "./pageHandler";
+import { JSDOM } from "jsdom";
 
 export type Prompt = {
   role: "SYSTEM" | "HUMAN" | "AI";
@@ -41,9 +42,7 @@ export const getAiResponse = async (
   long: boolean = true
 ) => {
   const promptMessages = prompts.map((prompt) => {
-    const promptContent =
-      prompt.content.slice(0, MAX_CHARACTERS) +
-      "... [Content trimmed due to token limits]";
+    const promptContent = prompt.content.slice(0, MAX_CHARACTERS) + "...";
     if (prompt.role === "HUMAN") {
       return new HumanChatMessage(promptContent);
     } else if (prompt.role === "AI") {
@@ -222,7 +221,9 @@ export const getComponentInfo = async ({
 }) => {
   const extractComponentSystemPrompt: Prompt = {
     role: "SYSTEM",
-    content: `Describe the action that the user can take with its purpose, starting with '${editActionType(
+    content: `An user is looking at the web page screen. 
+
+Describe the action that the user can take on the given element with its purpose, starting with '${editActionType(
       actionType
     )} ' in a sentence.
 
@@ -244,13 +245,18 @@ ${extractSurroundingHtml(screenHtml, componentHtml)}
 
   const modifyActionPrompt: Prompt = {
     role: "HUMAN",
-    content: `Don't use the default value inside elements for the action because the user can change its value, and remove the wording to identify each element. For example, 'Click the button to ' is allowed, but 'Click the "Change" button with/labeled ~' is not allowed.`,
+    content: `Don't use the default value inside elements for the action and remove its attributes to identify each element. For example, 'Click the button to ' is allowed, but 'Click the "Change" button with/labeled ~' is not allowed.`,
   };
+
+  // const modifyActionPrompt: Prompt = {
+  //   role: "HUMAN",
+  //   content: `Remove descriptions of the element's features within the action`,
+  // };
 
   const componentDescription = await getAiResponse([
     extractComponentSystemPrompt,
-    firstActionPrompt,
-    modifyActionPrompt,
+    // firstActionPrompt,
+    // modifyActionPrompt,
   ]);
 
   return componentDescription;
@@ -303,13 +309,13 @@ ${screenDescription}`,
 
   const componentDescription = await getAiResponse([
     extractComponentSystemPrompt,
-    firstActionPrompt,
-    modifyActionPrompt,
+    // firstActionPrompt,
+    // modifyActionPrompt,
   ]);
   return componentDescription;
 };
 
-function removeBeforeAndIncludingRepresents(sentence: string): string {
+function removeBeforeAndIncludingKeyword(sentence: string): string {
   const keyword = "It is ";
   const index = sentence.indexOf(keyword);
 
@@ -342,7 +348,7 @@ ${screenDescription}
   };
 
   try {
-    return removeBeforeAndIncludingRepresents(
+    return removeBeforeAndIncludingKeyword(
       await getAiResponse([describeItemPrompt])
     );
   } catch (error) {
@@ -437,13 +443,55 @@ The description of the screen: ${screenDescription}
   const modifyQuestionPrompt: Prompt = {
     role: "HUMAN",
     content:
-      "The user does not see the screen and is unfamiliar with technology, so please do not mention the action on the screen, and avoid the jargon, mechanical terms, and terms that are too specific to the webpage.",
+      "The user does not see the screen and is unfamiliar with technology, so please do not mention the element and the action on the screen, and avoid the jargon, mechanical terms, and terms that are too specific to the webpage.",
   };
 
   return await getAiResponse([
     makeQuestionPrompt,
     firstQuestionPrompt,
     modifyQuestionPrompt,
+  ]);
+}
+
+function replaceClickWithSelect(sentence: string) {
+  if (sentence.startsWith("Click ")) {
+    return "Select" + sentence.slice(5);
+  }
+  return sentence;
+}
+
+export async function makeQuestionForConfirmation(
+  component: ActionComponent,
+  screenDescription: string,
+  actionValue?: string
+) {
+  const makeConfirmationPrompt: Prompt = {
+    role: "SYSTEM",
+    content: `Create a natural language question to ask whether the user wants to do the given action${
+      component.actionType === "input" ? " with value" : ""
+    }.
+
+Action: ${replaceClickWithSelect(component.description || "")}
+${component.actionType === "input" ? `Value: ${actionValue}` : ""}
+
+The description of the screen: ${screenDescription}`,
+  };
+
+  const firstConfirmationPrompt: Prompt = {
+    role: "AI",
+    content: await getAiResponse([makeConfirmationPrompt]),
+  };
+
+  const modifyConfirmationPrompt: Prompt = {
+    role: "HUMAN",
+    content:
+      "The user does not see the screen and is unfamiliar with technology, so please do not mention the element and the action on the screen, and avoid the jargon, mechanical terms, and terms that are too specific to the webpage.",
+  };
+
+  return await getAiResponse([
+    makeConfirmationPrompt,
+    firstConfirmationPrompt,
+    modifyConfirmationPrompt,
   ]);
 }
 
@@ -514,48 +562,6 @@ OR
   const response = await getAiResponse([inputComponentPrompt]);
   console.log(response);
   return response;
-}
-
-function replaceClickWithSelect(sentence: string) {
-  if (sentence.startsWith("Click ")) {
-    return "Select" + sentence.slice(5);
-  }
-  return sentence;
-}
-
-export async function makeQuestionForConfirmation(
-  component: ActionComponent,
-  screenDescription: string,
-  actionValue?: string
-) {
-  const makeConfirmationPrompt: Prompt = {
-    role: "SYSTEM",
-    content: `Create a natural language question to ask whether the user wants to do the given action${
-      component.actionType === "input" ? " with value" : ""
-    }.
-
-Action: ${replaceClickWithSelect(component.description || "")}
-${component.actionType === "input" ? `Value: ${actionValue}` : ""}
-
-The description of the screen: ${screenDescription}`,
-  };
-
-  const firstConfirmationPrompt: Prompt = {
-    role: "AI",
-    content: await getAiResponse([makeConfirmationPrompt]),
-  };
-
-  const modifyConfirmationPrompt: Prompt = {
-    role: "HUMAN",
-    content:
-      "The user does not see the screen and is unfamiliar with technology, so please do not mention the action on the screen, and avoid the jargon, mechanical terms, and terms that are too specific to the webpage.",
-  };
-
-  return await getAiResponse([
-    makeConfirmationPrompt,
-    firstConfirmationPrompt,
-    modifyConfirmationPrompt,
-  ]);
 }
 
 export async function getActionHistory(
@@ -667,21 +673,18 @@ export async function getUsefulAttrFromList(
   const makeListPrompts: Prompt[] = [
     {
       role: "SYSTEM",
-      content: `
-              You are the AI assistant who sees a list of items in webpage. For each item, there's a description and full html.
-              As a database developer, we want to create a table for those items to keep all useful information in html for user, and help user to select from those items.
-              Please help us to choose which attributes to keep.
-              Remember, our ultimate goal is to help the user to make their decision from those options based on the attribute we keep. 
-              Only keep the name of attributes. You do not have to keep an example of the attribute value.
-              The description of the webpage:${screenDescription}
-              The output should be like:
+      content: `You are the AI assistant who sees a list of items in webpage. For each item, there's a description and full html.
+As a database developer, we want to create a table for those items to keep all useful information in html for user, and help user to select from those items.
+Please help us to choose which attributes to keep.
+Remember, our ultimate goal is to help the user to make their decision from those options based on the attribute we keep. 
+Only keep the name of attributes. You do not have to keep an example of the attribute value.
+The description of the webpage:${screenDescription}
+The output should be like:
 - <attr1>
 - <attr2>
 - ...
 
-               Please do not include any other information in the output.
-              
-            `,
+Please do not include any other information in the output.`,
     },
     {
       role: "HUMAN",
@@ -696,6 +699,134 @@ export async function getUsefulAttrFromList(
     .filter((item) => item.startsWith("-"))
     .map((item) => item.replace(/^- */, "").trim());
   return array;
+}
+
+async function getAttrValueFromItem(
+  longComponent: ActionComponent,
+  screenDescription: string
+) {
+  const simpleItemHtml = simplifyItemHtml(longComponent.html);
+
+  const makeListPrompts: Prompt[] = [
+    {
+      role: "SYSTEM",
+      content: `Extract all useful information the users can see on the web browser for them to select the item they want. 
+
+Description of the section where the list is located:
+${screenDescription}
+
+HTML of one item in the list:
+${simpleItemHtml}
+
+Output the attributes and values in the following JSON format:
+
+{
+  <Attribute 1>: <value 1>,
+  <Attribute 2>: <value 2>,
+  ...
+}
+
+Please do not include any other information in the output.`,
+    },
+  ];
+
+  console.log(makeListPrompts[0].content);
+
+  const attrValue = await getGpt4Response(makeListPrompts);
+  console.log(attrValue);
+  return attrValue;
+}
+
+export async function getDataFromHTML(screen: ScreenResult) {
+  const { actionComponents, screenDescription } = screen;
+
+  const longComponent = actionComponents.reduce((longestItem, current) => {
+    return current.html.length > longestItem.html.length
+      ? current
+      : longestItem;
+  });
+
+  const shortComponent = actionComponents.reduce((shortestItem, current) => {
+    return current.html.length < shortestItem.html.length
+      ? current
+      : shortestItem;
+  });
+
+  const shortElement = new JSDOM(shortComponent.html).window.document.body;
+
+  let results = [];
+
+  if ((shortElement.textContent || "").length < 20) {
+    async function extractTextLabel(component: ActionComponent) {
+      const simpleItemHtml = simplifyItemHtml(component.html);
+
+      const makeTextLabelPrompts: Prompt[] = [
+        {
+          role: "SYSTEM",
+          content: `Generate the text label for the given HTML element.
+
+Description of the section where the element is located:
+${screenDescription}
+
+HTML of the element:
+${simpleItemHtml}`,
+        },
+      ];
+      return await getAiResponse(makeTextLabelPrompts);
+    }
+    results = await Promise.all(actionComponents.map(extractTextLabel));
+  } else {
+    const attrValue = await getAttrValueFromItem(
+      longComponent,
+      screenDescription
+    );
+
+    async function processComponent(component: ActionComponent) {
+      const simpleItemHtml = simplifyItemHtml(component.html);
+      const makeItemPrompts: Prompt[] = [
+        {
+          role: "SYSTEM",
+          content: `Extract the information from the given HTML element using the same attribute with the example.
+  
+  Here is an example of another element in the same list.
+  ${attrValue}
+  
+  HTML of the element:
+  ${simpleItemHtml}
+  
+  Output the attributes and values in the following JSON format:
+  
+  {
+    <attr1>: <val1>,
+    <attr2>: <val2>,
+    ...
+  }
+  
+  Please do not include any other information in the output.
+  `,
+        },
+      ];
+
+      const jsonString = await getAiResponse(makeItemPrompts);
+      const jsonObject = JSON.parse(jsonString);
+
+      return jsonObject;
+    }
+
+    results = await Promise.all(actionComponents.map(processComponent));
+  }
+
+  const data = results.map((item, index) => {
+    return {
+      data: item,
+      i: actionComponents[index].i,
+      description: actionComponents[index].description
+        ?.split(" ")
+        .slice(1)
+        .join(" "),
+    };
+  });
+  return data;
 }
 
 export async function getListFromSelectResult(
