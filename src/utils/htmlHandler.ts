@@ -514,7 +514,6 @@ export async function parsingItemAgent({
     async (comp, index) => {
       const iAttr = comp.getAttribute("i");
       const possibleInteractions = parsingPossibleInteractions(comp.innerHTML);
-      console.log(possibleInteractions);
 
       if (possibleInteractions.length === 0) {
         return [];
@@ -539,8 +538,6 @@ export async function parsingItemAgent({
           },
         ];
       } else {
-        console.log("multiple interactions");
-
         const partDescription = await getPartDescription({
           itemHtml: comp.outerHTML,
           screenHtml: screenHtml,
@@ -549,10 +546,11 @@ export async function parsingItemAgent({
 
         if (possibleInteractions.length > 5) {
           // find every possible interactions
-          return await parsingAgent({
+          const components = await parsingAgent({
             screenHtml: comp.innerHTML,
             screenDescription: partDescription || "",
           });
+          return components;
         } else {
           return [
             {

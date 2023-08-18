@@ -8,6 +8,7 @@ import {
   simplifyHtml,
 } from "./htmlHandler";
 import {
+  editActionType,
   getModalDescription,
   getPageDescription,
   getSectionDescription,
@@ -294,7 +295,10 @@ export class PageHandler {
     return {
       type: "section",
       screenDescription: sectionDescription,
-      actionComponents: itemComponents,
+      actionComponents: itemComponents.map((item) => ({
+        ...item,
+        description: item.description,
+      })),
       id: `${this.extractBaseURL(page.url())}section/${element?.getAttribute(
         "i"
       )}`,

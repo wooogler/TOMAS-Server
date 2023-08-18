@@ -250,7 +250,7 @@ ${extractSurroundingHtml(screenHtml, componentHtml)}
 
   const modifyActionPrompt: Prompt = {
     role: "HUMAN",
-    content: `Don't refer to the default value inside elements to describe the action.`,
+    content: `Don't refer to the default value inside elements to describe the action. Don't apologize.`,
   };
 
   // const modifyActionPrompt: Prompt = {
@@ -283,37 +283,44 @@ export const getSelectInfo = async ({
     screenDescription,
   });
 
-  const listString = components
-    .map((component) => `- ${component.description}`)
-    .join("\n");
+  let extractComponentSystemPrompt: Prompt;
 
-  const extractComponentSystemPrompt: Prompt = {
-    role: "SYSTEM",
-    content: `Describe the action the user can take, starting with "Select one ".
+  if (components[0].actionType === "click") {
+    extractComponentSystemPrompt = {
+      role: "SYSTEM",
+      content: `Describe the action the user can take on the section in one sentence, starting with 'Select one '
 
-UI Elements on the screen:
-${listString}
+This is the HTML code of the section:
+${componentHtml}
 
-The description of the screen where the elements are located:
-${screenDescription}`,
-  };
+This is the description of the screen where the element is located:
+${screenDescription}
 
-  console.log(extractComponentSystemPrompt.content);
+This is the HTML code of the screen:
+${screenHtml}`,
+    };
+  } else {
+    const listString = components
+      .map((component) => `- ${component.description}`)
+      .join("\n");
 
-  const firstActionPrompt: Prompt = {
-    role: "AI",
-    content: await getAiResponse([extractComponentSystemPrompt]),
-  };
+    extractComponentSystemPrompt = {
+      role: "SYSTEM",
+      content: `Describe the user's action refering to the items in the list in one sentence, starting with 'Select one '.
 
-  const modifyActionPrompt: Prompt = {
-    role: "HUMAN",
-    content: `Don't use the default value inside the element to describe the action because the user can change its value.`,
-  };
+Items in the list:
+${listString} 
+
+The description of the screen where the list is located:
+${screenDescription}
+
+This is the HTML code of the screen:
+${screenHtml}`,
+    };
+  }
 
   const componentDescription = await getAiResponse([
     extractComponentSystemPrompt,
-    // firstActionPrompt,
-    // modifyActionPrompt,
   ]);
   return componentDescription;
 };
@@ -592,7 +599,6 @@ OR
 }
         `,
   };
-  console.log("inputComponentPrompt: ", inputComponentPrompt.content);
   return await getAiResponse([inputComponentPrompt]);
 }
 
@@ -800,7 +806,6 @@ Please do not include any other information in the output.`,
   console.log(makeListPrompts[0].content);
 
   const attrValue = await getGpt4Response(makeListPrompts);
-  console.log(attrValue);
   return attrValue;
 }
 
