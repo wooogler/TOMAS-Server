@@ -277,7 +277,7 @@ export async function answerForSelect(
       i: component.i,
       description: component.description,
       html: "",
-      actionType: typeof component.data === "string" ? "click" : "focus",
+      actionType: component.actionType as ActionType,
     },
     type: "requestConfirmation",
     actionValue: component.i + "---" + component.description,

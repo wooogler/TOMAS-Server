@@ -845,7 +845,7 @@ export async function getDataFromHTML(screen: ScreenResult) {
       data: item,
       i: actionComponents[index].i,
       description: actionComponents[index].description,
-      actionType: "focus",
+      actionType: actionComponents[index].actionType,
     };
   });
   return data;
