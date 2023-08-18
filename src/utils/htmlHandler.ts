@@ -606,6 +606,10 @@ export async function parsingAgent({
               screenDescription,
             });
 
+      if (componentDescription === null) {
+        return null;
+      }
+
       return {
         i: iAttr,
         actionType: interaction.actionType,
@@ -616,10 +620,5 @@ export async function parsingAgent({
   );
 
   const actionComponents = await Promise.all(actionComponentsPromises);
-  // console.log(
-  //   actionComponents
-  //     .map((comp) => `- ${comp.description} (i=${comp.i})`)
-  //     .join("\n")
-  // );
-  return actionComponents;
+  return actionComponents.filter((comp) => comp !== null) as ActionComponent[];
 }
