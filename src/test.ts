@@ -72,7 +72,7 @@ ${questions.join("\n")}
   // );
 
   // select the departure
-  // logScreenResult(await pageHandler.click("#searchInputMobile-from", true));
+  logScreenResult(await pageHandler.click("#searchInputMobile-from", true));
 
   // input the passenger number
   // logScreenResult(
@@ -82,16 +82,16 @@ ${questions.join("\n")}
   // logScreenResult(await pageHandler.select(".rySY1", true, true));
 
   // input the calendar
-  logScreenResult(await pageHandler.click("#dateInput-from", true));
-  logScreenResult(
-    await pageHandler.select(".hcr-clndr-7-6-0.wnaY8", false, true)
-  );
-  logScreenResult(
-    await pageHandler.select("table.hcr-clndr__table-7-6-0", false, true)
-  );
-  logScreenResult(
-    await pageHandler.select(".hcr-clndr__table-7-6-0 > tbody", true, true)
-  );
+  // logScreenResult(await pageHandler.click("#dateInput-from", true));
+  // logScreenResult(
+  //   await pageHandler.select(".hcr-clndr-7-6-0.wnaY8", false, true)
+  // );
+  // logScreenResult(
+  //   await pageHandler.select("table.hcr-clndr__table-7-6-0", false, true)
+  // );
+  // logScreenResult(
+  //   await pageHandler.select(".hcr-clndr__table-7-6-0 > tbody", true, true)
+  // );
 
   // const screen = await pageHandler.select(
   //   ".ResultsList__resultsList___eGsLK",

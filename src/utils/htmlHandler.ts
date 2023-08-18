@@ -583,6 +583,8 @@ export async function parsingAgent({
   const dom = new JSDOM(screenHtml);
   const body = dom.window.document.body;
 
+  console.log(possibleInteractions);
+
   const actionComponentsPromises = possibleInteractions.map(
     async (interaction) => {
       const iAttr = interaction.i;
