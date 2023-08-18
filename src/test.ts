@@ -63,7 +63,7 @@ ${questions.join("\n")}
   };
 
   logScreenResult(
-    await pageHandler.navigate("https://www.greyhound.com", true)
+    await pageHandler.navigate("https://www.greyhound.com", false)
   );
 
   // select the trip type
@@ -72,7 +72,10 @@ ${questions.join("\n")}
   // );
 
   // select the departure
-  logScreenResult(await pageHandler.click("#searchInputMobile-from", true));
+  logScreenResult(await pageHandler.click("#searchInputMobile-from", false));
+  logScreenResult(
+    await pageHandler.inputText("#searchInput-from", "South Bend", true)
+  );
 
   // input the passenger number
   // logScreenResult(

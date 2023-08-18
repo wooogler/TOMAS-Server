@@ -471,18 +471,6 @@ function elementTextLength(html: string) {
   return body.textContent?.length || 0;
 }
 
-function elementTagName(html: string) {
-  const dom = new JSDOM(html);
-  const body = dom.window.document.body;
-  return body.firstElementChild?.tagName.toLowerCase() || "";
-}
-
-function extractElement(html: string, iAttr: string) {
-  const dom = new JSDOM(html);
-  const body = dom.window.document.body;
-  return body.querySelector(`[i="${iAttr}"]`)?.outerHTML || "";
-}
-
 export async function parsingItemAgent({
   screenHtml,
   screenDescription,
@@ -512,8 +500,9 @@ export async function parsingItemAgent({
 
   const itemComponentsPromises = components.map<Promise<ActionComponent[]>>(
     async (comp, index) => {
+      console.log(comp.outerHTML);
       const iAttr = comp.getAttribute("i");
-      const possibleInteractions = parsingPossibleInteractions(comp.innerHTML);
+      const possibleInteractions = parsingPossibleInteractions(comp.outerHTML);
 
       if (possibleInteractions.length === 0) {
         return [];
@@ -592,14 +581,14 @@ export async function parsingAgent({
       const componentDescription =
         actionType === "select"
           ? await getSelectInfo({
-              componentHtml: simplifyHtml(componentHtml, false) || "",
-              screenHtml: simplifyHtml(screenHtml, false),
+              componentHtml: componentHtml || "",
+              screenHtml: screenHtml,
               actionType: interaction.actionType,
               screenDescription,
             })
           : await getComponentInfo({
-              componentHtml: simplifyHtml(componentHtml, false) || "",
-              screenHtml: simplifyHtml(screenHtml, false),
+              componentHtml: componentHtml || "",
+              screenHtml: screenHtml,
               actionType: interaction.actionType,
               screenDescription,
             });
