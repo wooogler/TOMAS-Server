@@ -292,7 +292,7 @@ export const getSelectInfo = async ({
   if (components[0].actionType === "click") {
     extractComponentSystemPrompt = {
       role: "SYSTEM",
-      content: `Describe the action the user can take on the section in one sentence, starting with 'Click one '
+      content: `Describe the action the user can take on the section in one sentence, starting with 'Select one '
 
 This is the HTML code of the section:
 ${componentHtml}
