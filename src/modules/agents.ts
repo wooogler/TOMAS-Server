@@ -25,6 +25,19 @@ export async function planningAgent(
   userContext: string,
   systemContext: string
 ) {
+  //   userContext = `The user wants to book a one-way bus ticket from South Bend, IN, USA to Chicago, IL, USA.`;
+  //   systemContext = `In the page: The general purpose of the web page is to provide information and services related to bus travel, including trip planning, ticket booking, route maps, travel information, and customer support.
+  //   - The system clicked on a radio button labeled "One Way" that was already selected, allowing the user to choose a one-way trip.
+  //   - The system clicked on the "Departing from Los Angeles, CA" button to choose the location from where you want to depart for your bus trip.
+  //  In the modal: The general purpose of the modal in the web page is to allow the user to select their departure location for bus travel.
+  //   - The system input 'South Bend' in the departure location text field.
+  //   - The system clicked on a list item that displayed the location "South Bend, IN" in the USA.
+  //  In the page: The general purpose of the web page is to provide information and services related to bus travel, including trip planning, ticket booking, travel information, and customer support.
+  //   - The system clicked on the button labeled "Arriving at Las Vegas, NV" to select the destination for the bus trip.
+  //  In the modal: The general purpose of the modal in the web page is to allow the user to select a destination for their bus travel.
+  //   - The user input 'Chicago' as the desired destination for the bus travel.
+  //   - The system clicked on a list item that displayed the location "Chicago, IL" in the USA.`;
+
   const planningActionPromptForSystem: Prompt = {
     role: "SYSTEM",
     content: `
@@ -58,6 +71,7 @@ Do not include any headers before your list or follow your list with any other o
 If you cannot find any actions to achieve the user's objective with possible actions in this part, return "No plans".
     `,
   };
+
   const planningActionPromptForUser: Prompt = {
     role: "HUMAN",
     content: `

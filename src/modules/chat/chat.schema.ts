@@ -64,6 +64,7 @@ const selectSchema = z.object({
   i: z.string(),
   description: z.string().optional(),
   data: optionSchema,
+  actionType: z.string(),
 });
 
 const selectResponseSchema = z.object({

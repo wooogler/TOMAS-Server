@@ -181,8 +181,8 @@ const capitalizeFirstCharacter = (str: string) =>
   str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 
 export const editActionType = (actionType: ActionType) => {
-  const action = actionType === "focus" ? "select" : actionType;
-  const actionName = capitalizeFirstCharacter(action);
+  // const action = actionType === "focus" ? "select" : actionType;
+  const actionName = capitalizeFirstCharacter(actionType);
   return actionName;
 };
 
@@ -794,25 +794,11 @@ export async function getDataFromHTML(screen: ScreenResult) {
 
   let results = [];
 
-  if ((shortElement.textContent || "").length < 20) {
-    async function extractTextLabel(component: ActionComponent) {
-      const simpleItemHtml = simplifyItemHtml(component.html);
-
-      const makeTextLabelPrompts: Prompt[] = [
-        {
-          role: "SYSTEM",
-          content: `Generate the text label for the given HTML element.
-
-Description of the section where the element is located:
-${screenDescription}
-
-HTML of the element:
-${simpleItemHtml}`,
-        },
-      ];
-      return await getAiResponse(makeTextLabelPrompts);
-    }
-    results = await Promise.all(actionComponents.map(extractTextLabel));
+  if (
+    (shortElement.textContent || "").length < 20 ||
+    actionComponents.length > 5
+  ) {
+    results = actionComponents.map((comp) => comp.description);
   } else {
     const attrValue = await getAttrValueFromItem(
       longComponent,
@@ -859,6 +845,7 @@ ${simpleItemHtml}`,
       data: item,
       i: actionComponents[index].i,
       description: actionComponents[index].description,
+      actionType: "focus",
     };
   });
   return data;
@@ -912,4 +899,25 @@ ${screenDescription}
   } catch (error) {
     console.log("error in parsing json: ", error);
   }
+}
+
+export async function extractTextLabelFromHTML(
+  itemHtml: string,
+  screenDescription: string
+) {
+  const simpleItemHtml = simplifyItemHtml(itemHtml);
+
+  const makeTextLabelPrompts: Prompt[] = [
+    {
+      role: "SYSTEM",
+      content: `Generate the text label for the given HTML element.
+
+Description of the section where the element is located:
+${screenDescription}
+
+HTML of the element:
+${simpleItemHtml}`,
+    },
+  ];
+  return await getAiResponse(makeTextLabelPrompts);
 }
