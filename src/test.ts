@@ -71,28 +71,24 @@ ${questions.join("\n")}
   //   await pageHandler.select(".hcr-fieldset-7-6-0.OEcMX.Th_RO", false, true)
   // );
 
-  // // input the passenger number
+  // input the passenger number
   // logScreenResult(
   //   await pageHandler.click('[aria-label="1 Adult, Add passengers"]', true)
   // );
-
   // logScreenResult(await pageHandler.select(".avRmL", false, true));
-
   // logScreenResult(await pageHandler.select(".rySY1", true, true));
 
   // input the calendar
   logScreenResult(await pageHandler.click("#dateInput-from", false));
   logScreenResult(
-    await pageHandler.select(".hcr-clndr-7-6-0.wnaY8", false, false)
+    await pageHandler.select(".hcr-clndr-7-6-0.wnaY8", false, true)
   );
-
   logScreenResult(
-    await pageHandler.select(".hcr-clndr__table-7-6-0", false, true)
+    await pageHandler.select("table.hcr-clndr__table-7-6-0", false, true)
   );
-
-  logScreenResult(
-    await pageHandler.select(".hcr-clndr__table-7-6-0 > tbody", true, true)
-  );
+  // logScreenResult(
+  //   await pageHandler.select(".hcr-clndr__table-7-6-0 > tbody", true, true)
+  // );
 
   // const screen = await pageHandler.select(
   //   ".ResultsList__resultsList___eGsLK",

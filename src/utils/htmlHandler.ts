@@ -345,6 +345,7 @@ function createActionType(interactiveElement: Element): ActionType {
 export interface PossibleInteractions {
   actionType: ActionType;
   i: string;
+  tagName?: string;
 }
 
 const INFO_TAG_LIST = ["img", "a", "button", "input", "select"];
@@ -443,6 +444,7 @@ export function parsingPossibleInteractions(
       possibleInteractions.push({
         actionType: actionType,
         i: interactiveElement.getAttribute("i")!,
+        tagName: interactiveElement.tagName.toLowerCase(),
       });
     }
   });
@@ -469,6 +471,18 @@ function elementTextLength(html: string) {
   return body.textContent?.length || 0;
 }
 
+function elementTagName(html: string) {
+  const dom = new JSDOM(html);
+  const body = dom.window.document.body;
+  return body.firstElementChild?.tagName.toLowerCase() || "";
+}
+
+function extractElement(html: string, iAttr: string) {
+  const dom = new JSDOM(html);
+  const body = dom.window.document.body;
+  return body.querySelector(`[i="${iAttr}"]`)?.outerHTML || "";
+}
+
 export async function parsingItemAgent({
   screenHtml,
   screenDescription,
@@ -492,7 +506,6 @@ export async function parsingItemAgent({
       screenHtml,
       screenDescription: listDescription,
     });
-    console.log(rootElement.outerHTML);
     return components;
   }
   const components = Array.from(rootElement.children);
@@ -500,7 +513,7 @@ export async function parsingItemAgent({
   const itemComponentsPromises = components.map<Promise<ActionComponent[]>>(
     async (comp, index) => {
       const iAttr = comp.getAttribute("i");
-      const possibleInteractions = parsingPossibleInteractions(comp.outerHTML);
+      const possibleInteractions = parsingPossibleInteractions(comp.innerHTML);
       console.log(possibleInteractions);
 
       if (possibleInteractions.length === 0) {
@@ -508,7 +521,8 @@ export async function parsingItemAgent({
       } else if (possibleInteractions.length == 1) {
         const actionType = possibleInteractions[0].actionType;
         const itemDescription =
-          elementTextLength(comp.outerHTML) < 30
+          elementTextLength(comp.outerHTML) < 30 ||
+          possibleInteractions[0].tagName === "table"
             ? await extractTextLabelFromHTML(comp.outerHTML, screenDescription)
             : await getItemDescription({
                 itemHtml: comp.outerHTML,
@@ -519,25 +533,36 @@ export async function parsingItemAgent({
         return [
           {
             i: possibleInteractions[0].i,
-            actionType,
+            actionType: actionType,
             description: itemDescription,
             html: comp.outerHTML,
           },
         ];
       } else {
+        console.log("multiple interactions");
+
         const partDescription = await getPartDescription({
           itemHtml: comp.outerHTML,
           screenHtml: screenHtml,
           screenDescription: listDescription,
         });
-        return [
-          {
-            i: iAttr || "",
-            actionType: "focus",
-            description: partDescription,
-            html: comp.outerHTML,
-          },
-        ];
+
+        if (possibleInteractions.length > 5) {
+          // find every possible interactions
+          return await parsingAgent({
+            screenHtml: comp.innerHTML,
+            screenDescription: partDescription || "",
+          });
+        } else {
+          return [
+            {
+              i: iAttr || "",
+              actionType: "focus",
+              description: partDescription,
+              html: comp.outerHTML,
+            },
+          ];
+        }
       }
     }
   );

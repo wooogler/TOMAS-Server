@@ -289,11 +289,9 @@ export const getSelectInfo = async ({
 
   const extractComponentSystemPrompt: Prompt = {
     role: "SYSTEM",
-    content: `Describe the action the user can take in one single sentence, starting with '${
-      components[0].actionType === "click" ? "Select one" : "Read"
-    }'.
+    content: `Describe the action the user can take, starting with "Select one ".
 
-Elements on the screen:
+UI Elements on the screen:
 ${listString}
 
 The description of the screen where the elements are located:
