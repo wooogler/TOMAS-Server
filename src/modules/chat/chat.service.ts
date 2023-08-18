@@ -164,7 +164,7 @@ async function planningAndAsk(): Promise<
 
           const actionValue = valueBasedOnHistory.value;
           // If user context is not enough to answer the question
-          if (actionValue === null) {
+          if (actionValue === null || actionValue === "") {
             const question = await makeQuestionForActionValue(
               screenDescription,
               component.description

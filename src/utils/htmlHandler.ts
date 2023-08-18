@@ -164,7 +164,7 @@ export const simplifyHtml = (
       "meta",
     ]);
 
-    const attributesToKeepForAllComps = ["href"];
+    const attributesToKeepForAllComps = ["href", "clickable"];
     if (isClass === true) {
       attributesToKeepForAllComps.push("class");
     }
@@ -187,6 +187,7 @@ export const simplifyHtml = (
       "readonly",
       "role",
       "alt",
+      "clickable",
     ];
     if (isClass === true) {
       attributesToKeepForActionComps.push("class");
@@ -500,7 +501,6 @@ export async function parsingItemAgent({
 
   const itemComponentsPromises = components.map<Promise<ActionComponent[]>>(
     async (comp, index) => {
-      console.log(comp.outerHTML);
       const iAttr = comp.getAttribute("i");
       const possibleInteractions = parsingPossibleInteractions(comp.outerHTML);
 
@@ -581,14 +581,14 @@ export async function parsingAgent({
       const componentDescription =
         actionType === "select"
           ? await getSelectInfo({
-              componentHtml: componentHtml || "",
-              screenHtml: screenHtml,
+              componentHtml: simplifyHtml(componentHtml, false) || "",
+              screenHtml: simplifyHtml(screenHtml, false),
               actionType: interaction.actionType,
               screenDescription,
             })
           : await getComponentInfo({
-              componentHtml: componentHtml || "",
-              screenHtml: screenHtml,
+              componentHtml: simplifyHtml(componentHtml, false) || "",
+              screenHtml: simplifyHtml(screenHtml, false),
               actionType: interaction.actionType,
               screenDescription,
             });

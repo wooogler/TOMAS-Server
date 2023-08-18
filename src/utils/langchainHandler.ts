@@ -285,8 +285,6 @@ export const getSelectInfo = async ({
 
   let extractComponentSystemPrompt: Prompt;
 
-  console.log(components);
-
   if (components.length === 0) {
     return null;
   }
