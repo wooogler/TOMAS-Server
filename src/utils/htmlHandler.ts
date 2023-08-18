@@ -5,6 +5,7 @@ import {
   getComponentInfo,
   getItemDescription,
   getListDescription,
+  getPartDescription,
   getSelectInfo,
 } from "./langchainHandler";
 import { ActionComponent } from "./pageHandler";
@@ -288,11 +289,26 @@ export function findRepeatingComponents(html: string) {
 
 export type ActionType = "select" | "input" | "click" | "focus" | "item";
 
+const inputTypes = [
+  "text",
+  "password",
+  "search",
+  "url",
+  "tel",
+  "email",
+  "number",
+  "date",
+  "datetime-local",
+  "time",
+  "month",
+  "week",
+];
+
 function createActionType(interactiveElement: Element): ActionType {
   switch (interactiveElement.tagName.toLowerCase()) {
     case "input":
       const type = interactiveElement.getAttribute("type");
-      if (!type || type === "text") return "input";
+      if (!type || inputTypes.includes(type)) return "input";
       if (["checkbox", "radio", "button"].includes(type)) return "click";
       break;
     case "button":
@@ -447,6 +463,12 @@ function comparePossibleInteractions(
   return 0;
 }
 
+function elementTextLength(html: string) {
+  const dom = new JSDOM(html);
+  const body = dom.window.document.body;
+  return body.textContent?.length || 0;
+}
+
 export async function parsingItemAgent({
   screenHtml,
   screenDescription,
@@ -467,9 +489,10 @@ export async function parsingItemAgent({
   }
   if (isFocus) {
     const components = await parsingAgent({
-      screenHtml: rootElement.outerHTML,
+      screenHtml,
       screenDescription: listDescription,
     });
+    console.log(rootElement.outerHTML);
     return components;
   }
   const components = Array.from(rootElement.children);
@@ -478,27 +501,31 @@ export async function parsingItemAgent({
     async (comp, index) => {
       const iAttr = comp.getAttribute("i");
       const possibleInteractions = parsingPossibleInteractions(comp.outerHTML);
+      console.log(possibleInteractions);
 
       if (possibleInteractions.length === 0) {
         return [];
       } else if (possibleInteractions.length == 1) {
-        const itemLabel = await extractTextLabelFromHTML(
-          comp.outerHTML,
-          screenDescription
-        );
+        const actionType = possibleInteractions[0].actionType;
+        const itemDescription =
+          elementTextLength(comp.outerHTML) < 30
+            ? await extractTextLabelFromHTML(comp.outerHTML, screenDescription)
+            : await getItemDescription({
+                itemHtml: comp.outerHTML,
+                screenHtml: screenHtml,
+                screenDescription: listDescription,
+              });
+
         return [
           {
             i: possibleInteractions[0].i,
-            actionType: possibleInteractions[0].actionType,
-            description: itemLabel,
+            actionType,
+            description: itemDescription,
             html: comp.outerHTML,
           },
         ];
-      } else if (
-        possibleInteractions.length > 1 &&
-        possibleInteractions.length < 5
-      ) {
-        const itemDescription = await getItemDescription({
+      } else {
+        const partDescription = await getPartDescription({
           itemHtml: comp.outerHTML,
           screenHtml: screenHtml,
           screenDescription: listDescription,
@@ -507,20 +534,7 @@ export async function parsingItemAgent({
           {
             i: iAttr || "",
             actionType: "focus",
-            description: itemDescription,
-            html: comp.outerHTML,
-          },
-        ];
-      } else {
-        const itemLabel = await extractTextLabelFromHTML(
-          comp.outerHTML,
-          screenDescription
-        );
-        return [
-          {
-            i: iAttr || "",
-            actionType: "focus",
-            description: itemLabel,
+            description: partDescription,
             html: comp.outerHTML,
           },
         ];

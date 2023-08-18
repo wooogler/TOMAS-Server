@@ -26,7 +26,8 @@ async function main() {
     isQuestion: boolean = false
   ) => {
     const actionComponentsDescriptions = screen.actionComponents.map(
-      (comp) => `- ${comp.description} (i=${comp.i})`
+      (comp) =>
+        `- ${comp.description} (actionType=${comp.actionType}) (i=${comp.i})`
     );
 
     console.log(`
@@ -65,24 +66,39 @@ ${questions.join("\n")}
     await pageHandler.navigate("https://www.greyhound.com", false)
   );
 
+  // // select the trip type
+  // logScreenResult(
+  //   await pageHandler.select(".hcr-fieldset-7-6-0.OEcMX.Th_RO", false, true)
+  // );
+
+  // // input the passenger number
+  // logScreenResult(
+  //   await pageHandler.click('[aria-label="1 Adult, Add passengers"]', true)
+  // );
+
+  // logScreenResult(await pageHandler.select(".avRmL", false, true));
+
+  // logScreenResult(await pageHandler.select(".rySY1", true, true));
+
+  // input the calendar
+  logScreenResult(await pageHandler.click("#dateInput-from", false));
+  logScreenResult(
+    await pageHandler.select(".hcr-clndr-7-6-0.wnaY8", false, false)
+  );
+
+  logScreenResult(
+    await pageHandler.select(".hcr-clndr__table-7-6-0", false, true)
+  );
+
+  logScreenResult(
+    await pageHandler.select(".hcr-clndr__table-7-6-0 > tbody", true, true)
+  );
+
   // const screen = await pageHandler.select(
-  //   ".hcr-fieldset-7-6-0.OEcMX.Th_RO",
+  //   ".ResultsList__resultsList___eGsLK",
   //   false,
   //   true
   // );
-
-  logScreenResult(
-    await pageHandler.click(
-      ".hcr-btn-7-6-0.hcr-btn--primary-7-6-0.lKKy1",
-      false
-    )
-  );
-
-  const screen = await pageHandler.select(
-    ".ResultsList__resultsList___eGsLK",
-    false,
-    true
-  );
 
   // const table = await convertSelectResultIntoTable(
   //   selectRes.actionComponents,
@@ -105,15 +121,15 @@ ${questions.join("\n")}
   // logScreenResult(await pageHandler.click(".hcr-fieldset-7-6-0", true));
   // logScreenResult(await pageHandler.select(".hcr-fieldset-7-6-0", true));
 
-  const data = await getDataFromHTML(screen);
+  // const data = await getDataFromHTML(screen);
 
-  fs.writeFile("data.json", JSON.stringify(data, null, 2), (err) => {
-    if (err) {
-      console.error("Error writing file", err);
-    } else {
-      console.log("Successfully wrote to data.json");
-    }
-  });
+  // fs.writeFile("data.json", JSON.stringify(data, null, 2), (err) => {
+  //   if (err) {
+  //     console.error("Error writing file", err);
+  //   } else {
+  //     console.log("Successfully wrote to data.json");
+  //   }
+  // });
 
   console.log("Done");
 }

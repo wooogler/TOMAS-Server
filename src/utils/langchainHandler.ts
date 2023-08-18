@@ -284,23 +284,23 @@ export const getSelectInfo = async ({
   });
 
   const listString = components
-    .map(
-      (component) => `- ${component.description?.split(" ").slice(1).join(" ")}`
-    )
+    .map((component) => `- ${component.description}`)
     .join("\n");
 
   const extractComponentSystemPrompt: Prompt = {
     role: "SYSTEM",
-    content: `Describe the action the user can take in one single sentence, starting with '${editActionType(
-      actionType
-    )} one'
+    content: `Describe the action the user can take in one single sentence, starting with '${
+      components[0].actionType === "click" ? "Select one" : "Read"
+    }'.
 
-List in the screen:
+Elements on the screen:
 ${listString}
 
-The description of the screen where the element is located:
+The description of the screen where the elements are located:
 ${screenDescription}`,
   };
+
+  console.log(extractComponentSystemPrompt.content);
 
   const firstActionPrompt: Prompt = {
     role: "AI",
@@ -348,6 +348,37 @@ HTML of the item:
 ${itemHtml}
 
 Description of the list:
+${screenDescription}
+`,
+  };
+
+  try {
+    return removeBeforeAndIncludingKeyword(
+      await getAiResponse([describeItemPrompt])
+    );
+  } catch (error) {
+    console.error("Error in loading item info: ", error);
+  }
+};
+
+export const getPartDescription = async ({
+  itemHtml,
+  screenHtml,
+  screenDescription,
+}: {
+  itemHtml: string;
+  screenHtml: string;
+  screenDescription: string;
+}) => {
+  const describeItemPrompt: Prompt = {
+    role: "SYSTEM",
+    content: `
+Describe the part of the screen in one sentence starting "It is ". 
+
+HTML of the part of webpage:
+${itemHtml}
+
+Description of the section where the item is located:
 ${screenDescription}
 `,
   };
