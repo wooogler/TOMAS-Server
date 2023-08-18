@@ -812,12 +812,6 @@ Please do not include any other information in the output.`,
 export async function getDataFromHTML(screen: ScreenResult) {
   const { actionComponents, screenDescription } = screen;
 
-  const longComponent = actionComponents.reduce((longestItem, current) => {
-    return current.html.length > longestItem.html.length
-      ? current
-      : longestItem;
-  });
-
   const shortComponent = actionComponents.reduce((shortestItem, current) => {
     return current.html.length < shortestItem.html.length
       ? current
@@ -828,12 +822,14 @@ export async function getDataFromHTML(screen: ScreenResult) {
 
   let results = [];
 
-  if (
-    (shortElement.textContent || "").length < 20 ||
-    actionComponents.length > 5
-  ) {
+  if ((shortElement.textContent || "").length < 30) {
     results = actionComponents.map((comp) => comp.description);
   } else {
+    const longComponent = actionComponents.reduce((longestItem, current) => {
+      return current.html.length > longestItem.html.length
+        ? current
+        : longestItem;
+    });
     const attrValue = await getAttrValueFromItem(
       longComponent,
       screenDescription

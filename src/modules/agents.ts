@@ -58,7 +58,7 @@ ${systemContext}
 
 Please skip those actions that have been executed before and try different ways to achieve the user's objective.
 
-First, describe the interaction plan in natural language by referring to the user's and system's contexts. Do not add any useless actions to the plan.
+First, describe the most efficient interaction plan in natural language by referring to the user's and system's contexts. Do not add any useless actions to the plan.
 
 Then, return the plan as the list of actions as a numbered list in the format:
 
