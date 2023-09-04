@@ -1,11 +1,5 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import {
-  ClickInput,
-  HoverInput,
-  NavigateInput,
-  ScrollInput,
-  TextInput,
-} from "./screen.schema";
+import { NavigateInput } from "./screen.schema";
 import { navigate } from "./screen.service";
 
 export async function navigateHandler(

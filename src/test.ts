@@ -72,9 +72,15 @@ ${questions.join("\n")}
   // );
 
   // select the departure
-  logScreenResult(await pageHandler.click("#searchInputMobile-from", false));
+  // logScreenResult(await pageHandler.click("#searchInputMobile-from", false));
+  // logScreenResult(
+  //   await pageHandler.inputText("#searchInput-from", "South Bend", true)
+  // );
+
+  //select the arrival
+  logScreenResult(await pageHandler.click("#searchInputMobile-to"), false);
   logScreenResult(
-    await pageHandler.inputText("#searchInput-from", "South Bend", true)
+    await pageHandler.inputText("#searchInput-from", "Las Vegas", true)
   );
 
   // input the passenger number

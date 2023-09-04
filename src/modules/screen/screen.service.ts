@@ -2,18 +2,13 @@ import { Interaction } from "@prisma/client";
 import { minify } from "html-minifier-terser";
 import { Browser, Page } from "puppeteer";
 import { PossibleInteractions } from "../../utils/htmlHandler";
-import {
-  SystemLog,
-  getActionHistory,
-  getSystemContext,
-  getUserContext,
-  getUserObjective,
-} from "../../utils/langchainHandler";
 import { PageHandler } from "../../utils/pageHandler";
 import prisma from "../../utils/prisma";
 import { executionAgent, planningAgent } from "../agents";
 import { createHumanChat, getChats, createAIChat } from "../chat/chat.service";
 import { NavigateInput } from "./screen.schema";
+import { SystemLog, getSystemContext } from "../../prompts/actionPrompts";
+import { getUserObjective, getUserContext } from "../../prompts/chatPrompts";
 
 let globalBrowser: Browser | null = null;
 let globalPage: Page | null = null;

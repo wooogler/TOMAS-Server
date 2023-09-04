@@ -20,21 +20,25 @@ import {
   PageHandler,
   ScreenResult,
 } from "../../utils/pageHandler";
+import { planningAgent } from "../agents";
+import { ActionType } from "../../utils/htmlHandler";
 import {
   SystemLog,
+  getSystemContext,
   findInputTextValue,
   getActionHistory,
-  getSystemContext,
+} from "../../prompts/actionPrompts";
+import {
   getUserContext,
   makeQuestionForActionValue,
   makeQuestionForConfirmation,
+  makeQuestionForSelectConfirmation,
+} from "../../prompts/chatPrompts";
+import {
   getUsefulAttrFromList,
   getListFromSelectResult,
   getDataFromHTML,
-  makeQuestionForSelectConfirmation,
-} from "../../utils/langchainHandler";
-import { planningAgent } from "../agents";
-import { ActionType } from "../../utils/htmlHandler";
+} from "../../prompts/visualPrompts";
 
 const page = new PageHandler();
 let focusSection: ScreenResult;

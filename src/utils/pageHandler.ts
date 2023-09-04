@@ -1,18 +1,13 @@
 import dotenv from "dotenv";
 import { JSDOM } from "jsdom";
 import puppeteer, { Browser, Page } from "puppeteer";
+import { ActionType, simplifyHtml } from "./htmlHandler";
+import { parsingAgent, parsingItemAgent } from "../modules/agents";
 import {
-  ActionType,
-  parsingAgent,
-  parsingItemAgent,
-  simplifyHtml,
-} from "./htmlHandler";
-import {
-  editActionType,
   getModalDescription,
   getPageDescription,
   getSectionDescription,
-} from "./langchainHandler";
+} from "../prompts/screenPrompts";
 
 const NO_PAGE_ERROR = new Error("Cannot find a page.");
 

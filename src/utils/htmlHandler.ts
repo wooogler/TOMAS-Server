@@ -1,14 +1,5 @@
+// Functions to handle html string.
 import { JSDOM } from "jsdom";
-import {
-  editActionType,
-  extractTextLabelFromHTML,
-  getComponentInfo,
-  getItemDescription,
-  getListDescription,
-  getPartDescription,
-  getSelectInfo,
-} from "./langchainHandler";
-import { ActionComponent } from "./pageHandler";
 
 const removeSpecificTags = (element: Element, tagNames: string[]) => {
   for (const tagName of tagNames) {
@@ -453,7 +444,7 @@ export function parsingPossibleInteractions(
   return possibleInteractions;
 }
 
-function comparePossibleInteractions(
+export function comparePossibleInteractions(
   a: PossibleInteractions,
   b: PossibleInteractions
 ) {
@@ -466,146 +457,58 @@ function comparePossibleInteractions(
   return 0;
 }
 
-function elementTextLength(html: string) {
+export function elementTextLength(html: string) {
   const dom = new JSDOM(html);
   const body = dom.window.document.body;
   return body.textContent?.length || 0;
 }
 
-export async function parsingItemAgent({
-  screenHtml,
-  screenDescription,
-  isFocus = false,
-}: {
-  screenHtml: string;
-  screenDescription: string;
-  isFocus?: boolean;
-}): Promise<ActionComponent[]> {
-  const dom = new JSDOM(screenHtml);
-  const listDescription = await getListDescription(
-    screenHtml,
-    screenDescription
-  );
-  const rootElement = dom.window.document.body.firstElementChild;
-  if (!rootElement) {
-    return [];
-  }
-  if (isFocus) {
-    const components = await parsingAgent({
-      screenHtml,
-      screenDescription: listDescription,
-    });
-    return components;
-  }
-  const components = Array.from(rootElement.children);
-
-  const itemComponentsPromises = components.map<Promise<ActionComponent[]>>(
-    async (comp, index) => {
-      const iAttr = comp.getAttribute("i");
-      const possibleInteractions = parsingPossibleInteractions(comp.outerHTML);
-
-      if (possibleInteractions.length === 0) {
-        return [];
-      } else if (possibleInteractions.length == 1) {
-        const actionType = possibleInteractions[0].actionType;
-        const itemDescription =
-          elementTextLength(comp.outerHTML) < 30 ||
-          possibleInteractions[0].tagName === "table"
-            ? await extractTextLabelFromHTML(comp.outerHTML, screenDescription)
-            : await getItemDescription({
-                itemHtml: comp.outerHTML,
-                screenHtml: screenHtml,
-                screenDescription: listDescription,
-              });
-
-        return [
-          {
-            i: possibleInteractions[0].i,
-            actionType: actionType,
-            description: itemDescription,
-            html: comp.outerHTML,
-          },
-        ];
-      } else {
-        const partDescription = await getPartDescription({
-          itemHtml: comp.outerHTML,
-          screenHtml: screenHtml,
-          screenDescription: listDescription,
-        });
-
-        if (possibleInteractions.length > 5) {
-          // find every possible interactions
-          const components = await parsingAgent({
-            screenHtml: comp.innerHTML,
-            screenDescription: partDescription || "",
-          });
-          return components;
-        } else {
-          return [
-            {
-              i: iAttr || "",
-              actionType: "focus",
-              description: partDescription,
-              html: comp.outerHTML,
-            },
-          ];
-        }
-      }
-    }
-  );
-
-  const itemComponents = await Promise.all(itemComponentsPromises);
-  return itemComponents.flat();
+export interface ComponentInfo {
+  context: string;
+  action: {
+    type: ActionType;
+    description: string;
+  };
+  description: string;
 }
 
-export async function parsingAgent({
-  screenHtml,
-  screenDescription,
-}: {
-  screenHtml: string;
-  screenDescription: string;
-}): Promise<ActionComponent[]> {
-  const possibleInteractions = parsingPossibleInteractions(screenHtml).sort(
-    comparePossibleInteractions
+const capitalizeFirstCharacter = (str: string) =>
+  str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+
+export const editActionType = (actionType: ActionType) => {
+  // const action = actionType === "focus" ? "select" : actionType;
+  const actionName = capitalizeFirstCharacter(actionType);
+  return actionName;
+};
+
+export function extractSurroundingHtml(
+  htmlString: string,
+  target: string,
+  range = 1000
+) {
+  const startIndex = htmlString.indexOf(target);
+  if (startIndex === -1) {
+    return null;
+  }
+
+  const endIndex = startIndex + target.length;
+
+  const beforeTarget = htmlString.substring(
+    Math.max(0, startIndex - range),
+    startIndex
   );
 
-  const dom = new JSDOM(screenHtml);
-  const body = dom.window.document.body;
+  const afterTarget = htmlString.substring(endIndex, endIndex + range);
 
-  const actionComponentsPromises = possibleInteractions.map(
-    async (interaction) => {
-      const iAttr = interaction.i;
-      const actionType = interaction.actionType;
-      const componentHtml =
-        body.querySelector(`[i="${iAttr}"]`)?.outerHTML || "";
-      const componentDescription =
-        actionType === "select"
-          ? await getSelectInfo({
-              componentHtml: simplifyHtml(componentHtml, false) || "",
-              screenHtml: simplifyHtml(screenHtml, false),
-              actionType: interaction.actionType,
-              screenDescription,
-            })
-          : await getComponentInfo({
-              componentHtml: simplifyHtml(componentHtml, false) || "",
-              screenHtml: simplifyHtml(screenHtml, false),
-              actionType: interaction.actionType,
-              screenDescription,
-            });
+  return "..." + beforeTarget + target + afterTarget + "...";
+}
 
-      if (componentDescription === null) {
-        return null;
-      }
+export function removeBeforeAndIncludingKeyword(sentence: string): string {
+  const keyword = "It is ";
+  const index = sentence.indexOf(keyword);
 
-      return {
-        i: iAttr,
-        actionType: interaction.actionType,
-        description: componentDescription,
-        html: componentHtml,
-      };
-    }
-  );
-
-  const actionComponents = await Promise.all(actionComponentsPromises);
-  return actionComponents.filter((comp) => comp !== null) as ActionComponent[];
+  if (index !== -1) {
+    return sentence.substring(index + keyword.length);
+  }
+  return sentence; // 만약 "represents"가 문장에 없다면 원래 문장을 반환
 }

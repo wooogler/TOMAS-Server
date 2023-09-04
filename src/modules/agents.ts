@@ -1,25 +1,41 @@
+import { JSDOM } from "jsdom";
 import {
-  Prompt,
-  SystemLog,
-  findInputTextValue,
-  getActionHistory,
-  getGpt4Response,
-  getUserContext,
-  makeQuestionForActionValue,
-  makeQuestionForConfirmation,
-} from "../utils/langchainHandler";
+  comparePossibleInteractions,
+  elementTextLength,
+  parsingPossibleInteractions,
+  simplifyHtml,
+} from "../utils/htmlHandler";
 import {
   ActionComponent,
   PageHandler,
   ScreenResult,
 } from "../utils/pageHandler";
+import { Prompt, getGpt4Response } from "../utils/langchainHandler";
 import { getChats } from "./chat/chat.service";
-export interface taskList {
+import { createAIChat } from "./chat/chat.service";
+import {
+  SystemLog,
+  findInputTextValue,
+  getActionHistory,
+} from "../prompts/actionPrompts";
+import {
+  getUserContext,
+  makeQuestionForActionValue,
+  makeQuestionForConfirmation,
+} from "../prompts/chatPrompts";
+import {
+  getListDescription,
+  getItemDescription,
+  getPartDescription,
+  getSelectInfo,
+  getComponentInfo,
+} from "../prompts/screenPrompts";
+import { extractTextLabelFromHTML } from "../prompts/visualPrompts";
+
+export interface TaskList {
   i: string;
   description: string;
 }
-
-import { createAIChat } from "./chat/chat.service";
 export async function planningAgent(
   focusedSection: ScreenResult,
   userContext: string,
@@ -101,7 +117,7 @@ Planning Agent:
   // ...
   const filter: RegExp = /^\d+\./;
   const tasks = response.split("\n").filter((line) => filter.test(line));
-  const taskList: taskList[] = [];
+  const taskList: TaskList[] = [];
   for (const task of tasks) {
     const match = task.match(/(\d+)\. (.*) \(i=(\d+)\)/);
     if (match) {
@@ -234,4 +250,141 @@ Execution Agent:
   }
   return currentFocusedSection;
   // TODO: Update task history or system context in the database.
+}
+
+export async function parsingItemAgent({
+  screenHtml,
+  screenDescription,
+  isFocus = false,
+}: {
+  screenHtml: string;
+  screenDescription: string;
+  isFocus?: boolean;
+}): Promise<ActionComponent[]> {
+  const dom = new JSDOM(screenHtml);
+  const listDescription = await getListDescription(
+    screenHtml,
+    screenDescription
+  );
+  const rootElement = dom.window.document.body.firstElementChild;
+  if (!rootElement) {
+    return [];
+  }
+  if (isFocus) {
+    const components = await parsingAgent({
+      screenHtml,
+      screenDescription: listDescription,
+    });
+    return components;
+  }
+  const components = Array.from(rootElement.children);
+
+  const itemComponentsPromises = components.map<Promise<ActionComponent[]>>(
+    async (comp, index) => {
+      const iAttr = comp.getAttribute("i");
+      const possibleInteractions = parsingPossibleInteractions(comp.outerHTML);
+
+      if (possibleInteractions.length === 0) {
+        return [];
+      } else if (possibleInteractions.length == 1) {
+        const actionType = possibleInteractions[0].actionType;
+        const itemDescription =
+          elementTextLength(comp.outerHTML) < 30 ||
+          possibleInteractions[0].tagName === "table"
+            ? await extractTextLabelFromHTML(comp.outerHTML, screenDescription)
+            : await getItemDescription({
+                itemHtml: comp.outerHTML,
+                screenHtml: screenHtml,
+                screenDescription: listDescription,
+              });
+
+        return [
+          {
+            i: possibleInteractions[0].i,
+            actionType: actionType,
+            description: itemDescription,
+            html: comp.outerHTML,
+          },
+        ];
+      } else {
+        const partDescription = await getPartDescription({
+          itemHtml: comp.outerHTML,
+          screenHtml: screenHtml,
+          screenDescription: listDescription,
+        });
+
+        if (possibleInteractions.length > 5) {
+          // find every possible interactions
+          const components = await parsingAgent({
+            screenHtml: comp.innerHTML,
+            screenDescription: partDescription || "",
+          });
+          return components;
+        } else {
+          return [
+            {
+              i: iAttr || "",
+              actionType: "focus",
+              description: partDescription,
+              html: comp.outerHTML,
+            },
+          ];
+        }
+      }
+    }
+  );
+
+  const itemComponents = await Promise.all(itemComponentsPromises);
+  return itemComponents.flat();
+}
+
+export async function parsingAgent({
+  screenHtml,
+  screenDescription,
+}: {
+  screenHtml: string;
+  screenDescription: string;
+}): Promise<ActionComponent[]> {
+  const possibleInteractions = parsingPossibleInteractions(screenHtml).sort(
+    comparePossibleInteractions
+  );
+
+  const dom = new JSDOM(screenHtml);
+  const body = dom.window.document.body;
+
+  const actionComponentsPromises = possibleInteractions.map(
+    async (interaction) => {
+      const iAttr = interaction.i;
+      const actionType = interaction.actionType;
+      const componentHtml =
+        body.querySelector(`[i="${iAttr}"]`)?.outerHTML || "";
+      const componentDescription =
+        actionType === "select"
+          ? await getSelectInfo({
+              componentHtml: simplifyHtml(componentHtml, false) || "",
+              screenHtml: simplifyHtml(screenHtml, false),
+              screenDescription,
+            })
+          : await getComponentInfo({
+              componentHtml: simplifyHtml(componentHtml, false) || "",
+              screenHtml: simplifyHtml(screenHtml, false),
+              actionType: interaction.actionType,
+              screenDescription,
+            });
+
+      if (componentDescription === null) {
+        return null;
+      }
+
+      return {
+        i: iAttr,
+        actionType: interaction.actionType,
+        description: componentDescription,
+        html: componentHtml,
+      };
+    }
+  );
+
+  const actionComponents = await Promise.all(actionComponentsPromises);
+  return actionComponents.filter((comp) => comp !== null) as ActionComponent[];
 }
