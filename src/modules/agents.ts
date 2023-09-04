@@ -1,5 +1,7 @@
 import { JSDOM } from "jsdom";
 import {
+  ActionType,
+  PossibleInteractions,
   comparePossibleInteractions,
   elementTextLength,
   parsingPossibleInteractions,
@@ -41,19 +43,6 @@ export async function planningAgent(
   userContext: string,
   systemContext: string
 ) {
-  //   userContext = `The user wants to book a one-way bus ticket from South Bend, IN, USA to Chicago, IL, USA.`;
-  //   systemContext = `In the page: The general purpose of the web page is to provide information and services related to bus travel, including trip planning, ticket booking, route maps, travel information, and customer support.
-  //   - The system clicked on a radio button labeled "One Way" that was already selected, allowing the user to choose a one-way trip.
-  //   - The system clicked on the "Departing from Los Angeles, CA" button to choose the location from where you want to depart for your bus trip.
-  //  In the modal: The general purpose of the modal in the web page is to allow the user to select their departure location for bus travel.
-  //   - The system input 'South Bend' in the departure location text field.
-  //   - The system clicked on a list item that displayed the location "South Bend, IN" in the USA.
-  //  In the page: The general purpose of the web page is to provide information and services related to bus travel, including trip planning, ticket booking, travel information, and customer support.
-  //   - The system clicked on the button labeled "Arriving at Las Vegas, NV" to select the destination for the bus trip.
-  //  In the modal: The general purpose of the modal in the web page is to allow the user to select a destination for their bus travel.
-  //   - The user input 'Chicago' as the desired destination for the bus travel.
-  //   - The system clicked on a list item that displayed the location "Chicago, IL" in the USA.`;
-
   const planningActionPromptForSystem: Prompt = {
     role: "SYSTEM",
     content: `
@@ -135,16 +124,6 @@ Planning Agent:
   // }
 
   return taskList;
-}
-
-interface ActionValue {
-  reason: string;
-  value: string | null;
-}
-
-interface ActionValue {
-  reason: string;
-  value: string | null;
 }
 
 export async function executionAgent(
@@ -252,89 +231,126 @@ Execution Agent:
   // TODO: Update task history or system context in the database.
 }
 
-export async function parsingItemAgent({
+type ProcessComponentParams = {
+  comp: Element;
+  screenHtml: string;
+  listDescription: string;
+  screenDescription: string;
+};
+
+async function processComponent({
+  comp,
   screenHtml,
+  listDescription,
   screenDescription,
-  isFocus = false,
-}: {
+}: ProcessComponentParams): Promise<ActionComponent[]> {
+  const possibleInteractions = parsingPossibleInteractions(comp.outerHTML);
+
+  if (!possibleInteractions.length) return [];
+
+  if (possibleInteractions.length === 1) {
+    const actionType = possibleInteractions[0].actionType;
+    const tagName = possibleInteractions[0].tagName || "";
+    const itemDescription = await getItemDescriptionBasedOnCriteria({
+      comp,
+      screenHtml,
+      listDescription,
+      screenDescription,
+      tagName,
+    });
+    return [
+      {
+        i: possibleInteractions[0].i,
+        actionType,
+        description: itemDescription,
+        html: comp.outerHTML,
+      },
+    ];
+  }
+  return await processMultipleInteractions({
+    comp,
+    screenHtml,
+    listDescription,
+    screenDescription,
+    possibleInteractions,
+  });
+}
+
+async function getItemDescriptionBasedOnCriteria({
+  comp,
+  screenHtml,
+  listDescription,
+  screenDescription,
+  tagName,
+}: ProcessComponentParams & { tagName: string }) {
+  return elementTextLength(comp.outerHTML) < 30 || tagName === "table"
+    ? await extractTextLabelFromHTML(comp.outerHTML, screenDescription)
+    : await getItemDescription({
+        itemHtml: comp.outerHTML,
+        screenHtml,
+        screenDescription: listDescription,
+      });
+}
+
+async function processMultipleInteractions({
+  comp,
+  screenHtml,
+  listDescription,
+  screenDescription,
+  possibleInteractions,
+}: ProcessComponentParams & {
+  possibleInteractions: PossibleInteractions[];
+}): Promise<ActionComponent[]> {
+  const partDescription = await getPartDescription({
+    itemHtml: comp.outerHTML,
+    screenHtml,
+    screenDescription: listDescription,
+  });
+
+  if (possibleInteractions.length > 5) {
+    return await parsingAgent({
+      screenHtml: comp.innerHTML,
+      screenDescription: partDescription || "",
+    });
+  }
+
+  return [
+    {
+      i: comp.getAttribute("i") || "",
+      actionType: "focus",
+      description: partDescription,
+      html: comp.outerHTML,
+    },
+  ];
+}
+
+export async function parsingItemAgent(params: {
   screenHtml: string;
   screenDescription: string;
   isFocus?: boolean;
 }): Promise<ActionComponent[]> {
+  const { screenHtml, screenDescription, isFocus = false } = params;
   const dom = new JSDOM(screenHtml);
   const listDescription = await getListDescription(
     screenHtml,
     screenDescription
   );
-  const rootElement = dom.window.document.body.firstElementChild;
-  if (!rootElement) {
-    return [];
-  }
-  if (isFocus) {
-    const components = await parsingAgent({
+
+  if (isFocus)
+    return await parsingAgent({
       screenHtml,
       screenDescription: listDescription,
     });
-    return components;
-  }
+
+  const rootElement = dom.window.document.body.firstElementChild;
+  if (!rootElement) return [];
+
   const components = Array.from(rootElement.children);
-
-  const itemComponentsPromises = components.map<Promise<ActionComponent[]>>(
-    async (comp, index) => {
-      const iAttr = comp.getAttribute("i");
-      const possibleInteractions = parsingPossibleInteractions(comp.outerHTML);
-
-      if (possibleInteractions.length === 0) {
-        return [];
-      } else if (possibleInteractions.length == 1) {
-        const actionType = possibleInteractions[0].actionType;
-        const itemDescription =
-          elementTextLength(comp.outerHTML) < 30 ||
-          possibleInteractions[0].tagName === "table"
-            ? await extractTextLabelFromHTML(comp.outerHTML, screenDescription)
-            : await getItemDescription({
-                itemHtml: comp.outerHTML,
-                screenHtml: screenHtml,
-                screenDescription: listDescription,
-              });
-
-        return [
-          {
-            i: possibleInteractions[0].i,
-            actionType: actionType,
-            description: itemDescription,
-            html: comp.outerHTML,
-          },
-        ];
-      } else {
-        const partDescription = await getPartDescription({
-          itemHtml: comp.outerHTML,
-          screenHtml: screenHtml,
-          screenDescription: listDescription,
-        });
-
-        if (possibleInteractions.length > 5) {
-          // find every possible interactions
-          const components = await parsingAgent({
-            screenHtml: comp.innerHTML,
-            screenDescription: partDescription || "",
-          });
-          return components;
-        } else {
-          return [
-            {
-              i: iAttr || "",
-              actionType: "focus",
-              description: partDescription,
-              html: comp.outerHTML,
-            },
-          ];
-        }
-      }
-    }
+  const itemComponentsPromises = components.map((comp) =>
+    processComponent({ comp, screenHtml, listDescription, screenDescription })
   );
-
   const itemComponents = await Promise.all(itemComponentsPromises);
+
   return itemComponents.flat();
 }
 
