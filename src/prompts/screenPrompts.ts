@@ -122,7 +122,7 @@ ${extractSurroundingHtml(screenHtml, componentHtml)}
 
   const modifyActionPrompt: Prompt = {
     role: "HUMAN",
-    content: `Don't refer to the default value inside elements to describe the action. Don't apologize.`,
+    content: `Don't mention the value in the element to describe the action. Don't apologize.`,
   };
 
   // const modifyActionPrompt: Prompt = {
@@ -180,14 +180,18 @@ ${extractSurroundingHtml(screenHtml, componentHtml)}`,
 
     extractComponentSystemPrompt = {
       role: "SYSTEM",
-      content: `Describe the user's action refering to the items in the list in one sentence, starting with 'Select one '.
+      content: `Here is information of an list on the screen.      
 
 Items in the list:
 ${listString} 
 
 Description of the screen where the list is located:
-${screenDescription}`,
+${screenDescription}
+
+Infer the purpose of the list and describe the action of a user selecting one item from that list in one sentence, starting with 'Select one '.`,
     };
+
+    console.log(extractComponentSystemPrompt.content);
   }
 
   const componentDescription = await getAiResponse([

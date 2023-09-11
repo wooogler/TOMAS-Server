@@ -360,6 +360,17 @@ function addIAttributesToSet(element: Element, iAttrSet: Set<string>) {
   );
 }
 
+function hasClickableParent(element: Element): boolean {
+  let parent = element.parentElement;
+  while (parent) {
+    if (parent.getAttribute("clickable") === "true") {
+      return true;
+    }
+    parent = parent.parentElement;
+  }
+  return false;
+}
+
 // Function to filter unique elements based on 'i' attribute
 function filterUniqueElementsByIAttr(
   elements: Element[],
@@ -419,6 +430,7 @@ export function parsingPossibleInteractions(
   let divElements = (
     Array.from(body.querySelectorAll("div")) as Element[]
   ).filter((element) => element.getAttribute("clickable") === "true");
+  divElements = divElements.filter((element) => !hasClickableParent(element));
   divElements = filterUniqueElementsByIAttr(divElements, iAttrSet);
   divElements.forEach((element) => addIAttributesToSet(element, iAttrSet));
   components.push(...divElements);
@@ -431,6 +443,7 @@ export function parsingPossibleInteractions(
 
       if (
         actionType &&
+        interactiveElement.getAttribute("i") &&
         !(
           interactiveElement.hasAttribute("readonly") &&
           interactiveElement.getAttribute("type") === "text"
@@ -439,7 +452,7 @@ export function parsingPossibleInteractions(
         const identifier = generateIdentifier(interactiveElement);
         return {
           actionType: actionType,
-          i: interactiveElement.getAttribute("i")!,
+          i: interactiveElement.getAttribute("i"),
           tagName: interactiveElement.tagName.toLowerCase(),
           identifier: identifier,
         };
@@ -451,8 +464,16 @@ export function parsingPossibleInteractions(
   return possibleInteractions;
 }
 
-function generateIdentifier(element: Element): string {
-  const representativeAttributes = ["id", "class", "name", "role", "type"];
+export function generateIdentifier(element: Element): string {
+  const representativeAttributes = [
+    "id",
+    "class",
+    "name",
+    "role",
+    "type",
+    "aria-label",
+    "href",
+  ];
   let identifierComponents = [];
   identifierComponents.push(element.tagName.toLowerCase());
   if (element.textContent) {
