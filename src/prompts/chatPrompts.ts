@@ -1,6 +1,11 @@
 import { Chat } from "@prisma/client";
 import { Prompt, getAiResponse } from "../utils/langchainHandler";
 import { ActionComponent } from "../utils/pageHandler";
+import {
+  loadQuestionCacheFromFile,
+  saveQuestionCacheToFile,
+} from "../utils/fileUtil";
+import { generateIdentifier } from "../utils/htmlHandler";
 
 export const makeConversationPrompt = (chats: Chat[]): Prompt => ({
   role: "HUMAN",
@@ -38,8 +43,16 @@ export async function getUserContext(chats: Chat[]) {
 
 export async function makeQuestionForActionValue(
   screenDescription: string,
-  componentDescription: string | undefined
+  componentDescription: string | undefined,
+  componentHtml: string
 ) {
+  const identifier = generateIdentifier(componentHtml);
+  const questionCache = loadQuestionCacheFromFile();
+  const cachedQuestion = questionCache.get(identifier);
+  if (cachedQuestion) {
+    return cachedQuestion;
+  }
+
   const makeQuestionPrompt: Prompt = {
     role: "SYSTEM",
     content: `Create a natural language question to ask to the user before doing the given action on the screen.
@@ -61,11 +74,16 @@ The description of the screen: ${screenDescription}
       "The user does not see the screen and is unfamiliar with technology, so please do not mention the element and the action on the screen, and avoid the jargon, mechanical terms, and terms that are too specific to the webpage.",
   };
 
-  return await getAiResponse([
+  const newQuestion = await getAiResponse([
     makeQuestionPrompt,
     firstQuestionPrompt,
     modifyQuestionPrompt,
   ]);
+
+  questionCache.set(identifier, newQuestion);
+  saveQuestionCacheToFile(questionCache);
+
+  return newQuestion;
 }
 
 export async function makeQuestionForConfirmation(

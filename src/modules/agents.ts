@@ -4,6 +4,7 @@ import {
   PossibleInteractions,
   comparePossibleInteractions,
   elementTextLength,
+  generateIdentifier,
   parsingPossibleInteractions,
   simplifyHtml,
 } from "../utils/htmlHandler";
@@ -33,6 +34,10 @@ import {
   getComponentInfo,
 } from "../prompts/screenPrompts";
 import { extractTextLabelFromHTML } from "../prompts/visualPrompts";
+import {
+  loadParsingCacheFromFile,
+  saveParsingCacheToFile,
+} from "../utils/fileUtil";
 
 export interface TaskList {
   i: string;
@@ -76,20 +81,12 @@ Do not include any headers before your list or follow your list with any other o
 If you cannot find any actions to achieve the user's objective with possible actions in this part, return "No plans".
     `,
   };
-
-  const planningActionPromptForUser: Prompt = {
-    role: "HUMAN",
-    content: `
-
-    `,
-  };
   console.log(`
 ---------------
 Planning Agent:
 ---------------
 `);
   console.log(planningActionPromptForSystem.content);
-  console.log(planningActionPromptForUser.content);
   //   const response = await getAiResponse([
   //     planningActionPromptForSystem,
   //     planningActionPromptForUser,
@@ -154,7 +151,8 @@ Execution Agent:
     if (valueBasedOnHistory.value == null) {
       const question = await makeQuestionForActionValue(
         screenDescription,
-        component.description
+        component.description,
+        component.html
       );
 
       // TODO: Ask the user the question, and get the answer. Then update chat history in the database.
@@ -283,7 +281,7 @@ async function getItemDescriptionBasedOnCriteria({
   screenDescription,
   tagName,
 }: ProcessComponentParams & { tagName: string }) {
-  return elementTextLength(comp.outerHTML) < 30 || tagName === "table"
+  return elementTextLength(comp.textContent || "") < 30 || tagName === "table"
     ? await extractTextLabelFromHTML(comp.outerHTML, screenDescription)
     : await getItemDescription({
         itemHtml: comp.outerHTML,
@@ -361,6 +359,8 @@ export async function parsingAgent({
   screenHtml: string;
   screenDescription: string;
 }): Promise<ActionComponent[]> {
+  const descriptionCache = loadParsingCacheFromFile();
+
   const possibleInteractions = parsingPossibleInteractions(screenHtml).sort(
     comparePossibleInteractions
   );
@@ -372,8 +372,23 @@ export async function parsingAgent({
     async (interaction) => {
       const iAttr = interaction.i;
       const actionType = interaction.actionType;
+      const identifier = interaction.identifier;
+
       const componentHtml =
         body.querySelector(`[i="${iAttr}"]`)?.outerHTML || "";
+
+      if (descriptionCache.has(identifier)) {
+        // console.log(
+        //   `Cache hit for "${identifier}": "${descriptionCache.get(identifier)}"`
+        // );
+        return {
+          i: iAttr,
+          actionType: actionType,
+          description: descriptionCache.get(identifier),
+          html: componentHtml,
+        };
+      }
+
       const componentDescription =
         actionType === "select"
           ? await getSelectInfo({
@@ -392,6 +407,9 @@ export async function parsingAgent({
         return null;
       }
 
+      descriptionCache.set(identifier, componentDescription);
+      saveParsingCacheToFile(descriptionCache);
+
       return {
         i: iAttr,
         actionType: interaction.actionType,
@@ -402,5 +420,11 @@ export async function parsingAgent({
   );
 
   const actionComponents = await Promise.all(actionComponentsPromises);
-  return actionComponents.filter((comp) => comp !== null) as ActionComponent[];
+  return actionComponents
+    .filter((comp) => comp !== null)
+    .sort((a, b) => {
+      const iA = parseInt(a!.i, 10);
+      const iB = parseInt(b!.i, 10);
+      return iA - iB;
+    }) as ActionComponent[];
 }
