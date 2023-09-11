@@ -3,7 +3,7 @@ import path from "path";
 
 const parsingCacheFilePath = path.join(__dirname, "descriptionCache.json");
 
-export function loadParsingCacheFromFile() {
+export function loadParsingCacheFromFile(): Map<string, string> {
   if (fs.existsSync(parsingCacheFilePath)) {
     const fileData = fs.readFileSync(parsingCacheFilePath, "utf-8");
     return new Map(JSON.parse(fileData));
@@ -25,7 +25,7 @@ export function deleteParsingCacheFile() {
 
 const questionCacheFilePath = path.join(__dirname, "questionCache.json");
 
-export function loadQuestionCacheFromFile() {
+export function loadQuestionCacheFromFile(): Map<string, string> {
   if (fs.existsSync(questionCacheFilePath)) {
     const fileData = fs.readFileSync(questionCacheFilePath, "utf-8");
     return new Map(JSON.parse(fileData));

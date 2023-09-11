@@ -1,19 +1,23 @@
 [
   [
-    "button,Mon, Sep 11,class=hcr-btn-8-2-1 D0lvA,type=button,aria-label=Change departure date Mon, Sep 11",
-    "Click the button to change the departure date."
+    "a,,href=https://app.adjust.com/xe5q0k0_xc9xl7j?campaign=Footer&adgroup=US-GH&creative=gh-us-comPage&fallback=https://www.greyhound.com/mobile-app",
+    "Click on the element to download the Greyhound App."
   ],
   [
     "button,Search,class=hcr-btn-8-2-1 hcr-btn--primary-8-2-1 lKKy1,type=button,aria-label=Search trips",
     "Click 'Search' to perform a search for available bus trips."
   ],
   [
-    "a,,href=https://app.adjust.com/xe5q0k0_xc9xl7j?campaign=Footer&adgroup=US-GH&creative=gh-us-comPage&fallback=https://www.greyhound.com/mobile-app",
-    "Click on the element to download the Greyhound App."
+    "button,Mon, Sep 11,class=hcr-btn-8-2-1 D0lvA,type=button,aria-label=Change departure date Mon, Sep 11",
+    "Click the button to change the departure date."
   ],
   [
     "a,,class=flix-header-brand__link,aria-label=greyhound home graphic logo link,href=/",
     "Click on the element to navigate to the homepage of the website."
+  ],
+  [
+    "a,Privacy Policy,class=footer-legal-link,href=https://www.greyhound.com/privacy-policy",
+    "Click 'Privacy Policy' to view the privacy policy information provided by Greyhound."
   ],
   [
     "a,Your Privacy Choices,id=handle-consent-settings,class=footer-legal-link footer-ccpa-consent-container",
@@ -24,100 +28,88 @@
     "Click the link labeled \"Explore now\" to access more travel options."
   ],
   [
-    "a,Privacy Policy,class=footer-legal-link,href=https://www.greyhound.com/privacy-policy",
-    "Click 'Privacy Policy' to view the privacy policy information provided by Greyhound."
-  ],
-  [
-    "a,Legal,class=footer-legal-link,href=/legal",
-    "Click 'Legal' to access the legal information and policies provided by Greyhound."
-  ],
-  [
-    "button,Discover,class=footer-btn-nav,type=button",
-    "Click 'Discover' to explore and find more information about Greyhound's services and offerings."
-  ],
-  [
-    "button,class=hcr-btn-8-2-1 hcr-btn--square-8-2-1 hcr-btn--sm-8-2-1 cVoiG,type=button,aria-label=Swap departure and arrival location",
-    "Click the \"Swap departure and arrival location\" button to switch the departure and arrival locations."
-  ],
-  [
-    "a,Chicago,href=https://www.greyhound.com/en-us/bus-to-chicago",
-    "Click on the link labeled 'Chicago' to access information about bus travel to Chicago on the Greyhound website."
-  ],
-  [
-    "button,id=open-burger-menu-button,class=flix-header-burger-menu__toggle flix-btn flix-btn--link flix-btn--square flix-btn--md,type=button,aria-label=Open main site navigation",
-    "Click the button to open the main site navigation menu."
-  ],
-  [
-    "button,1 Adult,class=hcr-btn-8-2-1 D0lvA,type=button,aria-label=1 Adult, Add passengers",
-    "Click '1 Adult, Add passengers' to adjust the number of adult passengers for the trip."
-  ],
-  [
-    "button,Greyhound,class=footer-btn-nav,type=button",
-    "Click 'Greyhound' to access information and services related to bus travel offered by Greyhound."
-  ],
-  [
-    "a,onboard entertainmen,href=/travel-info/onboard-entertainment",
-    "Click 'onboard entertainment' to explore the entertainment options provided during your Greyhound bus journey."
-  ],
-  [
     "a,Albany,href=https://www.greyhound.com/en-us/bus-to-albany-3",
     "Click on the link labeled 'Albany' to access information about bus travel to Albany."
-  ],
-  [
-    "a,El Paso,href=https://www.greyhound.com/en-us/bus-to-el-paso",
-    "Click on the link for \"El Paso\" to access information about bus travel to that destination."
-  ],
-  [
-    "a,Help,class=service-menu-item,href=/help-and-info",
-    "Click on the \"Help\" link to access additional information and support regarding Greyhound's services and travel options."
-  ],
-  [
-    "button,Bus Travel,class=footer-btn-nav,type=button",
-    "Click the \"Bus Travel\" button to access information and services related to affordable bus travel offered by Greyhound."
-  ],
-  [
-    "input,id=searchInputMobile-from,class=hcr-input__field-8-2-1,role=button,type=button,aria-label=Departing from Los Angeles, CA",
-    "Click on the \"Departing from Los Angeles, CA\" button to select the departure location for the bus travel."
-  ],
-  [
-    "button,Customer Service,class=footer-btn-nav,type=button",
-    "Click 'Customer Service' to access information and services related to customer support and assistance provided by Greyhound."
   ],
   [
     "a,Find out what’s play,class=flix-btn flix-btn--link flix-btn--has-icon usp-link,href=/travel-info/onboard-entertainment",
     "Click the link \"Find out what's playing\" to access information about the onboard entertainment options."
   ],
   [
-    "a,Discover all your op,class=flix-btn flix-btn--link flix-btn--has-icon usp-link,href=/manage-my-booking",
-    "Click 'Discover all your options' to explore the different options available for managing bookings."
+    "input,id=searchInputMobile-to,class=hcr-input__field-8-2-1,role=button,type=button,aria-label=Arriving at Las Vegas, NV",
+    "Click the button to select the destination location for the bus travel."
   ],
   [
-    "a,Window or Aisle?,class=flix-btn flix-btn--link flix-btn--has-icon usp-link,href=/travel-info/seat-reservations",
-    "Click 'Window or Aisle?' to reserve a seat and choose your preferred seating option when booking a ticket."
+    "button,1 Adult,class=hcr-btn-8-2-1 D0lvA,type=button,aria-label=1 Adult, Add passengers",
+    "Click '1 Adult' to adjust the number of adult passengers for the trip."
   ],
   [
-    "a,Track My Bus,href=/track",
-    "Click 'Track My Bus' to access real-time bus stop information and up-to-date bus timetables."
+    "a,Legal,class=footer-legal-link,href=/legal",
+    "Click 'Legal' to access the legal information and policies provided by Greyhound."
   ],
   [
-    "a,Manage My Booking,class=service-menu-item,href=/manage-my-booking",
-    "Click 'Manage My Booking' to access the page where the user can manage their booking details and make changes if necessary."
-  ],
-  [
-    "a,New York,href=https://www.greyhound.com/en-us/bus-to-new-york",
-    "Click on the link labeled \"New York\" to access information about bus travel to New York on the Greyhound website."
+    "a,El Paso,href=https://www.greyhound.com/en-us/bus-to-el-paso",
+    "Click on the link for \"El Paso\" to access information about bus travel to that destination."
   ],
   [
     "a,Copyright,class=footer-legal-link,href=/copyright",
     "Click on the link labeled \"Copyright\" to access information about the copyright policies and regulations on the Greyhound website."
   ],
   [
-    "a,Bus Tracker,class=service-menu-item,href=/track",
-    "Click 'Bus Tracker' to access the bus tracking feature and get real-time updates on the location and status of your bus."
+    "button,id=open-burger-menu-button,class=flix-header-burger-menu__toggle flix-btn flix-btn--link flix-btn--square flix-btn--md,type=button,aria-label=Open main site navigation",
+    "Click the button to open the main site navigation menu."
   ],
   [
-    "input,id=searchInputMobile-to,class=hcr-input__field-8-2-1,role=button,type=button,aria-label=Arriving at Las Vegas, NV",
-    "Click the button to select the destination location for the bus travel."
+    "button,class=hcr-btn-8-2-1 hcr-btn--square-8-2-1 hcr-btn--sm-8-2-1 cVoiG,type=button,aria-label=Swap departure and arrival location",
+    "Click the \"Swap departure and arrival location\" button to switch the departure and arrival locations."
+  ],
+  [
+    "a,New York,href=https://www.greyhound.com/en-us/bus-to-new-york",
+    "Click on the element to be redirected to the Greyhound bus page for traveling to New York."
+  ],
+  [
+    "button,Greyhound,class=footer-btn-nav,type=button",
+    "Click 'Greyhound' to access information and services related to bus travel offered by Greyhound."
+  ],
+  [
+    "button,Discover,class=footer-btn-nav,type=button",
+    "Click 'Discover' to explore and find more information about Greyhound's services and offerings."
+  ],
+  [
+    "input,id=searchInputMobile-from,class=hcr-input__field-8-2-1,role=button,type=button,aria-label=Departing from Los Angeles, CA",
+    "Click on the \"Departing from Los Angeles, CA\" button to select the departure location for the bus travel."
+  ],
+  [
+    "a,onboard entertainmen,href=/travel-info/onboard-entertainment",
+    "Click 'onboard entertainment' to learn about the entertainment options provided during your Greyhound bus journey."
+  ],
+  [
+    "a,Chicago,href=https://www.greyhound.com/en-us/bus-to-chicago",
+    "Click on the link labeled 'Chicago' to access information about bus travel to Chicago on the Greyhound website."
+  ],
+  [
+    "a,Discover all your op,class=flix-btn flix-btn--link flix-btn--has-icon usp-link,href=/manage-my-booking",
+    "Click the link \"Discover all your options\" to access the Manage My Booking page."
+  ],
+  [
+    "a,Help,class=service-menu-item,href=/help-and-info",
+    "Click 'Help' to access additional information and support regarding Greyhound's services and travel options."
+  ],
+  [
+    "button,Bus Travel,class=footer-btn-nav,type=button",
+    "Click the \"Bus Travel\" button to access information and services related to affordable bus travel offered by Greyhound."
+  ],
+  [
+    "a,Window or Aisle?,class=flix-btn flix-btn--link flix-btn--has-icon usp-link,href=/travel-info/seat-reservations",
+    "Click 'Window or Aisle?' to reserve a seat and choose your preferred seating option when booking a ticket."
+  ],
+  [
+    "a,Omaha,href=https://www.greyhound.com/en-us/bus-to-omaha",
+    "Click on the link labeled \"Omaha\" to find out more about bus travel to Omaha on the Greyhound website."
+  ],
+  [
+    "a,Manage My Booking,class=service-menu-item,href=/manage-my-booking",
+    "Click 'Manage My Booking' to access the page where the user can manage their booking details and make changes if necessary."
   ],
   [
     "a,Atlanta,href=https://www.greyhound.com/en-us/bus-to-atlanta",
@@ -128,24 +120,32 @@
     "Select one option between \"One Way\" and \"Round Trip\"."
   ],
   [
-    "a,Omaha,href=https://www.greyhound.com/en-us/bus-to-omaha",
-    "Click on the link labeled \"Omaha\" to find out more about bus travel to Omaha on the Greyhound website."
-  ],
-  [
-    "button,Explore the map,class=flix-btn flix-btn--link exploration-map-teaser-button,type=button",
-    "Click 'Explore the map' to access a map that shows all the destinations available with Greyhound, FlixBus, and their connecting partners."
+    "a,Track My Bus,href=/track",
+    "Click 'Track My Bus' to stay up to date on your journey by accessing real-time bus stop information and up-to-date bus timetables."
   ],
   [
     "a,Greyhound app,href=/mobile-app",
     "Click on the \"Greyhound app\" link to download the Greyhound mobile app for convenient planning and booking of bus trips."
   ],
   [
-    "a,Discover all the pla,class=exploration-map-teaser-wrapper,href=https://www.greyhound.com/bus-routes",
-    "Click the button labeled 'Explore the map' to access a map that will allow you to explore all the destinations available with Greyhound, FlixBus, and their connecting partners."
+    "button,Explore the map,class=flix-btn flix-btn--link exploration-map-teaser-button,type=button",
+    "Click 'Explore the map' to access a map that shows all the destinations available with Greyhound, FlixBus, and their connecting partners."
   ],
   [
     "ul,,class=footer-social-icons",
     "Select one of the social media platforms to visit Greyhound's page/profile."
+  ],
+  [
+    "a,Discover all the pla,class=exploration-map-teaser-wrapper,href=https://www.greyhound.com/bus-routes",
+    "Click the button labeled 'Explore the map' to access a map that will allow you to explore all the destinations available with Greyhound, FlixBus, and their connecting partners."
+  ],
+  [
+    "button,Customer Service,class=footer-btn-nav,type=button",
+    "Click 'Customer Service' to access information and services related to customer support and assistance provided by Greyhound."
+  ],
+  [
+    "a,Bus Tracker,class=service-menu-item,href=/track",
+    "Click 'Bus Tracker' to access the bus tracking feature and get real-time updates on the location and status of your bus."
   ],
   [
     "ul,Atlantic City NJ to ,class=popular-routes-content",
@@ -153,26 +153,18 @@
   ],
   [
     "button,id=close-button,class=hcr-btn-8-2-1 hcr-btn--square-8-2-1 hcr-btn--link-8-2-1 hcr-panel__close-8-2-1,type=button,aria-label=Close",
-    "Click the \"Close\" button to close the modal."
+    "Click the \"Close\" button to close the modal and cancel the selection."
   ],
   [
     "input,id=searchInput-from,class=hcr-input__field-8-2-1,role=combobox,type=text,aria-label=Departing from Los Angeles, CA",
     "Input the departure location in the text field. The purpose of this action is to allow the user to specify their departure location for bus travel."
   ],
   [
-    "ul,Not sure where to st,class=hcr-autocomplete__list-8-2-1 hcr-autocomplete__list--boxed,role=group",
-    "Select one departure location by clicking on \"Explore the map\" to get started with bus travel."
-  ],
-  [
     "ul,Popular placesNew Yo,class=hcr-autocomplete__list-8-2-1 hcr-autocomplete__list--boxed,role=group",
-    "Select one of the popular places listed (New York, NY, Los Angeles, CA, Las Vegas, NV, Boston, MA, Washington, D.C.) as the departure location for bus travel."
+    "Select one of the popular places listed in the section as the departure location for bus travel."
   ],
   [
-    "ul,EuropeYorkGreat Brit,class=hcr-autocomplete__list-8-2-1 hcr-autocomplete__list--boxed,role=group",
-    "Select one of the options in the Europe section, such as \"York\" or \"Great Britain\"."
-  ],
-  [
-    "ul,North AmericaNew Yor,class=hcr-autocomplete__list-8-2-1 hcr-autocomplete__list--boxed,role=group",
-    "Select one of the following departure locations: North America, New York, NY, Albany, NY, York, PA, Newark, NJ, New Orleans, LA, Newark, OH, Los Angeles, CA, Las Cruces, NM, or Philadelphia, PA."
+    "ul,Not sure where to st,class=hcr-autocomplete__list-8-2-1 hcr-autocomplete__list--boxed,role=group",
+    "Select one departure location from the options provided or explore the map for more options."
   ]
 ]

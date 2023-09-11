@@ -171,7 +171,8 @@ async function planningAndAsk(): Promise<
           if (actionValue === null || actionValue === "") {
             const question = await makeQuestionForActionValue(
               screenDescription,
-              component.description
+              component.description,
+              component.html
             );
             await createAIChat({ content: question });
             return { component, type: "questionForInput" };
@@ -187,7 +188,8 @@ async function planningAndAsk(): Promise<
         } else if (component.actionType === "select") {
           const question = await makeQuestionForActionValue(
             screenDescription,
-            component.description
+            component.description,
+            component.html
           );
           const options = await page.select(`[i="${component.i}"]`);
           await createAIChat({
@@ -241,7 +243,8 @@ export async function answerForInput(
       console.log("actionValue is null");
       const question = await makeQuestionForActionValue(
         screenDescription,
-        component.description
+        component.description,
+        component.html
       );
       await createAIChat({ content: question });
       return { component, type: "questionForInput" };

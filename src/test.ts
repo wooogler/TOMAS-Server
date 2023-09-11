@@ -1,14 +1,13 @@
 import dotenv from "dotenv";
 import { PageHandler, ScreenResult } from "../src/utils/pageHandler";
-import {
-  getDataFromHTML,
-  makeQuestionForActionValue,
-  makeQuestionForConfirmation,
-} from "./utils/langchainHandler";
 import * as fs from "fs";
 
 import { convertSelectResultIntoTable } from "../src/modules/chat/chat.service";
 import { simplifyHtml, simplifyItemHtml } from "./utils/htmlHandler";
+import {
+  makeQuestionForActionValue,
+  makeQuestionForConfirmation,
+} from "./prompts/chatPrompts";
 dotenv.config();
 
 // describe("pageHandler", () => {
@@ -49,7 +48,8 @@ ${actionComponentsDescriptions.join("\n")}
           } else {
             return `- ${await makeQuestionForActionValue(
               screen.screenDescription,
-              comp.description
+              comp.description,
+              comp.html
             )} (i=${comp.i})`;
           }
         })

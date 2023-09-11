@@ -449,7 +449,7 @@ export function parsingPossibleInteractions(
           interactiveElement.getAttribute("type") === "text"
         )
       ) {
-        const identifier = generateIdentifier(interactiveElement);
+        const identifier = generateIdentifier(interactiveElement.outerHTML);
         return {
           actionType: actionType,
           i: interactiveElement.getAttribute("i"),
@@ -464,7 +464,10 @@ export function parsingPossibleInteractions(
   return possibleInteractions;
 }
 
-export function generateIdentifier(element: Element): string {
+export function generateIdentifier(html: string): string {
+  const dom = new JSDOM(html);
+  const element = dom.window.document.body.firstElementChild as Element;
+
   const representativeAttributes = [
     "id",
     "class",

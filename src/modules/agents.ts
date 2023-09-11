@@ -149,13 +149,10 @@ Execution Agent:
       )
     );
     if (valueBasedOnHistory.value == null) {
-      const dom = new JSDOM(component.html);
-      const element = dom.window.document.body.firstElementChild as Element;
-      const identifier = generateIdentifier(element);
-
       const question = await makeQuestionForActionValue(
         screenDescription,
-        component.description
+        component.description,
+        component.html
       );
 
       // TODO: Ask the user the question, and get the answer. Then update chat history in the database.
