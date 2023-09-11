@@ -338,6 +338,7 @@ export interface PossibleInteractions {
   actionType: ActionType;
   i: string;
   tagName?: string;
+  identifier: string;
 }
 
 const INFO_TAG_LIST = ["img", "a", "button", "input", "select"];
@@ -352,6 +353,24 @@ export function countingInfoElements(html: string): number {
   return count;
 }
 
+// Function to add all 'i' attributes within a component to the iAttrSet
+function addIAttributesToSet(element: Element, iAttrSet: Set<string>) {
+  Array.from(element.querySelectorAll("[i]")).forEach((el) =>
+    iAttrSet.add(el.getAttribute("i")!)
+  );
+}
+
+// Function to filter unique elements based on 'i' attribute
+function filterUniqueElementsByIAttr(
+  elements: Element[],
+  iAttrSet: Set<string>
+) {
+  return elements.filter((element) => {
+    const iAttr = element.getAttribute("i");
+    return !(iAttr && iAttrSet.has(iAttr));
+  });
+}
+
 export function parsingPossibleInteractions(
   html: string
 ): PossibleInteractions[] {
@@ -362,86 +381,91 @@ export function parsingPossibleInteractions(
   let components: Element[] = [];
   const repeatingComponents = findRepeatingComponents(html);
   repeatingComponents.forEach((element) => {
-    Array.from(element.querySelectorAll("[i]")).forEach((el) =>
-      iAttrSet.add(el.getAttribute("i")!)
-    );
+    addIAttributesToSet(element, iAttrSet);
     components.push(element);
   });
 
-  const iAttrForReapeatingComponents = new Set<string>();
-  repeatingComponents.forEach((element) => {
-    const iAttr = element.getAttribute("i");
-    iAttrForReapeatingComponents.add(iAttr!);
-  });
+  // Create a set for 'i' attributes of repeating components
+  const iAttrForRepeatingComponents = new Set(
+    repeatingComponents.map((element) => element.getAttribute("i")!)
+  );
 
   let specifiedElements = Array.from(
     body.querySelectorAll("ul, ol, table, fieldset")
-  );
-  specifiedElements.forEach((element) => {
+  ).filter((element) => {
     const iAttr = element.getAttribute("i");
-    if (
-      iAttr &&
-      !iAttrSet.has(iAttr) &&
-      !iAttrForReapeatingComponents.has(iAttr)
-    ) {
-      components.push(element);
-      Array.from(element.querySelectorAll("[i]")).forEach((el) =>
-        iAttrSet.add(el.getAttribute("i")!)
-      );
-    }
+    return (
+      iAttr && !iAttrSet.has(iAttr) && !iAttrForRepeatingComponents.has(iAttr)
+    );
+  });
+
+  specifiedElements.forEach((element) => {
+    addIAttributesToSet(element, iAttrSet);
+    components.push(element);
   });
 
   // Filter interactive elements
   let interactiveElements = Array.from(
     body.querySelectorAll("input, button, a, select, textarea")
-  ).filter((element) => {
-    let isUniqueElement = !(
-      element.getAttribute("i") && iAttrSet.has(element.getAttribute("i")!)
-    );
-    Array.from(element.querySelectorAll("[i]")).forEach((el) =>
-      iAttrSet.add(el.getAttribute("i")!)
-    );
-    return isUniqueElement;
-  });
-
-  let divElements = Array.from(body.querySelectorAll("div")).filter(
-    (element) => element.getAttribute("clickable") === "true"
+  );
+  interactiveElements = filterUniqueElementsByIAttr(
+    interactiveElements,
+    iAttrSet
+  );
+  interactiveElements.forEach((element) =>
+    addIAttributesToSet(element, iAttrSet)
   );
 
-  divElements.forEach((element) => {
-    const iAttr = element.getAttribute("i");
-    if (iAttr && !iAttrSet.has(iAttr)) {
-      components.push(element);
-      Array.from(element.querySelectorAll("[i]")).forEach((el) =>
-        iAttrSet.add(el.getAttribute("i")!)
-      );
-    }
-  });
+  let divElements = (
+    Array.from(body.querySelectorAll("div")) as Element[]
+  ).filter((element) => element.getAttribute("clickable") === "true");
+  divElements = filterUniqueElementsByIAttr(divElements, iAttrSet);
+  divElements.forEach((element) => addIAttributesToSet(element, iAttrSet));
+  components.push(...divElements);
 
   interactiveElements.push(...components);
 
-  const possibleInteractions: PossibleInteractions[] = [];
+  const possibleInteractions: PossibleInteractions[] = interactiveElements
+    .map((interactiveElement) => {
+      const actionType = createActionType(interactiveElement);
 
-  // Determine action type and gather possible interactions
-  interactiveElements.forEach((interactiveElement) => {
-    const actionType = createActionType(interactiveElement);
-
-    if (
-      actionType &&
-      !(
-        interactiveElement.hasAttribute("readonly") &&
-        interactiveElement.getAttribute("type") === "text"
-      )
-    ) {
-      possibleInteractions.push({
-        actionType: actionType,
-        i: interactiveElement.getAttribute("i")!,
-        tagName: interactiveElement.tagName.toLowerCase(),
-      });
-    }
-  });
+      if (
+        actionType &&
+        !(
+          interactiveElement.hasAttribute("readonly") &&
+          interactiveElement.getAttribute("type") === "text"
+        )
+      ) {
+        const identifier = generateIdentifier(interactiveElement);
+        return {
+          actionType: actionType,
+          i: interactiveElement.getAttribute("i")!,
+          tagName: interactiveElement.tagName.toLowerCase(),
+          identifier: identifier,
+        };
+      }
+      return null;
+    })
+    .filter((interaction) => interaction !== null) as PossibleInteractions[];
 
   return possibleInteractions;
+}
+
+function generateIdentifier(element: Element): string {
+  const representativeAttributes = ["id", "class", "name", "role", "type"];
+  let identifierComponents = [];
+  identifierComponents.push(element.tagName.toLowerCase());
+  if (element.textContent) {
+    identifierComponents.push(element.textContent.trim().slice(0, 20));
+  }
+
+  for (const attr of representativeAttributes) {
+    const attrValue = element.getAttribute(attr);
+    if (attrValue) {
+      identifierComponents.push(`${attr}=${attrValue}`);
+    }
+  }
+  return identifierComponents.join(",");
 }
 
 export function comparePossibleInteractions(

@@ -354,6 +354,8 @@ export async function parsingItemAgent(params: {
   return itemComponents.flat();
 }
 
+const descriptionCache = new Map<string, string>();
+
 export async function parsingAgent({
   screenHtml,
   screenDescription,
@@ -372,8 +374,23 @@ export async function parsingAgent({
     async (interaction) => {
       const iAttr = interaction.i;
       const actionType = interaction.actionType;
+      const identifier = interaction.identifier;
+
       const componentHtml =
         body.querySelector(`[i="${iAttr}"]`)?.outerHTML || "";
+
+      if (descriptionCache.has(identifier)) {
+        console.log(
+          `Cache hit for "${identifier}": "${descriptionCache.get(identifier)}"`
+        );
+        return {
+          i: iAttr,
+          actionType: actionType,
+          description: descriptionCache.get(identifier),
+          html: componentHtml,
+        };
+      }
+
       const componentDescription =
         actionType === "select"
           ? await getSelectInfo({
@@ -391,6 +408,8 @@ export async function parsingAgent({
       if (componentDescription === null) {
         return null;
       }
+
+      descriptionCache.set(identifier, componentDescription);
 
       return {
         i: iAttr,
