@@ -1,10 +1,7 @@
 import { Chat } from "@prisma/client";
 import { Prompt, getAiResponse } from "../utils/langchainHandler";
 import { ActionComponent } from "../utils/pageHandler";
-import {
-  loadQuestionCacheFromFile,
-  saveQuestionCacheToFile,
-} from "../utils/fileUtil";
+import { loadCacheFromFile, saveCacheToFile } from "../utils/fileUtil";
 import { generateIdentifier } from "../utils/htmlHandler";
 
 export const makeConversationPrompt = (chats: Chat[]): Prompt => ({
@@ -47,7 +44,7 @@ export async function makeQuestionForActionValue(
   componentHtml: string
 ) {
   const identifier = generateIdentifier(componentHtml);
-  const questionCache = loadQuestionCacheFromFile();
+  const questionCache = loadCacheFromFile("questionCache.json");
   const cachedQuestion = questionCache.get(identifier);
   if (cachedQuestion) {
     return cachedQuestion;
@@ -81,7 +78,7 @@ The description of the screen: ${screenDescription}
   ]);
 
   questionCache.set(identifier, newQuestion);
-  saveQuestionCacheToFile(questionCache);
+  saveCacheToFile(questionCache, "questionCache.json");
 
   return newQuestion;
 }

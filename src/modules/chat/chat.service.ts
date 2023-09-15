@@ -39,6 +39,10 @@ import {
   getListFromSelectResult,
   getDataFromHTML,
 } from "../../prompts/visualPrompts";
+import {
+  loadObjectArrayFromFile,
+  saveObjectArrayToFile,
+} from "../../utils/fileUtil";
 
 const page = new PageHandler();
 let focusSection: ScreenResult;
@@ -141,6 +145,8 @@ async function planningAndAsk(): Promise<
 > {
   console.log("planningAndAsk");
   try {
+    actionLogs = loadObjectArrayFromFile<SystemLog>("actionLogs.json");
+
     const chats = await getChats();
     const userContext = await getUserContext(chats);
     const actionComponents = focusSection.actionComponents;
@@ -313,6 +319,7 @@ export async function confirm(
           screenDescription: focusSection.screenDescription,
           actionDescription,
         });
+        saveObjectArrayToFile(actionLogs, "actionLogs.json");
         focusSection = await page.inputText(
           `[i="${component.i}"]`,
           input.actionValue
@@ -326,6 +333,7 @@ export async function confirm(
           screenDescription: focusSection.screenDescription,
           actionDescription,
         });
+        saveObjectArrayToFile(actionLogs, "actionLogs.json");
         focusSection = await page.click(`[i="${component.i}"]`);
       } else if (component.actionType === "select") {
         if (!input.actionValue) {
@@ -368,6 +376,7 @@ export async function confirm(
       screenDescription: focusSection.screenDescription,
       actionDescription,
     });
+    saveObjectArrayToFile(actionLogs, "actionLogs.json");
   }
   return await planningAndAsk();
 }

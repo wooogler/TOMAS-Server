@@ -1,46 +1,49 @@
 import fs from "fs";
 import path from "path";
 
-const parsingCacheFilePath = path.join(__dirname, "descriptionCache.json");
+const baseDir = __dirname;
 
-export function loadParsingCacheFromFile(): Map<string, string> {
-  if (fs.existsSync(parsingCacheFilePath)) {
-    const fileData = fs.readFileSync(parsingCacheFilePath, "utf-8");
+function getCacheFilePath(fileName: string): string {
+  return path.join(baseDir, fileName);
+}
+
+export function loadCacheFromFile(fileName: string): Map<string, string> {
+  const filePath = getCacheFilePath(fileName);
+  if (fs.existsSync(filePath)) {
+    const fileData = fs.readFileSync(filePath, "utf-8");
     return new Map(JSON.parse(fileData));
   }
   return new Map();
 }
 
-export function saveParsingCacheToFile(cache: Map<string, string>) {
+export function saveCacheToFile(
+  cache: Map<string, string>,
+  fileName: string
+): void {
+  const filePath = getCacheFilePath(fileName);
   const arrayifiedData = Array.from(cache.entries());
   const jsonData = JSON.stringify(arrayifiedData, null, 2);
-  fs.writeFileSync(parsingCacheFilePath, jsonData, "utf-8");
+  fs.writeFileSync(filePath, jsonData, "utf-8");
 }
 
-export function deleteParsingCacheFile() {
-  if (fs.existsSync(parsingCacheFilePath)) {
-    fs.unlinkSync(parsingCacheFilePath);
+export function loadObjectArrayFromFile<T>(fileName: string): T[] {
+  const filePath = getCacheFilePath(fileName);
+  if (fs.existsSync(filePath)) {
+    const fileData = fs.readFileSync(filePath, "utf-8");
+    return JSON.parse(fileData) as T[];
   }
+  return [];
 }
 
-const questionCacheFilePath = path.join(__dirname, "questionCache.json");
-
-export function loadQuestionCacheFromFile(): Map<string, string> {
-  if (fs.existsSync(questionCacheFilePath)) {
-    const fileData = fs.readFileSync(questionCacheFilePath, "utf-8");
-    return new Map(JSON.parse(fileData));
-  }
-  return new Map();
+export function saveObjectArrayToFile<T>(array: T[], fileName: string): void {
+  const filePath = getCacheFilePath(fileName);
+  const jsonData = JSON.stringify(array, null, 2);
+  fs.writeFileSync(filePath, jsonData, "utf-8");
 }
 
-export function saveQuestionCacheToFile(cache: Map<string, string>) {
-  const arrayifiedData = Array.from(cache.entries());
-  const jsonData = JSON.stringify(arrayifiedData, null, 2);
-  fs.writeFileSync(questionCacheFilePath, jsonData, "utf-8");
-}
-
-export function deleteQuestionCacheFile() {
-  if (fs.existsSync(questionCacheFilePath)) {
-    fs.unlinkSync(questionCacheFilePath);
+export function deleteFile(fileName: string): void {
+  const filePath = getCacheFilePath(fileName);
+  if (fs.existsSync(filePath)) {
+    fs.unlinkSync(filePath);
   }
 }

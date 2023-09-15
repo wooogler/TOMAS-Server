@@ -2,5 +2,37 @@
   [
     "input,id=searchInput-from,class=hcr-input__field-8-2-1,role=combobox,type=text,aria-label=Departing from Los Angeles, CA",
     "Where are you starting your bus journey from?"
+  ],
+  [
+    "fieldset,One WayRound Trip,class=hcr-fieldset-8-2-1 OEcMX Th_RO",
+    "Are you planning to travel just one way or do you need a round trip?"
+  ],
+  [
+    "ul,Not sure where to st,class=hcr-autocomplete__list-8-2-1 hcr-autocomplete__list--boxed,role=group",
+    "Where will you be starting your bus trip from?"
+  ],
+  [
+    "ul,North AmericaNew Yor,class=hcr-autocomplete__list-8-2-1 hcr-autocomplete__list--boxed,role=group",
+    "From which city would you like to start your bus journey?"
+  ],
+  [
+    "ul,Popular placesToront,class=hcr-autocomplete__list-8-2-1 hcr-autocomplete__list--boxed,role=group",
+    "Which city would you like to choose as your destination for your bus travel?"
+  ],
+  [
+    "div,September 2023SunMon,class=hcr-clndr-8-2-1 wnaY8",
+    "What date would you like to choose for your bus travel?"
+  ],
+  [
+    "ul,North AmericaLas Veg,class=hcr-autocomplete__list-8-2-1 hcr-autocomplete__list--boxed,role=group",
+    "Where would you like to start your bus trip from?"
+  ],
+  [
+    "input,id=searchInput-to,class=hcr-input__field-8-2-1,role=combobox,type=text,aria-label=Arriving at Los Angeles, CA",
+    "Where would you like to go on your bus trip?"
+  ],
+  [
+    "ul,North AmericaLos Ang,class=hcr-autocomplete__list-8-2-1 hcr-autocomplete__list--boxed,role=group",
+    "Where are you planning to go for your bus travel?"
   ]
 ]

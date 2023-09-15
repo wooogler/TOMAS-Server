@@ -14,8 +14,7 @@ import {
   ScreenResult,
 } from "../utils/pageHandler";
 import { Prompt, getGpt4Response } from "../utils/langchainHandler";
-import { getChats } from "./chat/chat.service";
-import { createAIChat } from "./chat/chat.service";
+import { getChats, createAIChat } from "./chat/chat.service";
 import {
   SystemLog,
   findInputTextValue,
@@ -34,10 +33,7 @@ import {
   getComponentInfo,
 } from "../prompts/screenPrompts";
 import { extractTextLabelFromHTML } from "../prompts/visualPrompts";
-import {
-  loadParsingCacheFromFile,
-  saveParsingCacheToFile,
-} from "../utils/fileUtil";
+import { loadCacheFromFile, saveCacheToFile } from "../utils/fileUtil";
 
 export interface TaskList {
   i: string;
@@ -359,7 +355,7 @@ export async function parsingAgent({
   screenHtml: string;
   screenDescription: string;
 }): Promise<ActionComponent[]> {
-  const descriptionCache = loadParsingCacheFromFile();
+  const descriptionCache = loadCacheFromFile("descriptionCache.json");
 
   const possibleInteractions = parsingPossibleInteractions(screenHtml).sort(
     comparePossibleInteractions
@@ -408,7 +404,7 @@ export async function parsingAgent({
       }
 
       descriptionCache.set(identifier, componentDescription);
-      saveParsingCacheToFile(descriptionCache);
+      saveCacheToFile(descriptionCache, "descriptionCache.json");
 
       return {
         i: iAttr,

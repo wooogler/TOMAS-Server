@@ -1,21 +1,10 @@
 import dotenv from "dotenv";
-import { PageHandler, ScreenResult } from "../src/utils/pageHandler";
-import * as fs from "fs";
-
-import { convertSelectResultIntoTable } from "../src/modules/chat/chat.service";
-import { simplifyHtml, simplifyItemHtml } from "./utils/htmlHandler";
+import { PageHandler, ScreenResult } from "./utils/pageHandler";
 import {
   makeQuestionForActionValue,
   makeQuestionForConfirmation,
 } from "./prompts/chatPrompts";
 dotenv.config();
-
-// describe("pageHandler", () => {
-//   const pageHandler = new PageHandler();
-
-//   beforeAll(async () => {
-//     await pageHandler.initialize();
-//   }, 10000);
 
 async function main() {
   const pageHandler = new PageHandler();
@@ -30,13 +19,13 @@ async function main() {
     );
 
     console.log(`
-id: ${screen.id}
-type: ${screen.type}
-description: ${screen.screenDescription}
-ActionComponents: 
-${actionComponentsDescriptions.join("\n")}
--------------------
-    `);
+  id: ${screen.id}
+  type: ${screen.type}
+  description: ${screen.screenDescription}
+  ActionComponents:
+  ${actionComponentsDescriptions.join("\n")}
+  -------------------
+      `);
     if (isQuestion) {
       const questions = await Promise.all(
         screen.actionComponents.map(async (comp) => {
@@ -56,15 +45,15 @@ ${actionComponentsDescriptions.join("\n")}
       );
 
       console.log(`Questions:
-${questions.join("\n")}
--------------------------------------------------------
-    `);
+  ${questions.join("\n")}
+  -------------------------------------------------------
+      `);
     }
   };
 
-  logScreenResult(
-    await pageHandler.navigate("https://www.greyhound.com", false)
-  );
+  //   logScreenResult(
+  //     await pageHandler.navigate("https://www.greyhound.com", false)
+  //   );
 
   // select the trip type
   // logScreenResult(
@@ -78,10 +67,10 @@ ${questions.join("\n")}
   // );
 
   //select the arrival
-  logScreenResult(await pageHandler.click("#searchInputMobile-to"), false);
-  logScreenResult(
-    await pageHandler.inputText("#searchInput-from", "Las Vegas", true)
-  );
+  // logScreenResult(await pageHandler.click("#searchInputMobile-to"), false);
+  // logScreenResult(
+  //   await pageHandler.inputText("#searchInput-from", "Las Vegas", true)
+  // );
 
   // input the passenger number
   // logScreenResult(

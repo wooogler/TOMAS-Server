@@ -28,7 +28,6 @@ export interface ScreenResult {
 export class PageHandler {
   private browser: Browser | null = null;
   private page: Page | null = null;
-
   async initialize() {
     dotenv.config();
     this.browser = await puppeteer.launch({ headless: false });
@@ -39,14 +38,12 @@ export class PageHandler {
     );
     await this.page.setViewport({ width: 390, height: 844 });
   }
-
   private async getPage() {
     if (!this.page) {
       throw new Error("Page is not initialized. Please call initialize first.");
     }
     return this.page;
   }
-
   private async getElement(selector: string) {
     const page = await this.getPage();
     const element = await page.$(selector);
@@ -55,12 +52,10 @@ export class PageHandler {
     }
     return element;
   }
-
   private extractBaseURL(url: string) {
     const parsedURL = new URL(url);
     return parsedURL.origin + parsedURL.pathname;
   }
-
   async navigate(url: string, parsing: boolean = true): Promise<ScreenResult> {
     const page = await this.getPage();
     await page.setDefaultNavigationTimeout(0);
@@ -69,7 +64,6 @@ export class PageHandler {
         waitUntil: "networkidle0",
       });
     });
-
     if (parsing === false) {
       if (screen.modalI) {
         return {
@@ -87,7 +81,6 @@ export class PageHandler {
         };
       }
     }
-
     const pageSimpleHtml = simplifyHtml(await page.content(), true);
     const pageDescription = await getPageDescription(pageSimpleHtml);
     const screenSimpleHtml = simplifyHtml(screen.html, true);
@@ -112,7 +105,6 @@ export class PageHandler {
         screenHtml: screen.html,
         screenDescription: pageDescription,
       });
-
       return {
         type: "page",
         screenDescription: pageDescription,
@@ -121,7 +113,6 @@ export class PageHandler {
       };
     }
   }
-
   async click(
     selector: string,
     parsing: boolean = true
@@ -131,7 +122,6 @@ export class PageHandler {
     const screen = await trackModalChanges(page, async () => {
       await element.click();
     });
-
     if (parsing === false) {
       if (screen.modalI) {
         return {
@@ -149,11 +139,9 @@ export class PageHandler {
         };
       }
     }
-
     const pageSimpleHtml = simplifyHtml(await page.content(), true);
     const pageDescription = await getPageDescription(pageSimpleHtml);
     const screenSimpleHtml = simplifyHtml(screen.html, true);
-
     if (screen.modalI) {
       // if screen is a modal
       const modalDescription = await getModalDescription(
@@ -164,7 +152,6 @@ export class PageHandler {
         screenHtml: screen.html,
         screenDescription: modalDescription,
       });
-
       return {
         type: "modal",
         screenDescription: modalDescription,
@@ -176,7 +163,6 @@ export class PageHandler {
         screenHtml: screen.html,
         screenDescription: pageDescription,
       });
-
       return {
         type: "page",
         screenDescription: pageDescription,
@@ -185,7 +171,6 @@ export class PageHandler {
       };
     }
   }
-
   async inputText(
     selector: string,
     text: string,
@@ -217,11 +202,9 @@ export class PageHandler {
         };
       }
     }
-
     const pageSimpleHtml = simplifyHtml(await page.content(), true);
     const pageDescription = await getPageDescription(pageSimpleHtml);
     const screenSimpleHtml = simplifyHtml(screen.html, true);
-
     if (screen.modalI) {
       // if screen is a modal
       const modalDescription = await getModalDescription(
@@ -243,7 +226,6 @@ export class PageHandler {
         screenHtml: screen.html,
         screenDescription: pageDescription,
       });
-
       return {
         type: "page",
         screenDescription: pageDescription,
@@ -252,7 +234,6 @@ export class PageHandler {
       };
     }
   }
-
   //select one item in the list
   async select(
     selector: string,
@@ -264,7 +245,6 @@ export class PageHandler {
     const dom = new JSDOM(screen.html);
     const element = dom.window.document.querySelector(selector);
     const elementSimpleHtml = simplifyHtml(element?.innerHTML || "", true);
-
     if (parsing === false) {
       return {
         type: "section",
@@ -275,7 +255,6 @@ export class PageHandler {
         )}`,
       };
     }
-
     const pageSimpleHtml = simplifyHtml(await page.content(), true);
     const pageDescription = await getPageDescription(pageSimpleHtml);
     const sectionDescription = await getSectionDescription(
@@ -299,12 +278,10 @@ export class PageHandler {
       )}`,
     };
   }
-
   async unfocus(parsing: boolean = true): Promise<ScreenResult> {
     const page = await this.getPage();
     const screen = await trackModalChanges(page, async () => {});
     const screenSimpleHtml = simplifyHtml(screen.html, true);
-
     const pageSimpleHtml = simplifyHtml(await page.content(), true);
     if (parsing === false) {
       return {
@@ -326,7 +303,6 @@ export class PageHandler {
       id: `${this.extractBaseURL(page.url())}`,
     };
   }
-
   async close() {
     if (this.page) {
       await this.page.close();

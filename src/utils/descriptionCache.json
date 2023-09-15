@@ -165,6 +165,86 @@
   ],
   [
     "ul,Not sure where to st,class=hcr-autocomplete__list-8-2-1 hcr-autocomplete__list--boxed,role=group",
-    "Select one departure location from the options provided or explore the map for more options."
+    "Click the link to explore the map for more options."
+  ],
+  [
+    "button,Fri, Sep 15,class=hcr-btn-8-2-1 D0lvA,type=button,aria-label=Change departure date Fri, Sep 15",
+    "Click the button to change the departure date for the bus trip."
+  ],
+  [
+    "button,Fri, Sep 15,class=hcr-btn-8-2-1 D0lvA,type=button,aria-label=Change arrival date Fri, Sep 15",
+    "Click the button labeled \"Change arrival date\" to modify the selected arrival date for the bus trip."
+  ],
+  [
+    "button,class=hcr-btn-8-2-1 hcr-btn--square-8-2-1 hcr-btn--sm-8-2-1 hcr-btn--link-8-2-1 hk_Eb hcr-input__icon-8-2-1,type=button,aria-label=Remove return date and travel one way",
+    "Click the button to remove the return date and travel one way."
+  ],
+  [
+    "ul,North AmericaSouth B,class=hcr-autocomplete__list-8-2-1 hcr-autocomplete__list--boxed,role=group",
+    "Select one of the locations listed in the section as the departure location for the bus trip."
+  ],
+  [
+    "ul,EuropeYorkGreat Brit,class=hcr-autocomplete__list-8-2-1 hcr-autocomplete__list--boxed,role=group",
+    "Select one of the options in the Europe section, such as \"York\" or \"Great Britain\"."
+  ],
+  [
+    "ul,North AmericaNew Yor,class=hcr-autocomplete__list-8-2-1 hcr-autocomplete__list--boxed,role=group",
+    "Select one of the following options: North America, New York, NY, Albany, NY, York, PA, Newark, NJ, New Orleans, LA, Newark, OH, Los Angeles, CA, Las Cruces, NM, Philadelphia, PA."
+  ],
+  [
+    "input,id=searchInputMobile-from,class=hcr-input__field-8-2-1,role=button,type=button,aria-label=Departing from New York, NY",
+    "Click on the button to select the departure location for the bus travel."
+  ],
+  [
+    "input,id=searchInput-to,class=hcr-input__field-8-2-1,role=combobox,type=text,aria-label=Arriving at Las Vegas, NV",
+    "Input the destination for the bus travel by typing it into the text field."
+  ],
+  [
+    "ul,Not sure where to go,class=hcr-autocomplete__list-8-2-1 hcr-autocomplete__list--boxed,role=group",
+    "Select one destination from the list provided."
+  ],
+  [
+    "ul,Popular placesToront,class=hcr-autocomplete__list-8-2-1 hcr-autocomplete__list--boxed,role=group",
+    "Select one of the popular places: Toronto, ON, Boston, MA, Washington, D.C., Chicago, IL, or Houston, TX."
+  ],
+  [
+    "input,id=searchInputMobile-to,class=hcr-input__field-8-2-1,role=button,type=button,aria-label=Arriving at Boston, MA",
+    "Click the button to select the destination for the bus travel."
+  ],
+  [
+    "button,Confirm,class=hcr-btn-8-2-1 hcr-btn--primary-8-2-1,type=button,aria-label=Confirm selection",
+    "Click the \"Confirm\" button to proceed with the selected departure date."
+  ],
+  [
+    "button,class=hcr-btn-8-2-1 hcr-btn--square-8-2-1 FNDwe,type=button,aria-label=Close Select departure date",
+    "Click the button to close the modal and cancel the selection of a departure date."
+  ],
+  [
+    "div,September 2023SunMon,class=hcr-clndr-8-2-1 wnaY8",
+    "Select one item from the list to view the corresponding calendar or departure dates for bus travel."
+  ],
+  [
+    "ul,North AmericaLas Veg,class=hcr-autocomplete__list-8-2-1 hcr-autocomplete__list--boxed,role=group",
+    "Select one of the locations listed in the section as the departure location for the bus trip."
+  ],
+  [
+    "input,id=searchInputMobile-to,class=hcr-input__field-8-2-1,role=button,type=button,aria-label=Arriving at Los Angeles, CA",
+    "Click the button to select the destination location for the bus travel."
+  ],
+  [
+    "input,id=searchInputMobile-from,class=hcr-input__field-8-2-1,role=button,type=button,aria-label=Departing from Las Vegas, NV",
+    "Click on the \"Departing from Las Vegas, NV\" button to select the departure location for the bus travel."
+  ],
+  [
+    "input,id=searchInput-to,class=hcr-input__field-8-2-1,role=combobox,type=text,aria-label=Arriving at Los Angeles, CA",
+    "Input the destination for the bus travel."
+  ],
+  [
+    "ul,Popular placesLos An,class=hcr-autocomplete__list-8-2-1 hcr-autocomplete__list--boxed,role=group",
+    "Select one of the popular places listed in the section to choose a destination for your bus travel."
+  ],
+  [
+    "ul,North AmericaLos Ang,class=hcr-autocomplete__list-8-2-1 hcr-autocomplete__list--boxed,role=group",
+    "Select one of the following destinations: Los Angeles, CA; Los Angeles International Airport; Ontario / Montclair / Claremont, CA; El Monte-Baldwin Park, CA; Long Beach, CA; Riverside, CA; San Bernardino, CA; North Hollywood, CA; San Fernando, CA; Port Angeles, WA."
   ]
 ]
