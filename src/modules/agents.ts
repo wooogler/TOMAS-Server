@@ -245,7 +245,6 @@ async function processComponent({
   if (possibleInteractions.length === 1) {
     const actionType = possibleInteractions[0].actionType;
     const tagName = possibleInteractions[0].tagName || "";
-
     const itemDescription = await getItemDescriptionBasedOnCriteria({
       comp,
       screenHtml,
@@ -262,28 +261,13 @@ async function processComponent({
       },
     ];
   }
-
-  const actionComponents: ActionComponent[] = [];
-
-  for (const possibleInteraction of possibleInteractions) {
-    const actionType = possibleInteraction.actionType;
-    const tagName = possibleInteraction.tagName || "";
-    const itemElement = comp.querySelector(`[i="${possibleInteraction.i}"]`);
-    const itemDescription = await getItemDescriptionBasedOnCriteria({
-      comp: itemElement || comp,
-      screenHtml,
-      listDescription,
-      screenDescription,
-      tagName,
-    });
-    actionComponents.push({
-      i: possibleInteraction.i,
-      actionType,
-      description: itemDescription,
-      html: itemElement?.outerHTML || comp.outerHTML,
-    });
-  }
-  return actionComponents;
+  return await processMultipleInteractions({
+    comp,
+    screenHtml,
+    listDescription,
+    screenDescription,
+    possibleInteractions,
+  });
 }
 
 async function getItemDescriptionBasedOnCriteria({
@@ -293,19 +277,13 @@ async function getItemDescriptionBasedOnCriteria({
   screenDescription,
   tagName,
 }: ProcessComponentParams & { tagName: string }) {
-  // console.log("tagName: ", tagName);
-  // console.log("comp.outerHTML: ", comp.outerHTML);
-
-  return !["ul", "ol"].includes(tagName)
-    ? `label-${await extractTextLabelFromHTML(
-        comp.outerHTML,
-        screenDescription
-      )}`
-    : `desc-${await getItemDescription({
+  return elementTextLength(comp.textContent || "") < 30 || tagName === "table"
+    ? await extractTextLabelFromHTML(comp.outerHTML, screenDescription)
+    : await getItemDescription({
         itemHtml: comp.outerHTML,
         screenHtml,
         screenDescription: listDescription,
-      })}`;
+      });
 }
 
 async function processMultipleInteractions({
@@ -323,12 +301,12 @@ async function processMultipleInteractions({
     screenDescription: listDescription,
   });
 
-  // if (possibleInteractions.length > 5) {
-  //   return await parsingAgent({
-  //     screenHtml: comp.innerHTML,
-  //     screenDescription: partDescription || "",
-  //   });
-  // }
+  if (possibleInteractions.length > 5) {
+    return await parsingAgent({
+      screenHtml: comp.innerHTML,
+      screenDescription: partDescription || "",
+    });
+  }
 
   return [
     {
@@ -343,13 +321,20 @@ async function processMultipleInteractions({
 export async function parsingItemAgent(params: {
   screenHtml: string;
   screenDescription: string;
+  isFocus?: boolean;
 }): Promise<ActionComponent[]> {
-  const { screenHtml, screenDescription } = params;
+  const { screenHtml, screenDescription, isFocus = false } = params;
   const dom = new JSDOM(screenHtml);
   const listDescription = await getListDescription(
     screenHtml,
     screenDescription
   );
+
+  if (isFocus)
+    return await parsingAgent({
+      screenHtml,
+      screenDescription: listDescription,
+    });
 
   const rootElement = dom.window.document.body.firstElementChild;
   if (!rootElement) return [];
@@ -392,9 +377,6 @@ export async function parsingAgent({
         // console.log(
         //   `Cache hit for "${identifier}": "${descriptionCache.get(identifier)}"`
         // );
-        if (descriptionCache.get(identifier) === "") {
-          return null;
-        }
         return {
           i: iAttr,
           actionType: actionType,

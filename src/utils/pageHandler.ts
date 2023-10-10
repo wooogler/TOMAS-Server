@@ -56,7 +56,6 @@ export class PageHandler {
     const parsedURL = new URL(url);
     return parsedURL.origin + parsedURL.pathname;
   }
-
   async navigate(url: string, parsing: boolean = true): Promise<ScreenResult> {
     const page = await this.getPage();
     await page.setDefaultNavigationTimeout(0);
@@ -262,15 +261,11 @@ export class PageHandler {
       elementSimpleHtml,
       pageDescription
     );
-    const itemComponents = isFocus
-      ? await parsingAgent({
-          screenHtml: element?.outerHTML || "",
-          screenDescription: sectionDescription,
-        })
-      : await parsingItemAgent({
-          screenHtml: element?.outerHTML || "",
-          screenDescription: sectionDescription,
-        });
+    const itemComponents = await parsingItemAgent({
+      screenHtml: element?.outerHTML || "",
+      screenDescription: sectionDescription,
+      isFocus,
+    });
     return {
       type: "section",
       screenDescription: sectionDescription,
@@ -480,7 +475,12 @@ export async function trackModalChanges(
   const initialUrl = page.url();
 
   await action();
-  await new Promise((r) => setTimeout(r, 3000));
+  if (page.url() !== initialUrl) {
+    // await navigationPromise;
+    await new Promise((r) => setTimeout(r, 3000));
+  } else {
+    await new Promise((r) => setTimeout(r, 3000));
+  }
 
   await addIAttribute(page);
   await markClickableDivs(page);
