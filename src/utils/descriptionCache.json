@@ -246,5 +246,409 @@
   [
     "ul,North AmericaLos Ang,class=hcr-autocomplete__list-8-2-1 hcr-autocomplete__list--boxed,role=group",
     "Select one of the following destinations: Los Angeles, CA; Los Angeles International Airport; Ontario / Montclair / Claremont, CA; El Monte-Baldwin Park, CA; Long Beach, CA; Riverside, CA; San Bernardino, CA; North Hollywood, CA; San Fernando, CA; Port Angeles, WA."
+  ],
+  [
+    "button,Special Discount pas,class=hcr-btn-8-2-1 aLJcq,type=button,aria-label=Show more discounts",
+    "Click 'Special Discount passengers' to access additional discounts for eligible passengers."
+  ],
+  [
+    "button,class=hcr-btn-8-2-1 hcr-btn--square-8-2-1 FNDwe,type=button,aria-label=Close Add passengers, 1 Adult",
+    "Click the button with the aria-label \"Close Add passengers\" to close the modal for selecting the number of passengers."
+  ],
+  [
+    "div,AdultsChild2 to 15 y,class=avRmL",
+    "Select one item from the list to specify the number of adults the user wants to include in their bus reservation."
+  ],
+  [
+    "button,28,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Thu, Sep 28",
+    "Click on the button to select the date in the calendar grid."
+  ],
+  [
+    "button,25,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Mon, Sep 25",
+    "Click on the button to select the date in the calendar grid."
+  ],
+  [
+    "button,29,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Fri, Sep 29",
+    "Click on the button to select the date in the calendar grid for September 2023."
+  ],
+  [
+    "button,18,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Mon, Sep 18",
+    "Click on the button to select the date September 18 in the calendar grid."
+  ],
+  [
+    "button,23,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Sat, Sep 23",
+    "Click on the button to select the date September 23 in the calendar grid."
+  ],
+  [
+    "button,24,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Sun, Sep 24",
+    "Click on the button to select the date in the calendar grid."
+  ],
+  [
+    "button,19,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Tue, Sep 19",
+    "Click on the button to select the date in the calendar grid."
+  ],
+  [
+    "button,15,class=hcr-clndr__btn-8-2-1 hcr-clndr__btn--selected-8-2-1,type=button,aria-label=Fri, Sep 15",
+    "Click on the button to select the date in the calendar grid for September 2023."
+  ],
+  [
+    "button,22,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Fri, Sep 22",
+    "Click on the button to select the date September 22 in the calendar grid."
+  ],
+  [
+    "button,30,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Sat, Sep 30",
+    "Click on the button to select the date \"Sat, Sep 30\" in the calendar grid."
+  ],
+  [
+    "button,20,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Wed, Sep 20",
+    "Click on the button with the date \"20\" to select that specific date in the calendar grid."
+  ],
+  [
+    "button,17,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Sun, Sep 17",
+    "Click on the button to select the date in the calendar grid."
+  ],
+  [
+    "button,16,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Sat, Sep 16",
+    "Click on the button to select the date \"Sat, Sep 16\" in the calendar grid."
+  ],
+  [
+    "button,21,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Thu, Sep 21",
+    "Click on the button to select the date September 21, 2023 in the calendar grid."
+  ],
+  [
+    "button,27,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Wed, Sep 27",
+    "Click on the button to select the date \"Wed, Sep 27\" in the calendar grid for September 2023."
+  ],
+  [
+    "button,26,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Tue, Sep 26",
+    "Click on the button with the aria-label \"Tue, Sep 26\" to perform an action related to that specific date in the calendar grid."
+  ],
+  [
+    "button,Mon, Sep 18,class=hcr-btn-8-2-1 D0lvA,type=button,aria-label=Change departure date Mon, Sep 18",
+    "Click the button to change the departure date."
+  ],
+  [
+    "button,18,class=hcr-clndr__btn-8-2-1 hcr-clndr__btn--selected-8-2-1,type=button,aria-label=Mon, Sep 18",
+    "Click on the button to select the date on the calendar."
+  ],
+  [
+    "button,Thu, Sep 21,class=hcr-btn-8-2-1 D0lvA,type=button,aria-label=Change departure date Thu, Sep 21",
+    "Click the button to change the departure date."
+  ],
+  [
+    "ul,North AmericaBoston,,class=hcr-autocomplete__list-8-2-1 hcr-autocomplete__list--boxed,role=group",
+    "Select one of the options in the list to choose the departure location for bus travel."
+  ],
+  [
+    "input,id=searchInputMobile-from,class=hcr-input__field-8-2-1,role=button,type=button,aria-label=Departing from Boston, MA",
+    "Click on the \"Departing from Boston, MA\" button to select the departure location for the bus travel."
+  ],
+  [
+    "input,id=searchInputMobile-to,class=hcr-input__field-8-2-1,role=button,type=button,aria-label=Arriving at New York, NY",
+    "Click the \"Arriving at New York, NY\" button to select the destination for the bus travel."
+  ],
+  [
+    "button,16,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Mon, Oct 16",
+    "Click on the button to select the date in the calendar grid."
+  ],
+  [
+    "button,19,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Thu, Oct 19",
+    "Click on the button to select the date in the calendar grid."
+  ],
+  [
+    "button,28,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Sat, Oct 28",
+    "Click on the button to select the date in the calendar grid."
+  ],
+  [
+    "button,24,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Tue, Oct 24",
+    "Click on the button to select the date in the calendar grid."
+  ],
+  [
+    "button,27,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Fri, Oct 27",
+    "Click on the button to select the date in the calendar grid."
+  ],
+  [
+    "button,13,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Fri, Oct 13",
+    "Click on the button to select the date in the calendar grid for October 2023."
+  ],
+  [
+    "button,25,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Wed, Oct 25",
+    "Click on the button to select the date in the calendar grid."
+  ],
+  [
+    "button,21,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Sat, Oct 21",
+    "Click on the button to select the date in the calendar grid for October 2023."
+  ],
+  [
+    "button,14,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Sat, Oct 14",
+    "Click on the button to select the date in the calendar grid."
+  ],
+  [
+    "button,15,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Sun, Oct 15",
+    "Click on the button to select the date in the calendar grid."
+  ],
+  [
+    "button,2,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Mon, Oct 2",
+    "Click on the button to select the second day of October 2023 in the calendar grid."
+  ],
+  [
+    "button,31,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Tue, Oct 31",
+    "Click on the button to select October 31, 2023 on the calendar."
+  ],
+  [
+    "button,12,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Thu, Oct 12",
+    "Click on the button to select the date October 12th in the calendar grid."
+  ],
+  [
+    "button,29,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Sun, Oct 29",
+    "Click on the button to select the date in the calendar grid."
+  ],
+  [
+    "button,17,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Tue, Oct 17",
+    "Click on the button to select the date in the calendar grid for October 2023."
+  ],
+  [
+    "button,23,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Mon, Oct 23",
+    "Click on the button to select the date in the calendar grid for October 2023."
+  ],
+  [
+    "button,30,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Mon, Oct 30",
+    "Click on the button to select the date in the calendar grid for October 2023."
+  ],
+  [
+    "button,26,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Thu, Oct 26",
+    "Click on the button to select the date \"Thu, Oct 26\" in the calendar grid."
+  ],
+  [
+    "button,7,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Sat, Oct 7",
+    "Click on the button to select the date October 7th, 2023 in the calendar."
+  ],
+  [
+    "button,6,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Fri, Oct 6",
+    "Click on the button to select the date Fri, Oct 6 in the calendar grid."
+  ],
+  [
+    "button,8,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Sun, Oct 8",
+    "Click on the button to select the date in the calendar grid for October 2023."
+  ],
+  [
+    "button,18,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Wed, Oct 18",
+    "Click on the button to select the date in the calendar grid for October 2023."
+  ],
+  [
+    "button,9,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Mon, Oct 9",
+    "Click on the button to select the date in the calendar grid."
+  ],
+  [
+    "button,4,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Wed, Oct 4",
+    "Click on the button to select the date \"Wed, Oct 4\" in the calendar grid for October 2023."
+  ],
+  [
+    "button,20,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Fri, Oct 20",
+    "Click on the button to select the date in the calendar grid for October 2023."
+  ],
+  [
+    "button,11,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Wed, Oct 11",
+    "Click on the button to select the date \"11\" in the calendar grid."
+  ],
+  [
+    "button,22,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Sun, Oct 22",
+    "Click on the button to select the date October 22 in the calendar grid."
+  ],
+  [
+    "button,1,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Sun, Oct 1",
+    "Click on the button to select the first day of October 2023 in the calendar grid."
+  ],
+  [
+    "button,3,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Tue, Oct 3",
+    "Click on the button to select the date October 3, 2023 in the calendar grid."
+  ],
+  [
+    "button,10,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Tue, Oct 10",
+    "Click on the button to select the date October 10th, 2023 in the calendar grid."
+  ],
+  [
+    "button,5,class=hcr-clndr__btn-8-2-1,type=button,aria-label=Thu, Oct 5",
+    "Click on the button to select the date Thu, Oct 5 in the calendar grid."
+  ],
+  [
+    "button,Sun, Oct 1,class=hcr-btn-8-2-1 D0lvA,type=button,aria-label=Change departure date Sun, Oct 1",
+    "Click the button labeled \"Change departure date\" to modify the departure date for the bus trip."
+  ],
+  [
+    "input,id=search-mask-trip-mode-oneway-toggle,class=hcr-radio__input-8-2-1,name=search-mask-trip-mode,type=radio,aria-label=One Way",
+    "Click on the radio button labeled \"One Way\" to select the option for a one-way trip mode when searching for affordable bus travel offered by Greyhound."
+  ],
+  [
+    "div,New York, NYUSA,class=XbMH7",
+    "Click on the element to view more information about Greyhound's office in New York, NY, USA."
+  ],
+  [
+    "input,id=searchInputMobile-to,class=hcr-input__field-8-2-1,role=button,type=button,aria-label=Arriving at Toronto, ON",
+    "Click the \"Arriving at Toronto, ON\" button to select the destination for the bus travel."
+  ],
+  [
+    "table,October 2023SunMonTu,id=calendar-grid,class=hcr-clndr__table-8-2-1,role=grid",
+    "Select one of the dates in the calendar to view more details or perform an action related to that specific date."
+  ],
+  [
+    "table,November 2023SunMonT,id=calendar-grid,class=hcr-clndr__table-8-2-1,role=grid",
+    "Select one of the dates in the calendar to view more details or perform an action related to that date."
+  ],
+  [
+    "button,Thu, Nov 2,class=hcr-btn-8-2-1 D0lvA,type=button,aria-label=Change departure date Thu, Nov 2",
+    "Click the button to change the departure date."
+  ],
+  [
+    "button,Wed, Sep 20,class=hcr-btn-8-2-1 D0lvA,type=button,aria-label=Change departure date Wed, Sep 20",
+    "Click the button to change the departure date."
+  ],
+  [
+    "button,class=hcr-btn-8-2-1 hcr-btn--square-8-2-1 GoToPreviousStage__button___LmZal,type=button,aria-label=Return to homepage",
+    "Click the button to return to the homepage of the travel website."
+  ],
+  [
+    "button,class=hcr-btn-8-2-1 hcr-btn--square-8-2-1 MainHeader__button___MsxGW MainHeader__editButton___cUdoZ,type=button,aria-label=Change search query",
+    "Click the button to change the search query on the travel website."
+  ],
+  [
+    "ul,LegalPrivacy PolicyC",
+    "Select one of the legal options (Legal, Privacy Policy, Copyright, Your Privacy Choices) to view more information about that topic."
+  ],
+  [
+    "button,Wed, Sep 20,class=hcr-btn-8-2-1 D0lvA,type=button,aria-label=Change arrival date Wed, Sep 20",
+    "Click the \"Change arrival date\" button to modify the arrival date for the trip."
+  ],
+  [
+    "button,id=close-burger-menu-button,class=flix-header-burger-menu__toggle flix-btn flix-btn--link flix-btn--square flix-btn--md,type=button,aria-label=Close main site navigation",
+    "Click the button to close the main site navigation menu."
+  ],
+  [
+    "ul,Plan a Trip\n        ,class=flix-header-burger-menu__list",
+    "Select one of the options from the navigation menu, such as \"Plan a Trip\", \"Travel Info\", \"Manage My Booking\", \"Track My Bus\", or \"Help\"."
+  ],
+  [
+    "button,Tue, Oct 10,class=hcr-btn-8-2-1 D0lvA,type=button,aria-label=Change departure date Tue, Oct 10",
+    "Click the button to change the departure date."
+  ],
+  [
+    "button,class=hcr-btn-8-2-1 hcr-btn--square-8-2-1 GoToPreviousStage__button___LmZal,type=button",
+    "Click the button to perform a specific action."
+  ],
+  [
+    "button,class=hcr-btn-8-2-1 hcr-btn--square-8-2-1 MainHeader__button___MsxGW MainHeader__editButton___cUdoZ,type=button",
+    "Click the button to perform an unspecified action."
+  ],
+  [
+    "ul,North AmericaPhilade,class=hcr-autocomplete__list-8-2-1 hcr-autocomplete__list--boxed,role=group",
+    "Select one of the destinations listed in the section, such as \"Philadelphia, PA\" or \"New Philadelphia, OH\"."
+  ],
+  [
+    "input,id=searchInputMobile-to,class=hcr-input__field-8-2-1,role=button,type=button,aria-label=Arriving at Philadelphia, PA",
+    "Click the button to select the destination city for the bus travel."
+  ],
+  [
+    "button,Confirm,id=confirm-date-button,class=hcr-btn-8-2-1 hcr-btn--primary-8-2-1,type=button,aria-label=Confirm selection",
+    "Click the \"Confirm\" button to finalize the selection."
+  ],
+  [
+    "button,Fri, Sep 22,class=hcr-btn-8-2-1 D0lvA,type=button,aria-label=Change departure date Fri, Sep 22",
+    "Click \"Change departure date\" to modify the departure date for the bus trip."
+  ],
+  [
+    "button,Special Discount pas,class=hcr-btn-8-2-1 foF5R,type=button,aria-label=Show more discounts",
+    "Click 'Show more discounts' to expand and view additional discounts for special discount passengers."
+  ],
+  [
+    "button,Confirm,id=confirm-button,class=hcr-btn-8-2-1 hcr-btn--primary-8-2-1,type=button,aria-label=Confirm selection",
+    "Click 'Confirm' to finalize and confirm the selection made for the number of passengers, including adults, children, and passengers with wheelchairs, as well as the number of bikes to bring on the bus."
+  ],
+  [
+    "button,Wed, Nov 8,class=hcr-btn-8-2-1 D0lvA,type=button,aria-label=Change departure date Wed, Nov 8",
+    "Click the button to change the departure date."
+  ],
+  [
+    "input,id=search.form.label.wheelchair,class=hcr-quantity__input-8-2-1,role=spinbutton,type=number,aria-label=Travel in your wheelchair",
+    "Input the number of wheelchair users for the bus travel."
+  ],
+  [
+    "input,id=search.form.label.adult,class=hcr-quantity__input-8-2-1,role=spinbutton,type=number,aria-label=Adults",
+    "Input the number of adults for the bus travel."
+  ],
+  [
+    "input,id=passenger.children,class=hcr-quantity__input-8-2-1,role=spinbutton,type=number,aria-label=Child",
+    "Input the number of children passengers in the \"Child\" input field. The purpose of this action is to specify the number of children passengers for the bus travel."
+  ],
+  [
+    "input,id=search.form.label.bike_slot,class=hcr-quantity__input-8-2-1,role=spinbutton,type=number,aria-label=Bikes",
+    "Input the number of bikes. The purpose of this input is to allow the user to specify the quantity of bikes they want to bring for their bus travel."
+  ],
+  [
+    "button,class=hcr-btn-8-2-1 hcr-btn--square-8-2-1 hcr-quantity__button-8-2-1 hcr-quantity__button--minus-8-2-1,type=button,aria-label=Remove Adults",
+    ""
+  ],
+  [
+    "button,id=lastPlus,class=hcr-btn-8-2-1 hcr-btn--square-8-2-1 hcr-quantity__button-8-2-1 hcr-quantity__button--plus-8-2-1,type=button,aria-label=Add Adults",
+    ""
+  ],
+  [
+    "button,class=hcr-btn-8-2-1 hcr-btn--square-8-2-1 hcr-quantity__button-8-2-1 hcr-quantity__button--minus-8-2-1,type=button,aria-label=Remove Child",
+    ""
+  ],
+  [
+    "button,id=lastPlus,class=hcr-btn-8-2-1 hcr-btn--square-8-2-1 hcr-quantity__button-8-2-1 hcr-quantity__button--plus-8-2-1,type=button,aria-label=Add Travel in your wheelchair",
+    ""
+  ],
+  [
+    "button,id=lastPlus,class=hcr-btn-8-2-1 hcr-btn--square-8-2-1 hcr-quantity__button-8-2-1 hcr-quantity__button--plus-8-2-1,type=button,aria-label=Add Child",
+    ""
+  ],
+  [
+    "button,class=hcr-btn-8-2-1 hcr-btn--square-8-2-1 hcr-quantity__button-8-2-1 hcr-quantity__button--minus-8-2-1,type=button,aria-label=Remove Bikes",
+    ""
+  ],
+  [
+    "button,class=hcr-btn-8-2-1 hcr-btn--square-8-2-1 hcr-quantity__button-8-2-1 hcr-quantity__button--minus-8-2-1,type=button,aria-label=Remove Travel in your wheelchair",
+    ""
+  ],
+  [
+    "button,id=lastPlus,class=hcr-btn-8-2-1 hcr-btn--square-8-2-1 hcr-quantity__button-8-2-1 hcr-quantity__button--plus-8-2-1,type=button,aria-label=Add Bikes",
+    ""
+  ],
+  [
+    "button,2 Adults,class=hcr-btn-8-2-1 D0lvA,type=button,aria-label=2 Adults, Add passengers",
+    "Click '2 Adults' to adjust the number of adult passengers for the trip."
+  ],
+  [
+    "div,Los Angeles, CALas V,class=CollapsedSearchMask__collapsedSearchMask___GJvTE,role=presentation",
+    "Click on the element to select a starting location for a journey."
+  ],
+  [
+    "input,id=id_direct_only_0,class=hcr-checkbox__input-8-2-1,type=checkbox",
+    "Click the checkbox to filter the search results for direct trips only."
+  ],
+  [
+    "button,Filters,id=filters,class=hcr-tag-8-2-1 FilterTag__pill___ct0WJ,aria-label=Open filters panel",
+    "Click 'Filters' to open the filters panel and modify the search results based on specific criteria."
+  ],
+  [
+    "ul,Thu, Sep 21Fri, Sep ,class=DatePicker__datePickerPillsWrapper___Y5NDC,role=navigation,aria-label=Date switcher",
+    "Select one of the available dates for search results: Thu, Sep 21, Fri, Sep 22, or Sat, Sep 23."
+  ],
+  [
+    "ul,Direct trip from Sat,class=ResultsList__resultsList___eGsLK,aria-label=3 trips from Los Angeles, CA to Las Vegas, NV on Sep 23",
+    "Select one of the available bus trips from Los Angeles to Las Vegas by clicking on the \"Select this trip\" button."
+  ],
+  [
+    "ul,Direct trip from Fri,class=ResultsList__resultsList___eGsLK,aria-label=57 trips from Los Angeles, CA to Las Vegas, NV on Fri, Sep 22",
+    "Select one of the available trips by clicking on the \"Select this trip\" button."
+  ],
+  [
+    "ul,North AmericaChicago,class=hcr-autocomplete__list-8-2-1 hcr-autocomplete__list--boxed,role=group",
+    "Select one departure location from the options provided in the list."
+  ],
+  [
+    "input,id=searchInputMobile-from,class=hcr-input__field-8-2-1,role=button,type=button,aria-label=Departing from Chicago, IL",
+    "Click on the \"Departing from Chicago, IL\" button to select the departure location for the bus travel."
   ]
 ]

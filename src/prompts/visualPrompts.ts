@@ -83,26 +83,26 @@ Please do not include any other information in the output.`,
 }
 
 export async function getDataFromHTML(screen: ScreenResult) {
+  // console.log(
+  //   `actionDescriptions: ${screen.actionComponents
+  //     .map((item) => item.description)
+  //     .join("\n")}`
+  // );
+
   const { actionComponents, screenDescription } = screen;
 
-  const shortComponent = actionComponents.reduce((shortestItem, current) => {
-    return current.html.length < shortestItem.html.length
+  const longComponent = actionComponents.reduce((longestItem, current) => {
+    return current.html.length > longestItem.html.length
       ? current
-      : shortestItem;
+      : longestItem;
   });
-
-  const shortElement = new JSDOM(shortComponent.html).window.document.body;
+  const longElementDescType = longComponent.description?.split("-")[0];
 
   let results = [];
 
-  if ((shortElement.textContent || "").length < 30) {
-    results = actionComponents.map((comp) => comp.description);
+  if (longElementDescType === "label") {
+    results = actionComponents.map((comp) => comp.description?.split("-")[1]);
   } else {
-    const longComponent = actionComponents.reduce((longestItem, current) => {
-      return current.html.length > longestItem.html.length
-        ? current
-        : longestItem;
-    });
     const attrValue = await getAttrValueFromItem(
       longComponent,
       screenDescription

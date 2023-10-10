@@ -1,55 +1,61 @@
 import dotenv from "dotenv";
-import { PageHandler, ScreenResult } from "./utils/pageHandler";
-import {
-  makeQuestionForActionValue,
-  makeQuestionForConfirmation,
-} from "./prompts/chatPrompts";
+import { PageHandler } from "./utils/pageHandler copy";
 dotenv.config();
 
 async function main() {
   const pageHandler = new PageHandler();
   await pageHandler.initialize();
-  const logScreenResult = async (
-    screen: ScreenResult,
-    isQuestion: boolean = false
-  ) => {
-    const actionComponentsDescriptions = screen.actionComponents.map(
-      (comp) =>
-        `- ${comp.description} (actionType=${comp.actionType}) (i=${comp.i})`
-    );
 
-    console.log(`
-  id: ${screen.id}
-  type: ${screen.type}
-  description: ${screen.screenDescription}
-  ActionComponents:
-  ${actionComponentsDescriptions.join("\n")}
-  -------------------
-      `);
-    if (isQuestion) {
-      const questions = await Promise.all(
-        screen.actionComponents.map(async (comp) => {
-          if (comp.actionType === "click") {
-            return `- ${await makeQuestionForConfirmation(
-              comp,
-              screen.screenDescription
-            )} (i=${comp.i})`;
-          } else {
-            return `- ${await makeQuestionForActionValue(
-              screen.screenDescription,
-              comp.description,
-              comp.html
-            )} (i=${comp.i})`;
-          }
-        })
-      );
+  const result = await pageHandler.navigate2(
+    "https://www.greyhound.com",
+    false
+  );
 
-      console.log(`Questions:
-  ${questions.join("\n")}
-  -------------------------------------------------------
-      `);
-    }
-  };
+  result.forEach((res) => {
+    console.log(`type: ${res.type}, i: ${res.i}, content: ${res.content}`);
+  });
+
+  // const logScreenResult = async (
+  //   screen: ScreenResult,
+  //   isQuestion: boolean = false
+  // ) => {
+  //   const actionComponentsDescriptions = screen.actionComponents.map(
+  //     (comp) =>
+  //       `- ${comp.description} (actionType=${comp.actionType}) (i=${comp.i})`
+  //   );
+
+  //   console.log(`
+  // id: ${screen.id}
+  // type: ${screen.type}
+  // description: ${screen.screenDescription}
+  // ActionComponents:
+  // ${actionComponentsDescriptions.join("\n")}
+  // -------------------
+  //     `);
+  //   if (isQuestion) {
+  //     const questions = await Promise.all(
+  //       screen.actionComponents.map(async (comp) => {
+  //         if (comp.actionType === "click") {
+  //           return `- ${await makeQuestionForConfirmation(
+  //             comp,
+  //             screen.screenDescription
+  //           )} (i=${comp.i})`;
+  //         } else {
+  //           return `- ${await makeQuestionForActionValue(
+  //             screen.screenDescription,
+  //             comp.description,
+  //             comp.html
+  //           )} (i=${comp.i})`;
+  //         }
+  //       })
+  //     );
+
+  //     console.log(`Questions:
+  // ${questions.join("\n")}
+  // -------------------------------------------------------
+  //     `);
+  //   }
+  // };
 
   //   logScreenResult(
   //     await pageHandler.navigate("https://www.greyhound.com", false)

@@ -3,25 +3,25 @@
     "type": "page",
     "id": "https://www.greyhound.com/",
     "screenDescription": "The general purpose of the web page is to provide information and services related to affordable bus travel offered by Greyhound.",
-    "actionDescription": "The system clicked on the \"One Way\" option on the web page."
+    "actionDescription": "The system clicked on the \"Departing from Los Angeles, CA\" button to select the departure location for the bus travel."
+  },
+  {
+    "type": "modal",
+    "id": "https://www.greyhound.com/modal/859",
+    "screenDescription": "The general purpose of the modal in the web page is to allow the user to select their departure location for bus travel.",
+    "actionDescription": "The system inputted 'Chicago' as the departure location in the text field."
+  },
+  {
+    "type": "modal",
+    "id": "https://www.greyhound.com/modal/859",
+    "screenDescription": "The general purpose of the modal in the web page is to allow the user to select their departure location for bus travel.",
+    "actionDescription": "The system clicked on the label for \"Chicago, IL, USA\"."
   },
   {
     "type": "page",
     "id": "https://www.greyhound.com/",
     "screenDescription": "The general purpose of the web page is to provide information and services related to affordable bus travel offered by Greyhound.",
-    "actionDescription": "The system clicked on the \"Departing from Los Angeles, CA\" button to select the departure location for the bus travel."
-  },
-  {
-    "type": "modal",
-    "id": "https://www.greyhound.com/modal/855",
-    "screenDescription": "The general purpose of the modal in the web page is to allow users to select their departure location for bus travel.",
-    "actionDescription": "The system inputted 'Las Vegas' as the departure location in the text field on the web page."
-  },
-  {
-    "type": "modal",
-    "id": "https://www.greyhound.com/modal/855",
-    "screenDescription": "The general purpose of the modal in the web page is to allow the user to select their departure location for their bus trip.",
-    "actionDescription": "The system clicked on the location input field to enter \"Las Vegas, NV, USA\"."
+    "actionDescription": "The system clicked on the \"One Way\" label on the web page."
   },
   {
     "type": "page",
@@ -31,14 +31,8 @@
   },
   {
     "type": "modal",
-    "id": "https://www.greyhound.com/modal/1213",
+    "id": "https://www.greyhound.com/modal/1217",
     "screenDescription": "The general purpose of the modal in the web page is to allow the user to select a destination for their bus travel.",
-    "actionDescription": "The system input 'Los Angeles' as the destination for the bus travel."
-  },
-  {
-    "type": "modal",
-    "id": "https://www.greyhound.com/modal/1213",
-    "screenDescription": "The general purpose of the modal in the web page is to allow the user to select their destination city for bus travel.",
-    "actionDescription": "The system clicked on the location input field to enter \"Los Angeles, CA, USA\"."
+    "actionDescription": "The system inputted 'South Bend' as the destination for the bus travel."
   }
 ]

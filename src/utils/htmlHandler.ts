@@ -205,6 +205,11 @@ const COMPLEX_TAG_LIST = ["img", "a", "button", "input", "select"];
 const MIN_COMPLEX_TAG_COUNT = 12;
 
 function isComplex(element: Element): boolean {
+  const inputCount = element.querySelectorAll("input").length;
+  if (inputCount >= 3) {
+    return false;
+  }
+
   let complexTagCount = 0;
 
   for (const tag of COMPLEX_TAG_LIST) {

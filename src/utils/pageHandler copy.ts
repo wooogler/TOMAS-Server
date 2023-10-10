@@ -2,12 +2,12 @@ import dotenv from "dotenv";
 import { JSDOM } from "jsdom";
 import puppeteer, { Browser, Page } from "puppeteer";
 import { ActionType, simplifyHtml } from "./htmlHandler";
-import { parsingAgent, parsingItemAgent } from "../modules/agents";
 import {
   getModalDescription,
   getPageDescription,
   getSectionDescription,
 } from "../prompts/screenPrompts";
+import { parsingAgent } from "./parsingAgent";
 
 const NO_PAGE_ERROR = new Error("Cannot find a page.");
 
@@ -57,7 +57,7 @@ export class PageHandler {
     return parsedURL.origin + parsedURL.pathname;
   }
 
-  async navigate(url: string, parsing: boolean = true): Promise<ScreenResult> {
+  async navigate2(url: string, parsing: boolean = true) {
     const page = await this.getPage();
     await page.setDefaultNavigationTimeout(0);
     const screen = await trackModalChanges(page, async () => {
@@ -65,256 +65,10 @@ export class PageHandler {
         waitUntil: "networkidle0",
       });
     });
-    if (parsing === false) {
-      if (screen.modalI) {
-        return {
-          type: "modal",
-          screenDescription: "",
-          actionComponents: [],
-          id: `${this.extractBaseURL(page.url())}modal/${screen.modalI}`,
-        };
-      } else {
-        return {
-          type: "page",
-          screenDescription: "",
-          actionComponents: [],
-          id: `${this.extractBaseURL(page.url())}`,
-        };
-      }
-    }
     const pageSimpleHtml = simplifyHtml(await page.content(), true);
     const pageDescription = await getPageDescription(pageSimpleHtml);
     const screenSimpleHtml = simplifyHtml(screen.html, true);
-    if (screen.modalI) {
-      // if screen is a modal
-      const modalDescription = await getModalDescription(
-        screenSimpleHtml,
-        pageDescription
-      );
-      const actionComponents = await parsingAgent({
-        screenHtml: screen.html,
-        screenDescription: modalDescription,
-      });
-      return {
-        type: "modal",
-        screenDescription: modalDescription,
-        actionComponents,
-        id: `${this.extractBaseURL(page.url())}modal/${screen.modalI}`,
-      };
-    } else {
-      const actionComponents = await parsingAgent({
-        screenHtml: screen.html,
-        screenDescription: pageDescription,
-      });
-      return {
-        type: "page",
-        screenDescription: pageDescription,
-        actionComponents,
-        id: `${this.extractBaseURL(page.url())}`,
-      };
-    }
-  }
-  async click(
-    selector: string,
-    parsing: boolean = true
-  ): Promise<ScreenResult> {
-    const page = await this.getPage();
-    const element = await this.getElement(selector);
-    const screen = await trackModalChanges(page, async () => {
-      await element.click();
-    });
-    if (parsing === false) {
-      if (screen.modalI) {
-        return {
-          type: "modal",
-          screenDescription: "",
-          actionComponents: [],
-          id: `${this.extractBaseURL(page.url())}modal/${screen.modalI}`,
-        };
-      } else {
-        return {
-          type: "page",
-          screenDescription: "",
-          actionComponents: [],
-          id: `${this.extractBaseURL(page.url())}`,
-        };
-      }
-    }
-    const pageSimpleHtml = simplifyHtml(await page.content(), true);
-    const pageDescription = await getPageDescription(pageSimpleHtml);
-    const screenSimpleHtml = simplifyHtml(screen.html, true);
-    if (screen.modalI) {
-      // if screen is a modal
-      const modalDescription = await getModalDescription(
-        screenSimpleHtml,
-        pageDescription
-      );
-      const actionComponents = await parsingAgent({
-        screenHtml: screen.html,
-        screenDescription: modalDescription,
-      });
-      return {
-        type: "modal",
-        screenDescription: modalDescription,
-        actionComponents,
-        id: `${this.extractBaseURL(page.url())}modal/${screen.modalI}`,
-      };
-    } else {
-      const actionComponents = await parsingAgent({
-        screenHtml: screen.html,
-        screenDescription: pageDescription,
-      });
-      return {
-        type: "page",
-        screenDescription: pageDescription,
-        actionComponents,
-        id: `${this.extractBaseURL(page.url())}`,
-      };
-    }
-  }
-  async inputText(
-    selector: string,
-    text: string,
-    parsing: boolean = true
-  ): Promise<ScreenResult> {
-    const page = await this.getPage();
-    const element = await this.getElement(selector);
-    const screen = await trackModalChanges(page, async () => {
-      await page.$eval(
-        selector,
-        (input) => ((input as HTMLInputElement).value = "")
-      );
-      await element.type(text);
-    });
-    if (parsing === false) {
-      if (screen.modalI) {
-        return {
-          type: "modal",
-          screenDescription: "",
-          actionComponents: [],
-          id: `${this.extractBaseURL(page.url())}modal/${screen.modalI}`,
-        };
-      } else {
-        return {
-          type: "page",
-          screenDescription: "",
-          actionComponents: [],
-          id: `${this.extractBaseURL(page.url())}`,
-        };
-      }
-    }
-    const pageSimpleHtml = simplifyHtml(await page.content(), true);
-    const pageDescription = await getPageDescription(pageSimpleHtml);
-    const screenSimpleHtml = simplifyHtml(screen.html, true);
-    if (screen.modalI) {
-      // if screen is a modal
-      const modalDescription = await getModalDescription(
-        screenSimpleHtml,
-        pageDescription
-      );
-      const actionComponents = await parsingAgent({
-        screenHtml: screen.html,
-        screenDescription: modalDescription,
-      });
-      return {
-        type: "modal",
-        screenDescription: modalDescription,
-        actionComponents,
-        id: `${this.extractBaseURL(page.url())}modal/${screen.modalI}`,
-      };
-    } else {
-      const actionComponents = await parsingAgent({
-        screenHtml: screen.html,
-        screenDescription: pageDescription,
-      });
-      return {
-        type: "page",
-        screenDescription: pageDescription,
-        actionComponents,
-        id: `${this.extractBaseURL(page.url())}`,
-      };
-    }
-  }
-  //select one item in the list
-  async select(
-    selector: string,
-    isFocus: boolean = false, // focus on the selected item
-    parsing: boolean = true
-  ): Promise<ScreenResult> {
-    const page = await this.getPage();
-    const screen = await trackModalChanges(page, async () => {});
-    const dom = new JSDOM(screen.html);
-    const element = dom.window.document.querySelector(selector);
-    const elementSimpleHtml = simplifyHtml(element?.innerHTML || "", true);
-    if (parsing === false) {
-      return {
-        type: "section",
-        screenDescription: "",
-        actionComponents: [],
-        id: `${this.extractBaseURL(page.url())}section/${element?.getAttribute(
-          "i"
-        )}`,
-      };
-    }
-    const pageSimpleHtml = simplifyHtml(await page.content(), true);
-    const pageDescription = await getPageDescription(pageSimpleHtml);
-    const sectionDescription = await getSectionDescription(
-      elementSimpleHtml,
-      pageDescription
-    );
-    const itemComponents = isFocus
-      ? await parsingAgent({
-          screenHtml: element?.outerHTML || "",
-          screenDescription: sectionDescription,
-        })
-      : await parsingItemAgent({
-          screenHtml: element?.outerHTML || "",
-          screenDescription: sectionDescription,
-        });
-    return {
-      type: "section",
-      screenDescription: sectionDescription,
-      actionComponents: itemComponents.map((item) => ({
-        ...item,
-        description: item.description,
-      })),
-      id: `${this.extractBaseURL(page.url())}section/${element?.getAttribute(
-        "i"
-      )}`,
-    };
-  }
-  async unfocus(parsing: boolean = true): Promise<ScreenResult> {
-    const page = await this.getPage();
-    const screen = await trackModalChanges(page, async () => {});
-    const screenSimpleHtml = simplifyHtml(screen.html, true);
-    const pageSimpleHtml = simplifyHtml(await page.content(), true);
-    if (parsing === false) {
-      return {
-        type: "page",
-        screenDescription: "",
-        actionComponents: [],
-        id: `${this.extractBaseURL(page.url())}`,
-      };
-    }
-    const pageDescription = await getPageDescription(pageSimpleHtml);
-    const actionComponents = await parsingAgent({
-      screenHtml: screen.html,
-      screenDescription: pageDescription,
-    });
-    return {
-      type: "page",
-      screenDescription: pageDescription,
-      actionComponents,
-      id: `${this.extractBaseURL(page.url())}`,
-    };
-  }
-  async close() {
-    if (this.page) {
-      await this.page.close();
-    }
-    if (this.browser) {
-      await this.browser.close();
-    }
+    return await parsingAgent(screen.html, pageDescription);
   }
 }
 

@@ -34,5 +34,53 @@
   [
     "ul,North AmericaLos Ang,class=hcr-autocomplete__list-8-2-1 hcr-autocomplete__list--boxed,role=group",
     "Where are you planning to go for your bus travel?"
+  ],
+  [
+    "div,AdultsChild2 to 15 y,class=avRmL",
+    "How many adults will be traveling on the bus?"
+  ],
+  [
+    "ul,North AmericaBoston,,class=hcr-autocomplete__list-8-2-1 hcr-autocomplete__list--boxed,role=group",
+    "Where would you like to depart from for your bus travel?"
+  ],
+  [
+    "input,id=searchInput-to,class=hcr-input__field-8-2-1,role=combobox,type=text,aria-label=Arriving at Las Vegas, NV",
+    "Question: Where would you like to go on your bus trip?"
+  ],
+  [
+    "table,October 2023SunMonTu,id=calendar-grid,class=hcr-clndr__table-8-2-1,role=grid",
+    "Is there a specific date you would like to know more about or do something with?"
+  ],
+  [
+    "ul,Not sure where to go,class=hcr-autocomplete__list-8-2-1 hcr-autocomplete__list--boxed,role=group",
+    "Question: Which place would you like to choose as your destination for the bus travel?"
+  ],
+  [
+    "table,November 2023SunMonT,id=calendar-grid,class=hcr-clndr__table-8-2-1,role=grid",
+    "Is there a specific date in November 2023 that you would like to know more about or perform an action related to?"
+  ],
+  [
+    "ul,Plan a Trip\n        ,class=flix-header-burger-menu__list",
+    "What would you like to do on the website?"
+  ],
+  [
+    "ul,North AmericaPhilade,class=hcr-autocomplete__list-8-2-1 hcr-autocomplete__list--boxed,role=group",
+    "Question: Which city would you like to travel to by bus?"
+  ],
+  [
+    "input,id=search.form.label.adult,class=hcr-quantity__input-8-2-1,role=spinbutton,type=number,aria-label=Adults",
+    "How many adults will be traveling with you on the bus?"
+  ],
+  [
+    "input,id=passenger.children,class=hcr-quantity__input-8-2-1,role=spinbutton,type=number,aria-label=Child",
+    "Are there any children traveling with you on the bus?"
+  ],
+  [
+    "ul,Direct trip from Sat,class=ResultsList__resultsList___eGsLK,aria-label=3 trips from Los Angeles, CA to Las Vegas, NV on Sep 23",
+    "Which bus trip would you like to choose for your journey from Los Angeles to Las Vegas?"
+  ],
+  [
+    "ul,North AmericaChicago,class=hcr-autocomplete__list-8-2-1 hcr-autocomplete__list--boxed,role=group",
+    "Question: From which city or town will you be starting your bus journey?"
   ]
 ]
