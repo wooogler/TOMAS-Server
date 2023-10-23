@@ -14,14 +14,14 @@
   {
     "type": "modal",
     "id": "https://www.greyhound.com/modal/855",
-    "screenDescription": "The general purpose of the modal in the web page is to allow users to select their departure location for bus travel.",
-    "actionDescription": "The system inputted 'Las Vegas' as the departure location in the text field on the web page."
+    "screenDescription": "The general purpose of the modal in the web page is to allow the user to select their departure location for bus travel.",
+    "actionDescription": "The system inputted 'Boston' as the departure location in the text field."
   },
   {
     "type": "modal",
     "id": "https://www.greyhound.com/modal/855",
-    "screenDescription": "The general purpose of the modal in the web page is to allow the user to select their departure location for their bus trip.",
-    "actionDescription": "The system clicked on the location input field to enter \"Las Vegas, NV, USA\"."
+    "screenDescription": "The general purpose of the modal in the web page is to allow users to select their departure location for bus travel.",
+    "actionDescription": "The system clicked on the location input field to enter \"Boston, MA, USA\"."
   },
   {
     "type": "page",
@@ -32,13 +32,19 @@
   {
     "type": "modal",
     "id": "https://www.greyhound.com/modal/1213",
-    "screenDescription": "The general purpose of the modal in the web page is to allow the user to select a destination for their bus travel.",
-    "actionDescription": "The system input 'Los Angeles' as the destination for the bus travel."
+    "screenDescription": "The general purpose of the modal in the web page is to allow the user to select their destination for bus travel.",
+    "actionDescription": "The system inputted 'Chicago' as the destination for the bus travel."
   },
   {
     "type": "modal",
     "id": "https://www.greyhound.com/modal/1213",
-    "screenDescription": "The general purpose of the modal in the web page is to allow the user to select their destination city for bus travel.",
-    "actionDescription": "The system clicked on the location input field to enter \"Los Angeles, CA, USA\"."
+    "screenDescription": "The general purpose of the modal in the web page is to allow the user to select their destination for bus travel.",
+    "actionDescription": "The system clicked on the location input field to enter \"Chicago, IL, USA\"."
+  },
+  {
+    "type": "page",
+    "id": "https://www.greyhound.com/",
+    "screenDescription": "The general purpose of the web page is to provide information and services related to affordable bus travel offered by Greyhound.",
+    "actionDescription": "The system clicked the button to change the departure date."
   }
 ]
