@@ -1,19 +1,37 @@
 import dotenv from "dotenv";
-import { PageHandler } from "./utils/pageHandler copy";
+import { PageHandler, ScreenResult } from "./utils/pageHandler copy";
 dotenv.config();
 
 async function main() {
   const pageHandler = new PageHandler();
   await pageHandler.initialize();
 
-  const result = await pageHandler.navigate2(
-    "https://www.greyhound.com",
+  const showScreenResults = async (screenResults: ScreenResult) => {
+    console.log(screenResults);
+    await pageHandler.highlightScreenResults(screenResults);
+  };
+
+  // const result = await pageHandler.navigate("https://www.greyhound.com", false);
+  // const resultTripType = await pageHandler.select(
+  //   ".hcr-fieldset-8-7-0.OEcMX.Th_RO",
+  //   false,
+  //   true
+  // );
+  // const resultDataInput = await pageHandler.click("#dateInput-from", true);
+  // const resultPassengers = await pageHandler.click("#productSummary", true);
+
+  const resultFirst = await pageHandler.navigate(
+    "https://m.megabox.co.kr/main",
     false
   );
+  const resultMain = await pageHandler.click(".btn-close-main-notice", true);
 
-  result.forEach((res) => {
-    console.log(`type: ${res.type}, i: ${res.i}, content: ${res.content}`);
-  });
+  showScreenResults(resultMain);
+
+  // const resultDeparture = await pageHandler.click("#s_area", true);
+  // const resultDate = await pageHandler.click(".day", true);
+
+  // console.log(resultDate);
 
   // const logScreenResult = async (
   //   screen: ScreenResult,

@@ -22,7 +22,6 @@ import {
 } from "../prompts/actionPrompts";
 import {
   getUserContext,
-  makeQuestionForActionValue,
   makeQuestionForConfirmation,
 } from "../prompts/chatPrompts";
 import {
@@ -34,6 +33,7 @@ import {
 } from "../prompts/screenPrompts";
 import { extractTextLabelFromHTML } from "../prompts/visualPrompts";
 import { loadCacheFromFile, saveCacheToFile } from "../utils/fileUtil";
+import { Action } from "../utils/parsingAgent";
 
 export interface TaskList {
   i: string;
@@ -55,8 +55,8 @@ ${userContext}
 You need to plan the most efficient action sequence using the following possible actions in the part of the current screen. 
 Description of the current screen: ${focusedSection.screenDescription}
 Possible actions:
-${focusedSection.actionComponents
-  .map((comp) => `- ${comp.description} (i=${comp.i})`)
+${focusedSection.actions
+  .map((comp) => `- ${comp.content} (i=${comp.i})`)
   .join("\n")}
 
 The action plan should reflect the results of the interactions the system has executed before: 
@@ -119,14 +119,19 @@ Planning Agent:
   return taskList;
 }
 
-export async function executionAgent(
-  page: PageHandler,
-  component: ActionComponent,
-  //   chats: Chat[],
-  screenDescription: string,
-  currentFocusedSection: ScreenResult,
-  systemLogs: SystemLog[]
-) {
+export async function executionAgent({
+  page,
+  action,
+  screenDescription,
+  currentFocusedSection,
+  systemLogs,
+}: {
+  page: PageHandler;
+  action: Action;
+  screenDescription: string;
+  currentFocusedSection: ScreenResult;
+  systemLogs: SystemLog[];
+}) {
   console.log(`
 ---------------
 Execution Agent:
@@ -136,45 +141,33 @@ Execution Agent:
   let chats = await getChats();
   let userContext = await getUserContext(chats);
   let actionValue = "";
-  if (component.actionType == "input") {
+  if (action.type == "input") {
     let valueBasedOnHistory = await JSON.parse(
-      await findInputTextValue(
-        screenDescription,
-        component.description,
-        userContext
-      )
+      await findInputTextValue(screenDescription, action.content, userContext)
     );
     if (valueBasedOnHistory.value == null) {
-      const question = await makeQuestionForActionValue(
-        screenDescription,
-        component.description,
-        component.html
-      );
+      const question = action.question;
 
       // TODO: Ask the user the question, and get the answer. Then update chat history in the database.
-      await createAIChat({ content: question });
+      await createAIChat({ content: question || "No Question" });
 
       chats = await getChats();
 
       userContext = await getUserContext(chats);
 
       valueBasedOnHistory = await JSON.parse(
-        await findInputTextValue(
-          screenDescription,
-          component.description,
-          userContext
-        )
+        await findInputTextValue(screenDescription, action.content, userContext)
       );
     }
 
     actionValue = valueBasedOnHistory.value;
-  } else if (component.actionType == "select") {
-    const options = await page.select(`[i="${component.i}"]`);
+  } else if (action.type == "select") {
+    const options = await page.select(`[i="${action.i}"]`);
     createAIChat({
       content: `Which one do you want?
     Possible options could be:
-    ${options.actionComponents.map(
-      (action) => `- ${action.description}\n (i=${action.i}))\n\n`
+    ${options.actions.map(
+      (action) => `- ${action.content}\n (i=${action.i}))\n\n`
     )}`,
     });
 
@@ -182,9 +175,9 @@ Execution Agent:
     // suppose the answer is "<integer i>".
     actionValue = "352";
   }
-  if (component.actionType != "select") {
+  if (action.type != "select") {
     const confirmationQuestion = await makeQuestionForConfirmation(
-      component,
+      action,
       actionValue,
       screenDescription
     );
@@ -196,16 +189,17 @@ Execution Agent:
   const answer = "yes";
 
   if (answer == "yes") {
-    if (component.actionType == "input") {
-      let rt = await page.inputText(`[i="${component.i}"]`, actionValue);
+    if (action.type == "input") {
+      let rt = await page.inputText(`[i="${action.i}"]`, actionValue);
       return rt;
-    } else if (component.actionType == "click") {
+    } else if (action.type == "click") {
       const actionHistoryDescription = await getActionHistory(
         {
-          i: component.i,
-          actionType: "click",
-          description: component.description,
-          html: component.html,
+          i: action.i,
+          type: "click",
+          content: action.content,
+          html: action.html,
+          question: action.question,
         },
         "yes"
       );
@@ -216,8 +210,8 @@ Execution Agent:
         actionDescription: actionHistoryDescription,
       });
 
-      return await page.click(`[i="${component.i}"]`);
-    } else if (component.actionType == "select") {
+      return await page.click(`[i="${action.i}"]`);
+    } else if (action.type == "select") {
       return await page.select(`[i="${actionValue}"]`);
     }
   }
@@ -392,7 +386,7 @@ export async function parsingAgent({
         // console.log(
         //   `Cache hit for "${identifier}": "${descriptionCache.get(identifier)}"`
         // );
-        if (descriptionCache.get(identifier) === "") {
+        if (!descriptionCache.get(identifier)) {
           return null;
         }
         return {
@@ -421,7 +415,7 @@ export async function parsingAgent({
         return null;
       }
 
-      descriptionCache.set(identifier, componentDescription);
+      descriptionCache.set(identifier, { description: componentDescription });
       saveCacheToFile(descriptionCache, "descriptionCache.json");
 
       return {

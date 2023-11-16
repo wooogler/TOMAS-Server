@@ -2,37 +2,37 @@
   {
     "type": "page",
     "id": "https://www.greyhound.com/",
-    "screenDescription": "The general purpose of the web page is to provide information and services related to affordable bus travel offered by Greyhound.",
-    "actionDescription": "The system clicked on the \"Departing from Los Angeles, CA\" button to select the departure location for the bus travel."
-  },
-  {
-    "type": "modal",
-    "id": "https://www.greyhound.com/modal/859",
-    "screenDescription": "The general purpose of the modal in the web page is to allow the user to select their departure location for bus travel.",
-    "actionDescription": "The system inputted 'Chicago' as the departure location in the text field."
-  },
-  {
-    "type": "modal",
-    "id": "https://www.greyhound.com/modal/859",
-    "screenDescription": "The general purpose of the modal in the web page is to allow the user to select their departure location for bus travel.",
-    "actionDescription": "The system clicked on the label for \"Chicago, IL, USA\"."
+    "screenDescription": "The general purpose of the web page is to provide information and services related to bus travel, including booking tickets, managing bookings, tracking buses, and accessing travel information and resources.",
+    "actionDescription": "The system clicked on the \"Round Trip\" radio button to select the option for booking a round trip."
   },
   {
     "type": "page",
     "id": "https://www.greyhound.com/",
-    "screenDescription": "The general purpose of the web page is to provide information and services related to affordable bus travel offered by Greyhound.",
-    "actionDescription": "The system clicked on the \"One Way\" label on the web page."
+    "screenDescription": "The general purpose of the web page is to provide information and services related to bus travel, including booking tickets, managing bookings, tracking buses, and accessing travel information and resources.",
+    "actionDescription": "The system clicked on the \"Departing from Los Angeles, CA\" button to select the departure location for the bus travel search."
+  },
+  {
+    "type": "modal",
+    "id": "https://www.greyhound.com/modal/1023",
+    "screenDescription": "The general purpose of the modal in the web page is to allow the user to select a departure location for their bus travel.",
+    "actionDescription": "The system inputted the text 'Chicago' into the \"Departing from\" input field."
+  },
+  {
+    "type": "section",
+    "id": "https://www.greyhound.com/section/1238",
+    "screenDescription": "The purpose of this section is to provide the location information for Chicago, IL in the context of bus travel.",
+    "actionDescription": "The system clicked on the element with the text \"Chicago, IL\" to view more information about bus locations in Chicago, IL."
   },
   {
     "type": "page",
     "id": "https://www.greyhound.com/",
-    "screenDescription": "The general purpose of the web page is to provide information and services related to affordable bus travel offered by Greyhound.",
-    "actionDescription": "The system clicked on the button to select the destination location for the bus travel."
+    "screenDescription": "The general purpose of the web page is to provide information and services related to bus travel, including booking tickets, managing bookings, tracking buses, and accessing travel information and resources.",
+    "actionDescription": "The system did not click the \"Open main site navigation\" button to open the main site navigation menu."
   },
   {
-    "type": "modal",
-    "id": "https://www.greyhound.com/modal/1217",
-    "screenDescription": "The general purpose of the modal in the web page is to allow the user to select a destination for their bus travel.",
-    "actionDescription": "The system inputted 'South Bend' as the destination for the bus travel."
+    "type": "page",
+    "id": "https://www.greyhound.com/",
+    "screenDescription": "The general purpose of the web page is to provide information and services related to bus travel, including booking tickets, managing bookings, tracking buses, and accessing travel information and resources.",
+    "actionDescription": "The system clicked on the \"Arriving at Las Vegas, NV\" button to select the destination for the bus trip."
   }
 ]

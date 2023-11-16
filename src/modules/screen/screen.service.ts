@@ -106,7 +106,7 @@ export async function navigate(input: NavigateInput) {
 
       //   const systemContext = await getSystemContext(); // TODO: get system context
       //   await planningAgent(parsingResult, userObjective, userContext, systemContext);
-      const actionComponents = focusSection.actionComponents;
+      const actions = focusSection.actions;
 
       const systemContext = await getSystemContext(actionLogs);
       // Get task list
@@ -119,13 +119,13 @@ export async function navigate(input: NavigateInput) {
       // Get first task
       const task = taskList[0];
       if (task) {
-        focusSection = await executionAgent(
+        focusSection = await executionAgent({
           page,
-          actionComponents.find((item) => item.i === task.i)!,
-          focusSection.screenDescription,
-          focusSection,
-          actionLogs
-        );
+          action: actions.find((item) => item.i === Number(task.i))!,
+          screenDescription: focusSection.screenDescription,
+          currentFocusedSection: focusSection,
+          systemLogs: actionLogs,
+        });
       } else {
         // TODO: Haven't tested unfocus yet
         if (focusSection.type === "section") {

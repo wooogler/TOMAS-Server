@@ -17,9 +17,10 @@ const chatGenerated = {
 
 const ActionComponentSchema = z.object({
   i: z.string(),
-  actionType: z.enum(["select", "input", "click", "focus", "item"]),
+  actionType: z.string(),
   description: z.string().optional(),
   html: z.string(),
+  question: z.string().optional(),
 });
 
 const createHumanChatSchema = z.object({

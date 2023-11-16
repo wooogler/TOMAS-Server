@@ -3,6 +3,8 @@ import { Prompt, getAiResponse } from "../utils/langchainHandler";
 import { ActionComponent } from "../utils/pageHandler";
 import { loadCacheFromFile, saveCacheToFile } from "../utils/fileUtil";
 import { generateIdentifier } from "../utils/htmlHandler";
+import { AnswerResponse } from "../modules/chat/chat.schema";
+import { Action } from "../utils/parsingAgent";
 
 export const makeConversationPrompt = (chats: Chat[]): Prompt => ({
   role: "HUMAN",
@@ -77,25 +79,25 @@ The description of the screen: ${screenDescription}
     modifyQuestionPrompt,
   ]);
 
-  questionCache.set(identifier, newQuestion);
+  questionCache.set(identifier, { question: newQuestion });
   saveCacheToFile(questionCache, "questionCache.json");
 
   return newQuestion;
 }
 
 export async function makeQuestionForConfirmation(
-  component: ActionComponent,
+  action: Action,
   screenDescription: string,
   actionValue?: string
 ) {
   const makeConfirmationPrompt: Prompt = {
     role: "SYSTEM",
     content: `Create a natural language question to ask whether the user wants to do the given action${
-      component.actionType === "input" ? " with value" : ""
+      action.type === "input" ? " with value" : ""
     }.
 
-Action: ${component.description}
-${component.actionType === "input" ? `Value: ${actionValue}` : ""}
+Action: ${action.content}
+${action.type === "input" ? `Value: ${actionValue}` : ""}
 
 The description of the screen: ${screenDescription}`,
   };
@@ -150,3 +152,14 @@ The description of the screen: ${screenDescription}`,
     modifyConfirmationPrompt,
   ]);
 }
+
+export const makeQuestionTemplate = (): Prompt => ({
+  role: "HUMAN",
+  content:
+    "Create a natural language question to ask to the user before doing the given action on the screen.",
+});
+
+export const translateQuestionTemplate = (): Prompt => ({
+  role: "HUMAN",
+  content: "Translate the question into Korean.",
+});

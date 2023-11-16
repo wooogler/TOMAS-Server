@@ -1,6 +1,8 @@
+import { AnswerResponse } from "../modules/chat/chat.schema";
 import { editActionType } from "../utils/htmlHandler";
 import { Prompt, getAiResponse } from "../utils/langchainHandler";
 import { ActionComponent } from "../utils/pageHandler";
+import { Action } from "../utils/parsingAgent";
 
 export async function findInputTextValue(
   pageDescription: string,
@@ -70,12 +72,9 @@ OR
   return response;
 }
 
-export async function getActionHistory(
-  actionComponent: ActionComponent,
-  actionValue: string
-) {
+export async function getActionHistory(action: Action, actionValue: string) {
   let actionDone = "";
-  const actionType = actionComponent.actionType;
+  const actionType = action.type;
   if (actionType === "click") {
     if (actionValue === "yes") {
       actionDone = "Do click";
@@ -89,7 +88,7 @@ export async function getActionHistory(
     role: "SYSTEM",
     content: `Here are the actions that the system tried and have done on the web page. 
 
-Tried: ${actionComponent.description}
+Tried: ${action.content}
 Done: ${
       actionType === "click"
         ? `${actionDone}`

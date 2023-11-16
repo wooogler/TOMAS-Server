@@ -106,6 +106,21 @@ const simplifyNestedStructure = (
   );
 };
 
+const removeComments = (node: Node) => {
+  const COMMENT_NODE_TYPE = 8;
+  let i = 0;
+  while (i < node.childNodes.length) {
+    const child = node.childNodes[i];
+
+    if (child.nodeType === COMMENT_NODE_TYPE) {
+      node.removeChild(child);
+    } else {
+      removeComments(child);
+      i++;
+    }
+  }
+};
+
 export const simplifyItemHtml = (html: string) => {
   const dom = new JSDOM(html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, ""));
   const document = dom.window.document;
@@ -146,6 +161,7 @@ export const simplifyHtml = (
   const document = dom.window.document;
   const rootElement = document.body;
   if (rootElement) {
+    removeComments(rootElement);
     removeSpecificTags(rootElement, [
       "script",
       "style",
@@ -164,7 +180,7 @@ export const simplifyHtml = (
       removeI
         ? attributesToKeepForAllComps
         : ["i", ...attributesToKeepForAllComps],
-      ["input", "button", "label"]
+      ["input", "button", "label", "a"]
     );
 
     const attributesToKeepForActionComps = [
@@ -179,6 +195,8 @@ export const simplifyHtml = (
       "role",
       "alt",
       "clickable",
+      "class",
+      "id",
     ];
     if (isClass === true) {
       attributesToKeepForActionComps.push("class");
@@ -528,7 +546,7 @@ export interface ComponentInfo {
 const capitalizeFirstCharacter = (str: string) =>
   str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 
-export const editActionType = (actionType: ActionType) => {
+export const editActionType = (actionType: string) => {
   // const action = actionType === "focus" ? "select" : actionType;
   const actionName = capitalizeFirstCharacter(actionType);
   return actionName;

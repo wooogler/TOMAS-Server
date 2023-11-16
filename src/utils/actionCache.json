@@ -1,0 +1,140 @@
+[
+  [
+    "a,href=javascript:AppHandler.Common.goMain()",
+    {
+      "type": "click",
+      "i": 114,
+      "content": "Click on the element to go to the main page of the Megabox website.",
+      "question": "질문: Megabox 웹사이트의 메인 페이지를 방문하는 것에 관심이 있으신가요?",
+      "html": "<a href=\"javascript:AppHandler.Common.goMain()\"></a>"
+    }
+  ],
+  [
+    "a,더 많은 영화보기,class=btn-more-movie,href=javascript:fn_goMovieList()",
+    {
+      "type": "click",
+      "i": 489,
+      "content": "Clicking on the \"더 많은 영화보기\" button will navigate the user to the movie list page, where they can view more movies available at Megabox.",
+      "question": "질문: Megabox에서 더 많은 영화를 볼 수 있었으면 좋겠습니까?",
+      "html": "<a href=\"javascript:fn_goMovieList()\" class=\"btn-more-movie\">더 많은 영화보기 </a>"
+    }
+  ],
+  [
+    "div,홈\n            \n     ,class=btn-bottom bnb-main col-5 whtm",
+    {
+      "type": "select",
+      "i": 972,
+      "content": "Select one item from the list to navigate to a specific section or page on the Megabox website.",
+      "question": "질문: Megabox 웹사이트에서 어떤 섹션이나 페이지로 이동하고 싶으신가요?",
+      "html": "<div><button type=\"button\" class=\"button-bot on\"><span>홈</span></button><button type=\"button\" class=\"button-bot\"><span>스토어</span></button><button type=\"button\" class=\"button-bot\"><span>예매</span></button><button id=\"navi_event_btn\" type=\"button\" class=\"button-bot\"><span>이벤트</span></button><button type=\"button\" class=\"button-bot\"><span>MY</span></button></div>",
+      "options": [
+        "Home Button",
+        "Store Button",
+        "예매 버튼",
+        "Event Button",
+        "My Megabox Button"
+      ]
+    }
+  ],
+  [
+    "ul,무비칩\n\t\t\t         \t\t\t\t,class=swiper-wrapper",
+    {
+      "type": "select",
+      "i": 136,
+      "content": "Select one movie or event from the list to view more details or participate in the promotion by clicking on the corresponding link.",
+      "question": "어떤 영화나 이벤트에 관심이 있나요?",
+      "html": "<ul><li><a href=\"https://www.megabox.co.kr/event/detail?eventNo=14481\"><span>무비칩</span></a></li><li><a href=\"https://www.megabox.co.kr/event/detail?eventNo=14492\"><span>O.T</span></a></li><li><a href=\"https://www.megabox.co.kr/event/detail?eventNo=14458\"><span>O.T</span></a></li><li><a href=\"https://www.megabox.co.kr/event/detail?eventNo=14442\"><span>O.T</span></a></li></ul>",
+      "options": [
+        "Movie Chip",
+        "Next Event: O.T",
+        "Event: O.T\nLink: https://www.megabox.co.kr/event/detail?eventNo=14458",
+        "Movie Promotion: O.T"
+      ]
+    }
+  ],
+  [
+    "div,#박스오피스\n\t\t\t\t\t\t#상영예정\n\t,class=list-btn swiper-wrapper",
+    {
+      "type": "select",
+      "i": 189,
+      "content": "Select one item from the list to navigate to a specific section or page related to that item, such as viewing box office information, upcoming movies, exclusive promotions, Dolby Cinema movies, or a specific event or promotion related to #클소.",
+      "question": "이 질문을 한국어로 번역해주세요.",
+      "html": "<div><button type=\"button\" class=\"btn swiper-slide on swiper-slide-active\"><span>#박스오피스</span></button><button type=\"button\" class=\"btn swiper-slide swiper-slide-next\"><span>#상영예정</span></button><button type=\"button\" class=\"btn swiper-slide act\"><span>#단독</span></button><button type=\"button\" class=\"btn swiper-slide act\"><span>#돌비시네마</span></button><button type=\"button\" class=\"btn swiper-slide\"><span>#클소</span></button></div>",
+      "options": [
+        "Button: #박스오피스",
+        "Upcoming Movies Button",
+        "Exclusive Promotion Button",
+        "Hashtag Dolby Cinema",
+        "Button: #클소"
+      ]
+    }
+  ],
+  [
+    "div,12세이상관람가 서울의 봄\n\t    ,id=boxo_movie,class=swiper-wrapper2",
+    {
+      "type": "select",
+      "i": 206,
+      "content": "Select one movie from the list to view its details and potentially make a quick booking for a movie ticket.",
+      "question": "어떤 영화에 대해 더 알고 티켓을 예매하고 싶으신가요?",
+      "html": "<div><div><a href=\"javascript:fn_goMoveDetail('23081200', '1', 'main')\"><div clickable=\"true\"></div><div clickable=\"true\"> <i>12세이상관람가</i> 서울의 봄</div></a><div><div><div><span>예매율 31.1%</span><em>D-5</em></div></div><div><a href=\"javascript:fn_goQuickBooking('23081200')\" class=\"vote-now\">바로예매</a></div></div></div><div><a href=\"javascript:fn_goMoveDetail('23083900', '1', 'main')\"><div clickable=\"true\"></div><div clickable=\"true\">2</div><div clickable=\"true\"> <i>15세이상관람가</i> 헝거게임: 노래하는 새와 뱀의 발라드</div></a><div><div><div><span>예매율 9.2%</span><em>8.2</em></div></div><div><a href=\"javascript:fn_goQuickBooking('23083900')\" class=\"vote-now\">바로예매</a></div></div></div></div>",
+      "options": [
+        "Movie: 서울의 봄\nAge rating: 12세 이상 관람가\nReservation rate: 31.1%\nDays until release: D-5\nQuick booking: 바로예매",
+        "Movie: 헝거게임: 노래하는 새와 뱀의 발라드\nRank: 2\nAge Rating: 15세 이상 관람가\nReservation Rate: 9.2%\nRating: 8.2\nQuick Booking: 바로예매"
+      ]
+    }
+  ],
+  [
+    "button,class=h-alarm,type=button",
+    {
+      "type": "click",
+      "i": 119,
+      "content": "Click the \"h-alarm\" button to set an alarm or receive notifications for movie updates, events, or promotions from Megabox.",
+      "question": "질문: Megabox에서 영화 업데이트, 이벤트 또는 프로모션에 대한 알림을 받고 싶으신가요?",
+      "html": "<button type=\"button\" class=\"h-alarm\"></button>"
+    }
+  ],
+  [
+    "a,class=h-ticket,href=javascript:AppDomain.Member.loginConfirm();",
+    {
+      "type": "click",
+      "i": 116,
+      "content": "Click on the \"h-ticket\" element to trigger the \"loginConfirm()\" function in the AppDomain.Member object, which likely prompts the user to log in and potentially grants access to ticket purchasing or member-exclusive features.",
+      "question": "\"‘h-ticket’ 요소를 클릭하여 회원 전용 기능에 로그인하시겠습니까?\"",
+      "html": "<a href=\"javascript:AppDomain.Member.loginConfirm();\" class=\"h-ticket\"></a>"
+    }
+  ],
+  [
+    "a,더보기,class=btn-more-link,href=javascript:void(0);",
+    {
+      "type": "click",
+      "i": 501,
+      "content": "Click on the \"더보기\" button to view more information or expand the content on the web page related to movie information, events, or promotions.",
+      "question": "영화, 이벤트 또는 프로모션에 대한 더 많은 정보를 보고 싶으신가요?",
+      "html": "<a href=\"javascript:void(0);\" class=\"btn-more-link\">더보기</a>"
+    }
+  ],
+  [
+    "button,class=h-burger,type=button",
+    {
+      "type": "click",
+      "i": 121,
+      "content": "Click the hamburger button to open the navigation menu, allowing the user to access different sections of the website or perform specific actions related to the movie theater.",
+      "question": "질문: \"영화관과 관련된 웹사이트의 다른 섹션에 접근하거나 특정 작업을 수행하고 싶으신가요? 그렇다면 햄버거 버튼을 클릭하여 내비게이션 메뉴를 열어주세요.\"",
+      "html": "<button type=\"button\" class=\"h-burger\"></button>"
+    }
+  ],
+  [
+    "div,1\n\t\t\t\t\t\t\t 12세이상관람가 서,id=boxo_movie,class=swiper-wrapper2",
+    {
+      "type": "select",
+      "i": 206,
+      "content": "Select one movie from the list to view its details and potentially make a quick booking for a movie ticket.",
+      "question": "어떤 영화에 대해 더 알고 티켓을 예매하고 싶으신가요?",
+      "html": "<div><div><a href=\"javascript:fn_goMoveDetail('23081200', '1', 'main')\"><div clickable=\"true\"></div><div clickable=\"true\">1</div><div clickable=\"true\"> <i>12세이상관람가</i> 서울의 봄</div></a><div><div><div><span>예매율 31.1%</span><em>D-5</em></div></div><div><a href=\"javascript:fn_goQuickBooking('23081200')\" class=\"vote-now\">바로예매</a></div></div></div><div><a href=\"javascript:fn_goMoveDetail('23083900', '1', 'main')\"><div clickable=\"true\"></div><div clickable=\"true\">2</div><div clickable=\"true\"> <i>15세이상관람가</i> 헝거게임: 노래하는 새와 뱀의 발라드</div></a><div><div><div><span>예매율 9.2%</span><em>8.2</em></div></div><div><a href=\"javascript:fn_goQuickBooking('23083900')\" class=\"vote-now\">바로예매</a></div></div></div></div>",
+      "options": [
+        "Movie: 서울의 봄\nAge Rating: 12세 이상 관람가\nRank: 1\nReservation Rate: 31.1%\nDays Left: D-5\nQuick Booking: 바로예매",
+        "Movie: 헝거게임: 노래하는 새와 뱀의 발라드\nRank: 2\nAge Rating: 15세 이상 관람가\nReservation Rate: 9.2%\nRating: 8.2\nQuick Booking: 바로예매"
+      ]
+    }
+  ]
+]

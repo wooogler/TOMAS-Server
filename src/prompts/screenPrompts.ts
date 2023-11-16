@@ -261,3 +261,77 @@ ${screenDescription}
     console.error("Error in loading item info: ", error);
   }
 };
+
+export const selectActionTemplate = ({
+  options,
+  firstOptionHtml,
+  screenDescription,
+}: {
+  options: string[];
+  firstOptionHtml: string;
+  screenDescription: string;
+}): Prompt => ({
+  role: "SYSTEM",
+  content: `A user is looking at the list on the web page screen. 
+
+Items in the list:
+${options.map((option) => `- ${option}`).join("\n")}
+
+HTML of the first item:
+${firstOptionHtml}
+
+Description of the screen where the list is located:
+${screenDescription}
+
+Infer the purpose of the list and describe the action of a user selecting one item from that list in one sentence, starting with 'Select one '.`,
+});
+
+export const tableActionTemplate = ({
+  screenDescription,
+  simplifiedElementHtml,
+  simplifiedScreenHtml,
+}: {
+  screenDescription: string;
+  simplifiedElementHtml: string;
+  simplifiedScreenHtml: string;
+}): Prompt => ({
+  role: "SYSTEM",
+  content: `A user is looking at the table on the web page screen.
+
+Description of the screen where the table is located:
+${screenDescription}
+
+HTML of the table:
+${simplifiedElementHtml}
+
+Surronding HTML of the table:
+${extractSurroundingHtml(simplifiedScreenHtml, simplifiedElementHtml)}
+
+Infer the purpose of the table and describe the action of a user selecting one item from that table in one sentence, starting with 'Select one '.`,
+});
+
+export const singleActionTemplate = ({
+  actionType,
+  screenDescription,
+  simplifiedElementHtml,
+  simplifiedScreenHtml,
+}: {
+  actionType: string;
+  screenDescription: string;
+  simplifiedElementHtml: string;
+  simplifiedScreenHtml: string;
+}): Prompt => ({
+  role: "SYSTEM",
+  content: `A user is looking at the web page screen. 
+
+Describe the action that the user can take on the given element with its purpose, starting with '${actionType} ' in a sentence.
+
+HTML of the element:
+${simplifiedElementHtml}
+
+Description of the screen where the element is located:
+${screenDescription}
+
+Surrounding HTML of the element:
+${extractSurroundingHtml(simplifiedScreenHtml, simplifiedElementHtml)}`,
+});

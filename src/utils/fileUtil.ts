@@ -7,21 +7,24 @@ function getCacheFilePath(fileName: string): string {
   return path.join(baseDir, fileName);
 }
 
-export function loadCacheFromFile(fileName: string): Map<string, string> {
+export function loadCacheFromFile(fileName: string): Map<string, object> {
   const filePath = getCacheFilePath(fileName);
+
   if (fs.existsSync(filePath)) {
     const fileData = fs.readFileSync(filePath, "utf-8");
-    return new Map(JSON.parse(fileData));
+    const rawCacheData: [string, object][] = JSON.parse(fileData);
+    return new Map(rawCacheData);
   }
+
   return new Map();
 }
 
 export function saveCacheToFile(
-  cache: Map<string, string>,
+  cache: Map<string, object>,
   fileName: string
 ): void {
   const filePath = getCacheFilePath(fileName);
-  const arrayifiedData = Array.from(cache.entries());
+  const arrayifiedData: [string, object][] = Array.from(cache.entries());
   const jsonData = JSON.stringify(arrayifiedData, null, 2);
   fs.writeFileSync(filePath, jsonData, "utf-8");
 }

@@ -82,5 +82,9 @@
   [
     "ul,North AmericaChicago,class=hcr-autocomplete__list-8-2-1 hcr-autocomplete__list--boxed,role=group",
     "Question: From which city or town will you be starting your bus journey?"
+  ],
+  [
+    "div,October 2023SunMonTu",
+    "When do you plan to travel by bus?"
   ]
 ]

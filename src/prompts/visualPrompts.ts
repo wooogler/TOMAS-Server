@@ -6,6 +6,7 @@ import {
 } from "../utils/langchainHandler";
 import { ActionComponent, ScreenResult } from "../utils/pageHandler";
 import { JSDOM } from "jsdom";
+import { Action } from "../utils/parsingAgent";
 
 export async function getUsefulAttrFromList(
   actionComponents: ActionComponent[],
@@ -48,7 +49,7 @@ Please do not include any other information in the output.`,
 }
 
 async function getAttrValueFromItem(
-  longComponent: ActionComponent,
+  longComponent: Action,
   screenDescription: string
 ) {
   const simpleItemHtml = simplifyItemHtml(longComponent.html);
@@ -89,26 +90,26 @@ export async function getDataFromHTML(screen: ScreenResult) {
   //     .join("\n")}`
   // );
 
-  const { actionComponents, screenDescription } = screen;
+  const { actions, screenDescription } = screen;
 
-  const longComponent = actionComponents.reduce((longestItem, current) => {
+  const longComponent = actions.reduce((longestItem, current) => {
     return current.html.length > longestItem.html.length
       ? current
       : longestItem;
   });
-  const longElementDescType = longComponent.description?.split("-")[0];
+  const longElementDescType = longComponent.content?.split("-")[0];
 
   let results = [];
 
   if (longElementDescType === "label") {
-    results = actionComponents.map((comp) => comp.description?.split("-")[1]);
+    results = actions.map((comp) => comp.content?.split("-")[1]);
   } else {
     const attrValue = await getAttrValueFromItem(
       longComponent,
       screenDescription
     );
 
-    async function processComponent(component: ActionComponent) {
+    async function processComponent(component: Action) {
       const simpleItemHtml = simplifyItemHtml(component.html);
       const makeItemPrompts: Prompt[] = [
         {
@@ -140,15 +141,15 @@ export async function getDataFromHTML(screen: ScreenResult) {
       return jsonObject;
     }
 
-    results = await Promise.all(actionComponents.map(processComponent));
+    results = await Promise.all(actions.map(processComponent));
   }
 
   const data = results.map((item, index) => {
     return {
       data: item,
-      i: actionComponents[index].i,
-      description: actionComponents[index].description,
-      actionType: actionComponents[index].actionType,
+      i: actions[index].i.toString(),
+      description: actions[index].content,
+      actionType: actions[index].type,
     };
   });
   return data;
