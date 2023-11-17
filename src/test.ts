@@ -22,11 +22,40 @@ async function main() {
 
   const resultFirst = await pageHandler.navigate(
     "https://m.megabox.co.kr/main",
-    false
+    true
   );
-  const resultMain = await pageHandler.click(".btn-close-main-notice", true);
+  // const resultMain = await pageHandler.click(".btn-close-main-notice", false);
 
-  showScreenResults(resultMain);
+  // const resultBook = await pageHandler.click(
+  //   "div.btn-bottom > button:nth-child(3)",
+  //   false
+  // );
+  // const resultMovie = await pageHandler.click(
+  //   ".item.movie > a:nth-child(1)",
+  //   false
+  // );
+  // const resultSelectMovie = await pageHandler.click(
+  //   "ul#movieBlockList > li:nth-child(3) > a",
+  //   false
+  // );
+  // const resultSelectTheater = await pageHandler.click(
+  //   "ul#branch_10 > li:nth-child(5) > a",
+  //   false
+  // );
+
+  // const resultSelect = await pageHandler.click("#theaterChoiceBtn", false);
+
+  // const resultLogin = await pageHandler.click(
+  //   "div.time-wrap > div:nth-child(3) > a",
+  //   false
+  // );
+
+  // await pageHandler.inputText("#loginId", "leesang627", false);
+  // await pageHandler.inputText("#loginPwd", "EWenavd9pA8^", false);
+
+  // const resultLoginBtn = await pageHandler.click("#loginBtn", true);
+
+  showScreenResults(resultFirst);
 
   // const resultDeparture = await pageHandler.click("#s_area", true);
   // const resultDate = await pageHandler.click(".day", true);

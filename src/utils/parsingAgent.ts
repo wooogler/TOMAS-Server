@@ -12,6 +12,7 @@ import {
   makeQuestionTemplate,
   translateQuestionTemplate,
 } from "../prompts/chatPrompts";
+import { Page } from "puppeteer";
 
 interface ActionableElement {
   i: string;
@@ -73,32 +74,14 @@ export async function parsingItemAgent({
 export async function parsingAgent({
   screenHtml,
   screenDescription,
-  scrollablesX,
-  scrollablesY,
 }: {
   screenHtml: string;
   screenDescription: string;
-  scrollablesX?: string[];
-  scrollablesY?: string[];
 }): Promise<Action[]> {
   const dom = new JSDOM(screenHtml);
   let screen = dom.window.document.body as Element;
   let originalScreen = screen.cloneNode(true) as Element;
   const actionableElements: ActionableElement[] = [];
-
-  // scrollablesX?.forEach((i) => {
-  //   actionableElements.push({
-  //     i,
-  //     type: "scrollX",
-  //   });
-  // });
-
-  // scrollablesY?.forEach((i) => {
-  //   actionableElements.push({
-  //     i,
-  //     type: "scrollY",
-  //   });
-  // });
 
   const selectableElements = findSelectableElements(screen);
   selectableElements.forEach((element) => {
@@ -135,19 +118,17 @@ export async function parsingAgent({
   return actions.sort((a, b) => a.i - b.i);
 }
 
-// function elementsToActions(element: Element, type: string): Action {}
-
 function findSelectableElements(screen: Element): Element[] {
   const elements: Element[] = [];
   const selectableTagNames = ["ul", "ol", "select", "fieldset", "table"];
+  const excludeClassKeywords = ["mask", "section", "swiper"];
 
   // Traverse the DOM and find all selectable elements
   function traverseAndFind(element: Element) {
     const tagName = element.tagName.toLowerCase();
 
     if (tagName === "div") {
-      // If the element is a div, check if it has a child with a frequency of 3 or more
-      const frequencyMap = createFrequencyMap(element);
+      const frequencyMap = createFrequencyMap(element, excludeClassKeywords);
 
       for (const frequency of frequencyMap.values()) {
         if (frequency >= 2) {
@@ -174,17 +155,29 @@ function findSelectableElements(screen: Element): Element[] {
     );
   });
 
+  // const selectableElements = repeatedElements.filter((element, _, arr) => {
+  //   let countClickable = 0;
+  //   const childElements = Array.from(element.children);
+  //   for (const childElement of childElements) {
+  //     findClickableElements(childElement).forEach(() => countClickable++);
+  //   }
+  //   return countClickable > arr.length * 2;
+  // });
+
   return selectableElements;
 }
 
 // Create a map of the frequency of each attribute
-function createFrequencyMap(element: Element): Map<string, number> {
+function createFrequencyMap(
+  element: Element,
+  excludeKeywords: string[]
+): Map<string, number> {
   const frequencyMap: Map<string, number> = new Map();
 
   for (const childElement of element.children) {
     // Add the element's classes to the frequency map
     for (const className of childElement.classList) {
-      if (!className.includes("mask") && !className.includes("section")) {
+      if (!excludeKeywords.some((keyword) => className.includes(keyword))) {
         frequencyMap.set(className, (frequencyMap.get(className) || 0) + 1);
       }
     }

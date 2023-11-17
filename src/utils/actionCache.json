@@ -136,5 +136,1186 @@
         "Movie: 헝거게임: 노래하는 새와 뱀의 발라드\nRank: 2\nAge Rating: 15세 이상 관람가\nReservation Rate: 9.2%\nRating: 8.2\nQuick Booking: 바로예매"
       ]
     }
+  ],
+  [
+    "button,홈,class=button-bot on,type=button",
+    {
+      "type": "click",
+      "i": 967,
+      "content": "Click the \"홈\" button to go back to the home page of the Megabox website.",
+      "question": "질문: Megabox 웹사이트의 홈페이지로 돌아가시겠습니까?",
+      "html": "<button type=\"button\" class=\"button-bot on\"><span>홈</span></button>"
+    }
+  ],
+  [
+    "a,O.T,href=https://www.megabox.co.kr/event/detail?eventNo=14492",
+    {
+      "type": "click",
+      "i": 143,
+      "content": "Click on the \"O.T\" link to navigate to the event details page for the O.T event on Megabox's website.",
+      "question": "질문: Megabox 웹사이트에서 O.T 이벤트의 이벤트 세부 정보를 보시겠습니까?",
+      "html": "<a href=\"https://www.megabox.co.kr/event/detail?eventNo=14492\"><span>O.T</span></a>"
+    }
+  ],
+  [
+    "a,O.T,href=https://www.megabox.co.kr/event/detail?eventNo=14442",
+    {
+      "type": "click",
+      "i": 151,
+      "content": "Click on the \"O.T\" link to navigate to the event details page for the O.T event on Megabox's website.",
+      "question": "질문: Megabox 웹사이트에서 O.T 이벤트의 이벤트 세부 정보를 보시겠습니까?",
+      "html": "<a href=\"https://www.megabox.co.kr/event/detail?eventNo=14442\"><span>O.T</span></a>"
+    }
+  ],
+  [
+    "a,다이어리,href=https://www.megabox.co.kr/event/detail?eventNo=14438",
+    {
+      "type": "click",
+      "i": 155,
+      "content": "Click on the \"다이어리\" link to navigate to the event detail page for the \"다이어리\" event on the Megabox website.",
+      "question": "질문: \"다이어리\" 이벤트에 대한 자세한 내용을 보시겠습니까?",
+      "html": "<a href=\"https://www.megabox.co.kr/event/detail?eventNo=14438\"><span>다이어리</span></a>"
+    }
+  ],
+  [
+    "a,O.T,href=https://www.megabox.co.kr/event/detail?eventNo=14458",
+    {
+      "type": "click",
+      "i": 147,
+      "content": "Click on the \"O.T\" link to navigate to the event details page for the event with event number 14458 on the Megabox website.",
+      "question": "질문: Megabox 웹사이트에서 이벤트 번호 14458의 이벤트 세부 정보를 보시겠습니까?",
+      "html": "<a href=\"https://www.megabox.co.kr/event/detail?eventNo=14458\"><span>O.T</span></a>"
+    }
+  ],
+  [
+    "button,#상영예정,class=btn swiper-slide swiper-slide-next,type=button",
+    {
+      "type": "click",
+      "i": 192,
+      "content": "Click on the button with the text \"#상영예정\" to view upcoming movie schedules or releases.",
+      "question": "질문: 다가오는 영화 일정이나 개봉 예정작을 보고 싶으신가요?",
+      "html": "<button type=\"button\" class=\"btn swiper-slide swiper-slide-next\"><span>#상영예정</span></button>"
+    }
+  ],
+  [
+    "button,#필소,class=btn swiper-slide,type=button",
+    {
+      "type": "click",
+      "i": 200,
+      "content": "Click on the button with the text \"#필소\" to perform an action related to the movie theater's promotion or event associated with the hashtag.",
+      "question": "질문: \"#필소\" 해시태그와 관련된 영화관의 프로모션 또는 이벤트에 대해 들어보셨나요?",
+      "html": "<button type=\"button\" class=\"btn swiper-slide\"><span>#필소</span></button>"
+    }
+  ],
+  [
+    "button,MY,class=button-bot,type=button",
+    {
+      "type": "click",
+      "i": 979,
+      "content": "Click the \"MY\" button to access the user's personal account or profile information on the Megabox website.",
+      "question": "질문: Megabox 웹사이트에서 개인 계정 또는 프로필 정보에 액세스하려는 것인지 확인해 주시겠습니까?",
+      "html": "<button type=\"button\" class=\"button-bot\"><span>MY</span></button>"
+    }
+  ],
+  [
+    "button,예매,class=button-bot,type=button",
+    {
+      "type": "click",
+      "i": 973,
+      "content": "Click the \"예매\" button to proceed with booking a movie ticket.",
+      "question": "\"영화 티켓을 예매하시겠습니까? 진행하시려면 '예매' 버튼을 클릭해주세요.\"",
+      "html": "<button type=\"button\" class=\"button-bot\"><span>예매</span></button>"
+    }
+  ],
+  [
+    "a,무비칩,href=https://www.megabox.co.kr/event/detail?eventNo=14481",
+    {
+      "type": "click",
+      "i": 138,
+      "content": "Click on the \"무비칩\" link to navigate to the event detail page for the \"무비칩\" promotion on the Megabox website.",
+      "question": "질문: 메가박스 웹사이트에서 \"무비칩\" 프로모션에 대한 더 자세한 내용을 보고 싶으신가요?",
+      "html": "<a href=\"https://www.megabox.co.kr/event/detail?eventNo=14481\"><span>무비칩</span></a>"
+    }
+  ],
+  [
+    "button,#클소,class=btn swiper-slide,type=button",
+    {
+      "type": "click",
+      "i": 198,
+      "content": "Click on the button with the text \"#클소\" to perform an action related to the movie or event associated with the hashtag.",
+      "question": "질문: \"#클소\" 해시태그와 관련된 영화 또는 이벤트에 대해 더 알고 싶으신가요?",
+      "html": "<button type=\"button\" class=\"btn swiper-slide\"><span>#클소</span></button>"
+    }
+  ],
+  [
+    "button,#돌비시네마,class=btn swiper-slide act,type=button",
+    {
+      "type": "click",
+      "i": 196,
+      "content": "Click on the button with the text \"#돌비시네마\" to perform an action related to Dolby Cinema, such as accessing more information or selecting it as a movie screening option.",
+      "question": "질문: Dolby Cinema에 대해 더 알고 싶으세요? 아니면 이를 선호하는 영화 상영 옵션으로 선택하시겠습니까?",
+      "html": "<button type=\"button\" class=\"btn swiper-slide act\"><span>#돌비시네마</span></button>"
+    }
+  ],
+  [
+    "button,이벤트,id=navi_event_btn,class=button-bot,type=button",
+    {
+      "type": "click",
+      "i": 976,
+      "content": "Clicking on the \"이벤트\" button will navigate the user to the events section of the web page, where they can view and participate in various movie-related events and promotions offered by Megabox.",
+      "question": "\"최신 영화 이벤트와 프로모션을 확인하시겠습니까? '이벤트' 버튼을 클릭하여 탐색해보세요!\"",
+      "html": "<button id=\"navi_event_btn\" type=\"button\" class=\"button-bot\"><span>이벤트</span></button>"
+    }
+  ],
+  [
+    "button,스토어,class=button-bot,type=button",
+    {
+      "type": "click",
+      "i": 970,
+      "content": "Click on the \"스토어\" button to access the Megabox store, where users can purchase movie tickets, merchandise, or other related items.",
+      "question": "\"메가박스 스토어를 탐색하고 영화 티켓, 상품 또는 관련 아이템을 구매하시겠습니까? 그렇다면 '스토어' 버튼을 클릭해주세요.\"",
+      "html": "<button type=\"button\" class=\"button-bot\"><span>스토어</span></button>"
+    }
+  ],
+  [
+    "button,#단독,class=btn swiper-slide act,type=button",
+    {
+      "type": "click",
+      "i": 194,
+      "content": "Click on the button with the text \"#단독\" to access exclusive movie information, events, or promotions.",
+      "question": "\"‘#단독’이라는 텍스트가 있는 버튼을 클릭하여 독점 영화 정보, 이벤트 또는 프로모션에 접근하시겠습니까?\"",
+      "html": "<button type=\"button\" class=\"btn swiper-slide act\"><span>#단독</span></button>"
+    }
+  ],
+  [
+    "button,#박스오피스,class=btn swiper-slide on swiper-slide-active,type=button",
+    {
+      "type": "click",
+      "i": 190,
+      "content": "Click on the button with the text \"#박스오피스\" to perform an action related to the \"박스오피스\" category, which could potentially display information about the current box office movies or related content.",
+      "question": "질문: \"'#박스오피스'라는 텍스트가 있는 버튼을 클릭하여 현재 박스오피스 영화를 확인하시겠습니까?\"",
+      "html": "<button type=\"button\" class=\"btn swiper-slide on swiper-slide-active\"><span>#박스오피스</span></button>"
+    }
+  ],
+  [
+    "a,어떤영화를보고 싶으세요?\n\t\t\t\t\t\t,href=javascript:fn_reserveChoice(moveType.movie, '')",
+    {
+      "type": "click",
+      "i": 153,
+      "content": "Click on the element to select the movie you want to watch and proceed with the reservation process.",
+      "question": "어떤 영화를 보고 싶으세요?",
+      "html": "<a href=\"javascript:fn_reserveChoice(moveType.movie, '')\"><p>어떤영화를보고 싶으세요?</p><p>영화별 예매</p></a>"
+    }
+  ],
+  [
+    "a,개인정보처리방침,href=javaScript:fn_mvMenu('INDVDLINFO')",
+    {
+      "type": "click",
+      "i": 173,
+      "content": "Click on the \"개인정보처리방침\" link to access the privacy policy information.",
+      "question": "질문: 개인 정보 보호 정책 정보를 보시겠습니까?",
+      "html": "<a href=\"javaScript:fn_mvMenu('INDVDLINFO')\">개인정보처리방침</a>"
+    }
+  ],
+  [
+    "a,PC버전,class=PCVER,href=javaScript:fn_mvMenu('PCVER')",
+    {
+      "type": "click",
+      "i": 177,
+      "content": "Click on the \"PC버전\" link to switch to the PC version of the website.",
+      "question": "질문: 웹사이트의 PC 버전으로 전환하시겠습니까?",
+      "html": "<a href=\"javaScript:fn_mvMenu('PCVER')\" class=\"PCVER\">PC버전</a>"
+    }
+  ],
+  [
+    "button,예매,class=button-bot on,type=button",
+    {
+      "type": "click",
+      "i": 191,
+      "content": "Click the \"예매\" button to initiate the movie reservation process.",
+      "question": "질문: 영화 티켓 예약을 진행하시겠습니까?",
+      "html": "<button type=\"button\" class=\"button-bot on\"><span>예매</span></button>"
+    }
+  ],
+  [
+    "a,어느곳에서보고 싶으세요?\n\t\t\t\t\t\t,href=javascript:fn_reserveChoice(moveType.theater, '')",
+    {
+      "type": "click",
+      "i": 147,
+      "content": "Click on the element \"어느곳에서보고 싶으세요?\" to access the option for reserving tickets by theater.",
+      "question": "질문: 사용 가능한 상영 시간표를 어디에서 확인하고 싶으세요?",
+      "html": "<a href=\"javascript:fn_reserveChoice(moveType.theater, '')\"><p>어느곳에서보고 싶으세요?</p><p>극장별 예매</p></a>"
+    }
+  ],
+  [
+    "button,홈,class=button-bot,type=button",
+    {
+      "type": "click",
+      "i": 185,
+      "content": "Click the \"홈\" button to go back to the home page of the website.",
+      "question": "질문: \"홈\" 버튼을 클릭하여 홈페이지로 돌아가시겠습니까?",
+      "html": "<button type=\"button\" class=\"button-bot\"><span>홈</span></button>"
+    }
+  ],
+  [
+    "a,이용약관,href=javaScript:fn_mvMenu('AGREE')",
+    {
+      "type": "click",
+      "i": 168,
+      "content": "Click on the \"이용약관\" link to access and view the terms and conditions of using the website and its services.",
+      "question": "\"이 웹사이트를 사용하기 전에 이용 약관을 검토하시겠습니까?\"",
+      "html": "<a href=\"javaScript:fn_mvMenu('AGREE')\">이용약관</a>"
+    }
+  ],
+  [
+    "a,위치기반서비스 이용약관,href=javaScript:fn_mvMenu('LCINFO')",
+    {
+      "type": "click",
+      "i": 170,
+      "content": "Click on the \"위치기반서비스 이용약관\" link to access the terms and conditions for using the location-based service.",
+      "question": "질문: 위치 기반 서비스 사용에 대한 약관을 읽고 싶으신가요?",
+      "html": "<a href=\"javaScript:fn_mvMenu('LCINFO')\">위치기반서비스 이용약관</a>"
+    }
+  ],
+  [
+    "a,서울의 봄,href=javascript:fn_moveReserve(moveType.boxOffice, { movieNo: '23081200', movieNm: '서울의 봄', admisClassCd: 'AD02' });",
+    {
+      "type": "click",
+      "i": 135,
+      "content": "Click on the link \"서울의 봄\" to move to the reservation page for the movie \"서울의 봄\".",
+      "question": "질문: \"서울의 봄\" 영화 예매를 하시겠습니까?",
+      "html": "<a href=\"javascript:fn_moveReserve(moveType.boxOffice, { movieNo: '23081200', movieNm: '서울의 봄', admisClassCd: 'AD02' });\">서울의 봄</a>"
+    }
+  ],
+  [
+    "a,특별한 날, 프라이빗관 어떠세요?\n\t,href=javascript:AppDomain.Booking.privateBooking(AppDomain.Flag.isCloseAll)",
+    {
+      "type": "click",
+      "i": 159,
+      "content": "Click on the element to access the private booking feature for reserving a private theater for special occasions at the COEX theater.",
+      "question": "질문: COEX 극장에서 특별한 행사를 위해 개인 극장을 예약하시겠습니까?",
+      "html": "<a href=\"javascript:AppDomain.Booking.privateBooking(AppDomain.Flag.isCloseAll)\"><p>특별한 날, 프라이빗관 어떠세요?</p><p>코엑스 프라이빗 대관예매</p></a>"
+    }
+  ],
+  [
+    "a,고객센터,href=javaScript:fn_mvMenu('CSTMRINFO')",
+    {
+      "type": "click",
+      "i": 175,
+      "content": "Clicking on the \"고객센터\" link will allow the user to access the customer center section of the web page, where they can find information and support related to their movie reservations and other features of the website.",
+      "question": "\"영화 예약이나 웹사이트의 다른 기능에 대한 정보나 지원을 찾고 계신가요?\"",
+      "html": "<a href=\"javaScript:fn_mvMenu('CSTMRINFO')\">고객센터</a>"
+    }
+  ],
+  [
+    "a,그대들은 어..,href=javascript:fn_moveReserve(moveType.boxOffice, { movieNo: '23075200', movieNm: '그대들은 어떻게 살 것인가', admisClassCd: 'AD01' });",
+    {
+      "type": "click",
+      "i": 141,
+      "content": "Click on the element \"그대들은 어..\" to move to the reservation page for the movie \"그대들은 어떻게 살 것인가\" with the movie number '23075200' and admission class code 'AD01'.",
+      "question": "질문: \"그대들은 어떻게 살 것인가\" 영화 예매를 하시겠습니까?",
+      "html": "<a href=\"javascript:fn_moveReserve(moveType.boxOffice, { movieNo: '23075200', movieNm: '그대들은 어떻게 살 것인가', admisClassCd: 'AD01' });\">그대들은 어..</a>"
+    }
+  ],
+  [
+    "a,헝거게임: 노..,href=javascript:fn_moveReserve(moveType.boxOffice, { movieNo: '23083900', movieNm: '헝거게임: 노래하는 새와 뱀의 발라드', admisClassCd: 'AD03' });",
+    {
+      "type": "click",
+      "i": 138,
+      "content": "Click on the element to reserve a ticket for the movie \"헝거게임: 노래하는 새와 뱀의 발라드\".",
+      "question": "질문: \"헝거게임: 노래하는 새와 뱀의 발라드\" 영화 티켓을 예약하시겠습니까?",
+      "html": "<a href=\"javascript:fn_moveReserve(moveType.boxOffice, { movieNo: '23083900', movieNm: '헝거게임: 노래하는 새와 뱀의 발라드', admisClassCd: 'AD03' });\">헝거게임: 노..</a>"
+    }
+  ],
+  [
+    "button,선택 완료,id=choiceBtn,class=button-bot purple,type=button",
+    {
+      "type": "click",
+      "i": 813,
+      "content": "Click the \"선택 완료\" button to confirm the selection and proceed with the booking process.",
+      "question": "질문: \"선택 완료\" 버튼을 클릭하여 예약을 진행하시겠습니까?",
+      "html": "<button type=\"button\" id=\"choiceBtn\" class=\"button-bot purple\">선택 완료</button>"
+    }
+  ],
+  [
+    "a,지역별,id=tab_branch,class=on,href=javascript:fn_tabOnClick(tabType.branch);",
+    {
+      "type": "click",
+      "i": 127,
+      "content": "Click on the \"지역별\" link to switch to the \"지역별\" tab, which allows the user to view theaters and movies by region.",
+      "question": "질문: 어떤 지역에서 극장과 영화를 보고 싶으세요?",
+      "html": "<a href=\"javascript:fn_tabOnClick(tabType.branch);\" id=\"tab_branch\" class=\"on\">지역별</a>"
+    }
+  ],
+  [
+    "a,특별관,id=tab_special,href=javascript:fn_tabOnClick(tabType.special);",
+    {
+      "type": "click",
+      "i": 129,
+      "content": "Click on the \"특별관\" tab to view the special screenings or events in the theater.",
+      "question": "\"특별 상영회나 이벤트를 관람하고 싶으신가요? 그렇다면, \"특별관\" 탭을 클릭하여 현재 제공되는 내용을 확인해주세요.\"",
+      "html": "<a href=\"javascript:fn_tabOnClick(tabType.special);\" id=\"tab_special\"><span>특별관</span></a>"
+    }
+  ],
+  [
+    "ul,나의극장 0\t\t\t\t\t서울20 경기 3",
+    {
+      "type": "select",
+      "i": 133,
+      "content": "Select one theater from the list to view available movies and book tickets.",
+      "question": "어떤 영화관에서 영화를 보고 티켓을 예매하고 싶으세요?",
+      "html": "<ul><li><a href=\"javascript:fn_branchChoice('my')\" class=\"area\">나의극장 <span>0</span></a></li><li><a href=\"javascript:fn_branchChoice('10')\" class=\"area\">서울<span>20</span></a></li><li><a href=\"javascript:fn_branchChoice('30')\" class=\"area\"><em> 경기 </em><span>30</span></a></li><li><a href=\"javascript:fn_branchChoice('35')\" class=\"area\">인천<span>5</span></a></li><li><a href=\"javascript:fn_branchChoice('45')\" class=\"area\">대전/충청/세종<span>14</span></a></li><li><a href=\"javascript:fn_branchChoice('55')\" class=\"area\">부산/대구/경상<span>25</span></a></li><li><a href=\"javascript:fn_branchChoice('65')\" class=\"area\">광주/전라<span>10</span></a></li><li><a href=\"javascript:fn_branchChoice('70')\" class=\"area\"><em> 강원 </em><span>4</span></a></li><li><a href=\"javascript:fn_branchChoice('80')\" class=\"area\"><em> 제주 </em><span>2</span></a></li></ul>",
+      "options": [
+        "My Theater (0)",
+        "Seoul (20)",
+        "Select theater in 경기 (30)",
+        "The text label for the given HTML element is \"인천 5\".",
+        "Select the theater in the Daejeon/Chungcheong/Sejong area (14 theaters available).",
+        "Select the theater branch in the Busan/Daegu/Gyeongsang area. (25 theaters available)",
+        "Select the theater in the Gwangju/Jeolla region (10 theaters available).",
+        "The text label for the given HTML element is \"강원 (4)\".",
+        "Jeju - 2"
+      ]
+    }
+  ],
+  [
+    "a,class=h-close,href=javascript:fn_goback()",
+    {
+      "type": "click",
+      "i": 115,
+      "content": "Clicking on the element with the class \"h-close\" will trigger the JavaScript function \"fn_goback()\" and allow the user to go back to the previous page or perform a specific action related to going back.",
+      "question": "질문: 이전 페이지로 돌아가거나 돌아가기와 관련된 특정 작업을 수행하고 싶습니까?",
+      "html": "<a href=\"javascript:fn_goback()\" class=\"h-close\"></a>"
+    }
+  ],
+  [
+    "ul,강남\t강남대로(씨티)\t강동\t군자\t더 ,id=branch_10,class=city-cont on",
+    {
+      "type": "select",
+      "i": 170,
+      "content": "Select one theater location from the list by clicking on the corresponding item, which will trigger a function to choose the theater and enable the user to proceed with booking tickets for movies.",
+      "question": "질문: 어떤 극장 위치를 선택하시겠습니까?",
+      "html": "<ul>\t<li><a href=\"javascript:fn_theaterChoice('1372', '강남', 'Y', 'N');\"><div clickable=\"true\">강남</div></a></li>\t<li><a href=\"javascript:fn_theaterChoice('0023', '강남대로(씨티)', 'Y', 'N');\"><div clickable=\"true\">강남대로(씨티)</div></a></li>\t<li><a href=\"javascript:fn_theaterChoice('1341', '강동', 'Y', 'N');\"><div clickable=\"true\">강동</div></a></li>\t<li><a href=\"javascript:fn_theaterChoice('1431', '군자', 'Y', 'N');\"><div clickable=\"true\">군자</div></a></li>\t<li><a href=\"javascript:fn_theaterChoice('0041', '더 부티크 목동현대백화점', 'Y', 'N');\"><div clickable=\"true\">더 부티크 목동현대백화점</div></a></li>\t<li><a href=\"javascript:fn_theaterChoice('1003', '동대문', 'Y', 'N');\"><div clickable=\"true\">동대문</div></a></li>\t<li><a href=\"javascript:fn_theaterChoice('1572', '마곡', 'Y', 'N');\"><div clickable=\"true\">마곡</div></a></li>\t<li><a href=\"javascript:fn_theaterChoice('1581', '목동', 'Y', 'N');\"><div clickable=\"true\">목동</div></a></li>\t<li><a href=\"javascript:fn_theaterChoice('1311', '상봉', 'Y', 'N');\"><div clickable=\"true\">상봉</div></a></li>\t<li><a href=\"javascript:fn_theaterChoice('1211', '상암월드컵경기장', 'Y', 'N');\"><div clickable=\"true\">상암월드컵경기장</div></a></li>\t<li><a href=\"javascript:fn_theaterChoice('1331', '성수', 'Y', 'N');\"><div clickable=\"true\">성수</div></a></li>\t<li><a href=\"javascript:fn_theaterChoice('1371', '센트럴', 'Y', 'N');\"><div clickable=\"true\">센트럴</div></a></li>\t<li><a href=\"javascript:fn_theaterChoice('1381', '송파파크하비오', 'Y', 'N');\"><div clickable=\"true\">송파파크하비오</div></a></li>\t<li><a href=\"javascript:fn_theaterChoice('1202', '신촌', 'Y', 'N');\"><div clickable=\"true\">신촌</div></a></li>\t<li><a href=\"javascript:fn_theaterChoice('1561', '이수', 'Y', 'N');\"><div clickable=\"true\">이수</div></a></li></ul>",
+      "options": [
+        "The text label for the given HTML element is \"강남\".",
+        "The text label for the given HTML element is \"강남대로(씨티)\".",
+        "The text label for the given HTML element is \"강동\".",
+        "The text label for the given HTML element is \"군자\".",
+        "The text label for the given HTML element is \"더 부티크 목동현대백화점\".",
+        "The text label for the given HTML element is \"동대문\".",
+        "The text label for the given HTML element is \"마곡\".",
+        "The text label for the given HTML element is \"목동\".",
+        "The text label for the given HTML element is \"상봉\".",
+        "The text label for the given HTML element is \"상암월드컵경기장\".",
+        "The text label for the given HTML element is \"성수\".",
+        "The text label for the given HTML element is \"센트럴\".",
+        "The text label for the given HTML element is \"송파파크하비오\".",
+        "The text label for the given HTML element is \"신촌\".",
+        "The text label for the given HTML element is \"이수\"."
+      ]
+    }
+  ],
+  [
+    "a,큐레이션,class=btn,href=javascript:void(0)",
+    {
+      "type": "click",
+      "i": 126,
+      "content": "Click on the \"큐레이션\" button to access a curated selection of movies.",
+      "question": "어떤 종류의 영화에 관심이 있나요?",
+      "html": "<a href=\"javascript:void(0)\" class=\"btn\"><span>큐레이션</span></a>"
+    }
+  ],
+  [
+    "a,class=h-movielist,href=javascript:fn_changeViewType();",
+    {
+      "type": "click",
+      "i": 115,
+      "content": "Click on the \"h-movielist\" element to change the view type of the movie selection page.",
+      "question": "질문: 영화 선택 페이지의 보기 유형을 변경하시겠습니까?",
+      "html": "<a href=\"javascript:fn_changeViewType();\" class=\"h-movielist\"></a>"
+    }
+  ],
+  [
+    "input,id=findBtn,class=btn-search,type=submit",
+    {
+      "type": "click",
+      "i": 131,
+      "content": "Click on the \"Search\" button to initiate a search for movies based on the user's input.",
+      "question": "어떤 종류의 영화에 관심이 있나요?",
+      "html": "<input id=\"findBtn\" type=\"submit\" class=\"btn-search\">"
+    }
+  ],
+  [
+    "input,id=searchText,name=searchText,type=text",
+    {
+      "type": "input",
+      "i": 130,
+      "content": "Input text in the \"searchText\" field to search for specific movies on the movie selection page.",
+      "question": "어떤 특정한 영화를 찾고 있나요?",
+      "html": "<input type=\"text\" id=\"searchText\">"
+    }
+  ],
+  [
+    "a,전체,class=btn on,href=javascript:void(0)",
+    {
+      "type": "click",
+      "i": 124,
+      "content": "Click on the \"전체\" button to view all movies available for booking on the movie selection page.",
+      "question": "질문: 예약 가능한 모든 영화를 보려면 어떤 버튼을 클릭해야 하나요?",
+      "html": "<a href=\"javascript:void(0)\" class=\"btn on\"><span>전체</span></a>"
+    }
+  ],
+  [
+    "button,class=h-close,type=button",
+    {
+      "type": "click",
+      "i": 118,
+      "content": "Click the \"h-close\" button to close a pop-up or modal window on the movie selection page.",
+      "question": "질문: 영화 선택 페이지에서 팝업 또는 모달 창을 닫고 싶습니까?",
+      "html": "<button type=\"button\" class=\"h-close\"></button>"
+    }
+  ],
+  [
+    "ul,12세이상관람가\t\t\t\t서울의 봄\t\t\t,id=movieBlockList",
+    {
+      "type": "select",
+      "i": 142,
+      "content": "Select one movie from the list by clicking on the movie title to view more details and potentially book tickets for that movie.",
+      "question": "어떤 영화에 관심이 있나요?",
+      "html": "<ul><li>\t<a href=\"javascript:void(0)\"><p><i>12세이상관람가</i></p><p>서울의 봄</p>\t</a></li><li>\t<a href=\"javascript:void(0)\"><p><i>15세이상관람가</i></p><p>헝거게임: 노래하는 새와 뱀의 발라드</p>\t</a></li><li>\t<a href=\"javascript:void(0)\"><p><i>전체관람가</i></p><p>그대들은 어떻게 살 것인가</p>\t</a></li><li>\t<a href=\"javascript:void(0)\"><p><i>12세이상관람가</i></p><p>더 마블스</p>\t</a></li><li>\t<a href=\"javascript:void(0)\"><p><i>12세이상관람가</i></p><p>프레디의 피자가게</p>\t</a></li><li>\t<a href=\"javascript:void(0)\"><p><i>15세이상관람가</i></p><p>다크 나이트</p>\t</a></li><li>\t<a href=\"javascript:void(0)\"><p><i>전체관람가</i></p><p>어른 김장하</p>\t</a></li><li>\t<a href=\"javascript:void(0)\"><p><i>12세이상관람가</i></p><p>싱글 인 서울</p>\t</a></li><li>\t<a href=\"javascript:void(0)\"><p><i>12세이상관람가</i></p><p>괴물</p>\t</a></li></ul>",
+      "options": [
+        "Movie: 서울의 봄\nAge Rating: 12세이상관람가",
+        "Movie: 헝거게임: 노래하는 새와 뱀의 발라드\nAge Rating: 15세이상관람가",
+        "Movie: 그대들은 어떻게 살 것인가\nAge rating: 전체관람가",
+        "Movie: 더 마블스\nAge rating: 12세이상관람가",
+        "Movie: 프레디의 피자가게\nAge Rating: 12세이상관람가",
+        "Movie: Dark Knight\nAge Rating: 15세이상관람가",
+        "Movie: 어른 김장하\nAge rating: 전체관람가",
+        "Movie: 싱글 인 서울\nAge Rating: 12세이상관람가",
+        "Movie: 괴물\nAge Rating: 12세이상관람가"
+      ]
+    }
+  ],
+  [
+    "a,class=h-close,href=javascript:popupClose();",
+    {
+      "type": "click",
+      "i": 557,
+      "content": "Click on the \"h-close\" element to close a popup on the movie selection page.",
+      "question": "질문: 영화 선택 페이지에서 팝업을 닫고 싶으세요?",
+      "html": "<a href=\"javascript:popupClose();\" class=\"h-close\"></a>"
+    }
+  ],
+  [
+    "button,선택 완료,id=theaterChoiceBtn,class=button-bot purple,type=button",
+    {
+      "type": "click",
+      "i": 576,
+      "content": "Click the \"선택 완료\" button to confirm the selection of a movie theater.",
+      "question": "어떤 영화관을 선택하시겠습니까?",
+      "html": "<button type=\"button\" id=\"theaterChoiceBtn\" class=\"button-bot purple\">선택 완료</button>"
+    }
+  ],
+  [
+    "a,지역별,id=tab_branch,class=on,href=javascript:theaterChoice.fn_tabOnClick(theaterChoice.tabType.branch);",
+    {
+      "type": "click",
+      "i": 569,
+      "content": "Click on the \"지역별\" link to filter the movie selection by region.",
+      "question": "질문: 영화 선택을 어떤 지역으로 필터링하고 싶으세요?",
+      "html": "<a href=\"javascript:theaterChoice.fn_tabOnClick(theaterChoice.tabType.branch);\" id=\"tab_branch\" class=\"on\">지역별</a>"
+    }
+  ],
+  [
+    "a,특별관,id=tab_special,href=javascript:theaterChoice.fn_tabOnClick(theaterChoice.tabType.special);",
+    {
+      "type": "click",
+      "i": 571,
+      "content": "Click on the \"특별관\" tab to view the special theaters and their movie selections.",
+      "question": "질문: 특별 극장과 그들의 영화 선택을 보려면 어떤 탭을 클릭해야 하나요?",
+      "html": "<a href=\"javascript:theaterChoice.fn_tabOnClick(theaterChoice.tabType.special);\" id=\"tab_special\"><span>특별관</span></a>"
+    }
+  ],
+  [
+    "ul,나의극장 0\t\t\t\t\t서울 17 경기 ",
+    {
+      "type": "select",
+      "i": 747,
+      "content": "Select one theater from the list to view the available movies and showtimes at that location.",
+      "question": "어떤 영화관에서 영화와 상영 시간을 보고 싶으세요?",
+      "html": "<ul><li><a href=\"javascript:theaterChoice.fn_branchChoice('my')\" class=\"area\">나의극장 <span>0</span></a></li><li><a href=\"javascript:theaterChoice.fn_branchChoice('10')\" class=\"area\">서울 <span>17</span></a></li><li><a href=\"javascript:theaterChoice.fn_branchChoice('30')\" class=\"area\"><em> 경기 </em> <span>28</span></a></li><li><a href=\"javascript:theaterChoice.fn_branchChoice('35')\" class=\"area\">인천 <span>5</span></a></li><li><a href=\"javascript:theaterChoice.fn_branchChoice('45')\" class=\"area\">대전/충청/세종 <span>14</span></a></li><li><a href=\"javascript:theaterChoice.fn_branchChoice('55')\" class=\"area\">부산/대구/경상 <span>21</span></a></li><li><a href=\"javascript:theaterChoice.fn_branchChoice('65')\" class=\"area\">광주/전라 <span>9</span></a></li><li><a href=\"javascript:theaterChoice.fn_branchChoice('70')\" class=\"area\"><em> 강원 </em> <span>3</span></a></li><li><a href=\"javascript:theaterChoice.fn_branchChoice('80')\" class=\"area\"><em> 제주 </em> <span>2</span></a></li></ul>",
+      "options": [
+        "My Theater (0)",
+        "Seoul (17)",
+        "Movie Theater: 경기 (28)",
+        "Incheon - 5",
+        "Movie Selection: 대전/충청/세종 (14)",
+        "Busan/Daegu/Gyeongsang (21)",
+        "Movie theaters in Gwangju/Jeolla (9)",
+        "Kangwon (3)",
+        "제주 (2)"
+      ]
+    }
+  ],
+  [
+    "ul,강남\t강남대로(씨티)\t\t\t더 부티크 ,id=branch_10,class=city-cont on",
+    {
+      "type": "select",
+      "i": 784,
+      "content": "Select one movie theater choice from the list by clicking on the corresponding item, such as '강남', to choose the desired theater for movie viewing.",
+      "question": "어떤 영화관을 선택하시겠습니까?",
+      "html": "<ul>\t<li><a href=\"javascript:theaterChoice.fn_theaterChoice('1372', '강남', 'Y', 'N')\"><div clickable=\"true\">강남</div></a></li>\t<li><a href=\"javascript:theaterChoice.fn_theaterChoice('0023', '강남대로(씨티)', 'Y', 'N')\"><div clickable=\"true\">강남대로(씨티)</div></a></li><li><a href=\"javascript:theaterChoice.fn_theaterChoice('0041', '더 부티크 목동현대백화점', 'Y', 'N')\"><div clickable=\"true\">더 부티크 목동현대백화점</div></a></li>\t<li><a href=\"javascript:theaterChoice.fn_theaterChoice('1003', '동대문', 'Y', 'N')\"><div clickable=\"true\">동대문</div></a></li>\t<li><a href=\"javascript:theaterChoice.fn_theaterChoice('1572', '마곡', 'Y', 'N')\"><div clickable=\"true\">마곡</div></a></li>\t<li><a href=\"javascript:theaterChoice.fn_theaterChoice('1581', '목동', 'Y', 'N')\"><div clickable=\"true\">목동</div></a></li>\t<li><a href=\"javascript:theaterChoice.fn_theaterChoice('1311', '상봉', 'Y', 'N')\"><div clickable=\"true\">상봉</div></a></li>\t<li><a href=\"javascript:theaterChoice.fn_theaterChoice('1211', '상암월드컵경기장', 'Y', 'N')\"><div clickable=\"true\">상암월드컵경기장</div></a></li>\t<li><a href=\"javascript:theaterChoice.fn_theaterChoice('1331', '성수', 'Y', 'N')\"><div clickable=\"true\">성수</div></a></li>\t<li><a href=\"javascript:theaterChoice.fn_theaterChoice('1371', '센트럴', 'Y', 'N')\"><div clickable=\"true\">센트럴</div></a></li>\t<li><a href=\"javascript:theaterChoice.fn_theaterChoice('1381', '송파파크하비오', 'Y', 'N')\"><div clickable=\"true\">송파파크하비오</div></a></li>\t<li><a href=\"javascript:theaterChoice.fn_theaterChoice('1202', '신촌', 'Y', 'N')\"><div clickable=\"true\">신촌</div></a></li>\t<li><a href=\"javascript:theaterChoice.fn_theaterChoice('1561', '이수', 'Y', 'N')\"><div clickable=\"true\">이수</div></a></li></ul>",
+      "options": [
+        "Movie Theater Choice: 강남",
+        "Movie Theater: 강남대로(씨티)",
+        "<div class=\"movie-title\">Avengers: Endgame</div>",
+        "<div class=\"movie-title\">Avengers: Endgame</div>",
+        "The text label for the given HTML element is \"더 부티크 목동현대백화점\".",
+        "Movie Theater: 동대문",
+        "Movie Theater: 마곡",
+        "Movie Theater Choice: 목동",
+        "Movie Theater: 상봉",
+        "Movie theater: 상암월드컵경기장",
+        "Movie theater choice: 성수",
+        "Movie theater option: 센트럴",
+        "Movie Theater: 송파파크하비오",
+        "Movie Theater Choice: 신촌",
+        "Movie Theater: 이수"
+      ]
+    }
+  ],
+  [
+    "div,서울의 봄\n\t\t\t\t\n\t\t\t\t\t극장변경,class=reserve-top fixedopen",
+    {
+      "type": "select",
+      "i": 589,
+      "content": "Select one movie from the list to swipe and view details or book tickets.",
+      "question": "어떤 영화에 대한 세부 정보를 보거나 티켓을 예매하고 싶으신가요?",
+      "html": "<div><div><div><div>\t<a href=\"javascript:void(0)\"></a></div><div>\t<a href=\"javascript:void(0)\"></a></div><div>\t<a href=\"javascript:void(0)\"></a></div><div>\t<a href=\"javascript:void(0)\"></a></div></div></div><div><h2> 서울의 봄</h2><div><a href=\"javascript:fn_changeTheater();\" class=\"change-theater\">극장변경</a><div><a href=\"javascript:void(0)\"><div clickable=\"true\">강남</div></a></div></div></div><div><div><div><div><span>2023</span><strong><em>11</em>월</strong></div>\t<a href=\"javascript:fn_playDateOnClick('20231122', '수');\" class=\"\"><strong>22</strong><span>수</span></a></div><div>\t<a href=\"javascript:fn_playDateOnClick('20231123', '목');\" class=\"\"><strong>23</strong><span>목</span></a></div><div>\t<a href=\"javascript:fn_playDateOnClick('20231124', '금');\" class=\"\"><strong>24</strong><span>금</span></a></div><div>\t<a href=\"javascript:fn_playDateOnClick('20231125', '토');\" class=\"sat\"><strong>25</strong><span>토</span></a></div><div>\t<a href=\"javascript:fn_playDateOnClick('20231126', '일');\" class=\"sun\"><strong>26</strong><span>일</span></a></div></div></div></div>",
+      "options": [
+        "Movie Swipe Wrap 3 Container",
+        "Change Theater",
+        "The label for this HTML element could be \"Calendar for selecting movie dates and booking tickets\"."
+      ]
+    }
+  ],
+  [
+    "div,그대들은 어떻게 살 것인가\n\t\t\t\t\n,class=reserve-top fixedopen",
+    {
+      "type": "select",
+      "i": 589,
+      "content": "Select one item from the list to change the theater for movie screenings.",
+      "question": "어떤 극장의 영화 상영 일정을 변경하고 싶으세요?",
+      "html": "<div><div><div><div>\t<a href=\"javascript:void(0)\"></a></div><div>\t<a href=\"javascript:void(0)\"></a></div><div>\t<a href=\"javascript:void(0)\"></a></div><div>\t<a href=\"javascript:void(0)\"></a></div><div>\t<a href=\"javascript:void(0)\"></a></div></div></div><div><h2> 그대들은 어떻게 살 것인가</h2><div><a href=\"javascript:fn_changeTheater();\" class=\"change-theater\">극장변경</a><div><a href=\"javascript:void(0)\"><div clickable=\"true\">상암월드컵경기장</div></a></div></div></div><div><div><div><div><span>2023</span><strong><em>11</em>월</strong></div>\t<a href=\"javascript:fn_playDateOnClick('20231117', '오늘');\" class=\"\"><strong>17</strong><span>오늘</span></a></div><div>\t<a href=\"javascript:fn_playDateOnClick('20231118', '내일');\" class=\"sat\"><strong>18</strong><span>내일</span></a></div><div>\t<a href=\"javascript:fn_playDateOnClick('20231119', '일');\" class=\"sun\"><strong>19</strong><span>일</span></a></div><div>\t<a href=\"javascript:fn_playDateOnClick('20231120', '월');\" class=\"\"><strong>20</strong><span>월</span></a></div><div>\t<a href=\"javascript:fn_playDateOnClick('20231121', '화');\" class=\"\"><strong>21</strong><span>화</span></a></div></div></div></div>",
+      "options": [
+        "Movie Theater Selection Modal",
+        "Change Theater",
+        "Date Selection Buttons"
+      ]
+    }
+  ],
+  [
+    "a,영화변경,class=mch,href=javascript:fn_changeMovie()",
+    {
+      "type": "click",
+      "i": 587,
+      "content": "Click on the \"영화변경\" link to change the selected movie on the web page.",
+      "question": "어떤 영화를 선택하고 싶으세요?",
+      "html": "<a href=\"javascript:fn_changeMovie()\" class=\"mch\">영화변경</a>"
+    }
+  ],
+  [
+    "a,class=h-back,href=javascript:fn_goback()",
+    {
+      "type": "click",
+      "i": 585,
+      "content": "Click on the \"h-back\" element to go back to the previous page or screen.",
+      "question": "질문: 이전 페이지나 화면으로 돌아가시겠습니까?",
+      "html": "<a href=\"javascript:fn_goback()\" class=\"h-back\"></a>"
+    }
+  ],
+  [
+    "div,상암월드컵경기장\t2D(자막)컴포트1관,class=theater-group",
+    {
+      "type": "select",
+      "i": 1902,
+      "content": "Select one theater from the list to view its details and available movie screenings.",
+      "question": "어떤 극장에서 영화 상영 정보와 상영 시간표를 확인하고 싶으세요?",
+      "html": "<div>\t<div><button type=\"button\" class=\"\"></button> 상암월드컵경기장<a href=\"javascript:fn_theaterDetail('10','1211','상암월드컵경기장','23075200','20231117');\" class=\"righten\"></a></div><div>\t<p><strong>2D(자막)</strong><span><strong>컴포트1관</strong> 202석</span></p>\t<div><div>\t<a id=\"time_1211_01_12451458\" href=\"javascript:void(0)\"><em>12:45</em><span>~14:58</span>\t</a>\t<p>189석</p></div><div>\t<a id=\"time_1211_01_15151728\" href=\"javascript:void(0)\"><em>15:15</em><span>~17:28</span>\t</a>\t<p>196석</p></div><div>\t<a id=\"time_1211_01_18002013\" href=\"javascript:void(0)\"><em>18:00</em><span>~20:13</span>\t</a>\t<p>190석</p></div><div>\t<a id=\"time_1211_01_20452258\" href=\"javascript:void(0)\"><em>20:45</em><span>~22:58</span>\t</a>\t<p>193석</p></div>\t</div></div><div>\t<p><strong>2D(자막)</strong><span><strong>6관</strong> 97석</span></p>\t<div><div>\t<a id=\"time_1211_06_16151828\" href=\"javascript:void(0)\"><em>16:15</em><span>~18:28</span>\t</a>\t<p>94석</p></div>\t</div></div></div>",
+      "options": [
+        "The text label for the given HTML element is \"상암월드컵경기장\".",
+        "2D(자막) - 컴포트1관 202석",
+        "Movie Screening Information: 2D(자막), 6관, 97석, 16:15~18:28, 94석"
+      ]
+    }
+  ],
+  [
+    "a,,href=javascript:void(0)",
+    {
+      "type": "click",
+      "i": 1629,
+      "content": "Click on the element to perform a specific action, such as selecting a movie, theater, or booking tickets for a movie screening.",
+      "question": "어떤 영화를 선택하고 싶으세요?",
+      "html": "<a href=\"javascript:void(0)\"></a>"
+    }
+  ],
+  [
+    "a,18내일,class=sat,href=javascript:fn_playDateOnClick('20231118', '내일');",
+    {
+      "type": "click",
+      "i": 1887,
+      "content": "Click on the element with the purpose of selecting the date \"내일\" (tomorrow) for the movie screening.",
+      "question": "언제 영화를 보고 싶으세요?",
+      "html": "<a href=\"javascript:fn_playDateOnClick('20231118', '내일');\" class=\"sat\"><strong>18</strong><span>내일</span></a>"
+    }
+  ],
+  [
+    "a,20월,href=javascript:fn_playDateOnClick('20231120', '월');",
+    {
+      "type": "click",
+      "i": 1895,
+      "content": "Click on the element to select a specific date for movie screenings.",
+      "question": "어떤 날짜에 영화 상영을 선택하고 싶으세요?",
+      "html": "<a href=\"javascript:fn_playDateOnClick('20231120', '월');\" class=\"\"><strong>20</strong><span>월</span></a>"
+    }
+  ],
+  [
+    "a,21화,href=javascript:fn_playDateOnClick('20231121', '화');",
+    {
+      "type": "click",
+      "i": 1899,
+      "content": "Click on the element to select a specific date for a movie screening.",
+      "question": "어떤 날짜에 영화 상영을 선택하고 싶으세요?",
+      "html": "<a href=\"javascript:fn_playDateOnClick('20231121', '화');\" class=\"\"><strong>21</strong><span>화</span></a>"
+    }
+  ],
+  [
+    "div,상암월드컵경기장,class=item on",
+    {
+      "type": "click",
+      "i": 1877,
+      "content": "Click on the element \"상암월드컵경기장\" to select it as the desired movie theater for booking tickets.",
+      "question": "어떤 영화관에서 티켓을 예매하고 싶으세요?",
+      "html": "<div clickable=\"true\">상암월드컵경기장</div>"
+    }
+  ],
+  [
+    "a,19일,class=sun,href=javascript:fn_playDateOnClick('20231119', '일');",
+    {
+      "type": "click",
+      "i": 1891,
+      "content": "Click on the element with the purpose of selecting the date \"19\" for booking movie tickets on the given web page.",
+      "question": "어떤 날짜에 영화 티켓을 예매하고 싶으세요?",
+      "html": "<a href=\"javascript:fn_playDateOnClick('20231119', '일');\" class=\"sun\"><strong>19</strong><span>일</span></a>"
+    }
+  ],
+  [
+    "a,극장변경,class=change-theater,href=javascript:fn_changeTheater();",
+    {
+      "type": "click",
+      "i": 595,
+      "content": "Clicking on the \"극장변경\" link will trigger the JavaScript function \"fn_changeTheater()\" and allow the user to change the selected theater for movie screenings.",
+      "question": "질문: 영화 상영을 위해 극장을 변경하고 싶으신가요?",
+      "html": "<a href=\"javascript:fn_changeTheater();\" class=\"change-theater\">극장변경</a>"
+    }
+  ],
+  [
+    "a,17오늘,href=javascript:fn_playDateOnClick('20231117', '오늘');",
+    {
+      "type": "click",
+      "i": 1883,
+      "content": "Click on the element to select the date \"17\" for today's movie screenings.",
+      "question": "어떤 날짜를 선택하시겠습니까? 오늘 영화 상영일정을 위해서요.",
+      "html": "<a href=\"javascript:fn_playDateOnClick('20231117', '오늘');\" class=\"\"><strong>17</strong><span>오늘</span></a>"
+    }
+  ],
+  [
+    "a,상암월드컵경기장,href=javascript:void(0)",
+    {
+      "type": "click",
+      "i": 1876,
+      "content": "Click on the element \"상암월드컵경기장\" to select it as the desired movie theater for booking tickets.",
+      "question": "어떤 영화관에서 티켓을 예매하고 싶으세요?",
+      "html": "<a href=\"javascript:void(0)\"><div clickable=\"true\">상암월드컵경기장</div></a>"
+    }
+  ],
+  [
+    "div,,id=movieList,class=swiper-wrapper",
+    {
+      "type": "select",
+      "i": 591,
+      "content": "Select one movie image from the list to view more details and book tickets for the corresponding movie screening.",
+      "question": "어떤 영화를 보고 싶으세요?",
+      "html": "<div><div>\t<a href=\"javascript:void(0)\"></a></div><div>\t<a href=\"javascript:void(0)\"></a></div><div>\t<a href=\"javascript:void(0)\"></a></div><div>\t<a href=\"javascript:void(0)\"></a></div><div>\t<a href=\"javascript:void(0)\"></a></div></div>",
+      "options": [
+        "Movie Image",
+        "Movie Image",
+        "Movie Image",
+        "Movie Image",
+        "Movie Image"
+      ]
+    }
+  ],
+  [
+    "div,202311월\t17오늘\t18내일\t19,id=playDateList,class=swiper-wrapper",
+    {
+      "type": "select",
+      "i": 601,
+      "content": "Select one date from the list to choose the desired movie screening date.",
+      "question": "언제 영화를 보고 싶으세요?",
+      "html": "<div><div><div><span>2023</span><strong><em>11</em>월</strong></div>\t<a href=\"javascript:fn_playDateOnClick('20231117', '오늘');\" class=\"\"><strong>17</strong><span>오늘</span></a></div><div>\t<a href=\"javascript:fn_playDateOnClick('20231118', '내일');\" class=\"sat\"><strong>18</strong><span>내일</span></a></div><div>\t<a href=\"javascript:fn_playDateOnClick('20231119', '일');\" class=\"sun\"><strong>19</strong><span>일</span></a></div><div>\t<a href=\"javascript:fn_playDateOnClick('20231120', '월');\" class=\"\"><strong>20</strong><span>월</span></a></div><div>\t<a href=\"javascript:fn_playDateOnClick('20231121', '화');\" class=\"\"><strong>21</strong><span>화</span></a></div></div>",
+      "options": [
+        "Today's Date: November 17, 2023",
+        "Date Box for Tomorrow",
+        "Date Box - November 19th",
+        "Date Box: Monday, November 20th",
+        "Date Box: Tuesday, November 21st"
+      ]
+    }
+  ],
+  [
+    "input,id=loginId,class=input-text enterTgt,name=loginId,type=text",
+    {
+      "type": "input",
+      "i": 2075,
+      "content": "Input text in the \"loginId\" field to enter the user's login ID for authentication purposes.",
+      "question": "당신의 로그인 ID는 무엇인가요?",
+      "html": "<input type=\"text\" class=\"input-text enterTgt\" id=\"loginId\">"
+    }
+  ],
+  [
+    "input,id=loginPwd,class=input-text enterTgt,name=loginPwd,type=password",
+    {
+      "type": "input",
+      "i": 2078,
+      "content": "Input the password for the user's account in order to log in to their account on the web page.",
+      "question": "질문: 당신의 계정 비밀번호는 무엇인가요?",
+      "html": "<input type=\"password\" class=\"input-text enterTgt\" id=\"loginPwd\">"
+    }
+  ],
+  [
+    "a,네이버로 로그인,class=login-naver,href=javascript:void(0);",
+    {
+      "type": "click",
+      "i": 2098,
+      "content": "Click on the \"네이버로 로그인\" link to log in using a Naver account.",
+      "question": "네이버 계정을 사용하여 로그인하시겠습니까?",
+      "html": "<a href=\"javascript:void(0);\" class=\"login-naver\">네이버로 로그인</a>"
+    }
+  ],
+  [
+    "a,페이코로 로그인,class=login-payco,href=javascript:void(0);",
+    {
+      "type": "click",
+      "i": 2102,
+      "content": "Click on the \"페이코로 로그인\" link to log in using the Payco service.",
+      "question": "질문: Payco 계정을 사용하여 로그인하시겠습니까?",
+      "html": "<a href=\"javascript:void(0);\" class=\"login-payco\">페이코로 로그인</a>"
+    }
+  ],
+  [
+    "a,광고,id=hpLogin2,class=button advertis,href=https://sepay.org/spm/join?regSiteCode=TG&ctgCode=1&subCode=1",
+    {
+      "type": "click",
+      "i": 2086,
+      "content": "Click on the \"광고\" button to access the advertisement page.",
+      "question": "광고 버튼을 클릭하여 광고 페이지를 보시겠습니까?",
+      "html": "<a id=\"hpLogin2\" href=\"https://sepay.org/spm/join?regSiteCode=TG&amp;ctgCode=1&amp;subCode=1\" class=\"button advertis\">광고</a>"
+    }
+  ],
+  [
+    "div,회원 로그인 \n            ,class=list-btn",
+    {
+      "type": "select",
+      "i": 2065,
+      "content": "Select one login option (either 회원 로그인 or 비회원 로그인) to proceed with the movie ticket booking process.",
+      "question": "질문: 당신은 등록된 회원입니까?",
+      "html": "<div><a href=\"javascript:fn_tabSwitch('member')\" id=\"memberTab\" class=\"btn on\"><span>회원 로그인</span></a><a href=\"javascript:fn_tabSwitch('noMember')\" id=\"noMemberTab\" class=\"btn\"><span>비회원 로그인</span></a></div>",
+      "options": [
+        "Button: 회원 로그인",
+        "Button: 비회원 로그인"
+      ]
+    }
+  ],
+  [
+    "a,카카오톡으로 로그인,class=login-kakao,href=javascript:void(0);",
+    {
+      "type": "click",
+      "i": 2100,
+      "content": "Clicking on the \"카카오톡으로 로그인\" link allows the user to log in using their KakaoTalk account.",
+      "question": "질문: 카카오톡 계정을 사용하여 로그인하시겠습니까?",
+      "html": "<a href=\"javascript:void(0);\" class=\"login-kakao\">카카오톡으로 로그인</a>"
+    }
+  ],
+  [
+    "a,휴대폰 간편로그인,id=hpLogin1,href=https://sepay.org/spm/join?regSiteCode=TG&ctgCode=1&subCode=1",
+    {
+      "type": "click",
+      "i": 2085,
+      "content": "Click on the \"휴대폰 간편로그인\" link to log in using a mobile phone for a simplified login process.",
+      "question": "질문: 간편한 로그인 절차를 위해 휴대전화를 사용하여 로그인하시겠습니까?",
+      "html": "<a id=\"hpLogin1\" href=\"https://sepay.org/spm/join?regSiteCode=TG&amp;ctgCode=1&amp;subCode=1\">휴대폰 간편로그인</a>"
+    }
+  ],
+  [
+    "button,로그인,id=loginBtn,class=button-bot purple,type=button",
+    {
+      "type": "click",
+      "i": 2088,
+      "content": "Click the \"로그인\" button to log in to the website.",
+      "question": "질문: 웹 사이트에 로그인하려면 \"로그인\" 버튼을 클릭해 주실 수 있나요?",
+      "html": "<button type=\"button\" class=\"button-bot purple\" id=\"loginBtn\">로그인</button>"
+    }
+  ],
+  [
+    "ul,ID/PW 찾기\n           ",
+    {
+      "type": "select",
+      "i": 2090,
+      "content": "Select one option from the list to perform actions related to finding ID/PW, signing up, or confirming a non-member booking.",
+      "question": "질문: ID/PW를 찾거나 가입하거나 비회원 예약을 확인하는 데 어떤 조치를 취하고 싶으십니까?",
+      "html": "<ul><li><a href=\"javascript:AppDomain.Member.findIdPwd(AppDomain.Flag.isRefreshClose)\">ID/PW 찾기</a></li><li><a href=\"javascript:AppDomain.Member.join()\">회원가입</a></li><li><a href=\"javascript:loginNon()\">비회원 예매확인</a></li></ul>",
+      "options": [
+        "ID/PW 찾기",
+        "Sign up",
+        "Non-member booking confirmation"
+      ]
+    }
+  ],
+  [
+    "div,더 부티크 목동현대백화점,class=item on",
+    {
+      "type": "click",
+      "i": 1877,
+      "content": "Click on the element \"더 부티크 목동현대백화점\" to select and book movie tickets at the theater named \"더 부티크 목동현대백화점\".",
+      "question": "질문: \"더 부티크 목동현대백화점\"이라는 극장에서 영화 티켓을 선택하고 예매하고 싶으신가요?",
+      "html": "<div clickable=\"true\">더 부티크 목동현대백화점</div>"
+    }
+  ],
+  [
+    "a,더 부티크 목동현대백화점,href=javascript:void(0)",
+    {
+      "type": "click",
+      "i": 1876,
+      "content": "Click on the element \"더 부티크 목동현대백화점\" to select and book movie tickets at the theater named \"더 부티크 목동현대백화점\".",
+      "question": "질문: \"더 부티크 목동현대백화점\"이라는 극장에서 영화 티켓을 선택하고 예매하고 싶으신가요?",
+      "html": "<a href=\"javascript:void(0)\"><div clickable=\"true\">더 부티크 목동현대백화점</div></a>"
+    }
+  ],
+  [
+    "div,더 부티크 목동현대백화점\t2D(자막),class=theater-group",
+    {
+      "type": "select",
+      "i": 1894,
+      "content": "Select one movie theater from the list to view its details and potentially book tickets.",
+      "question": "어떤 영화관의 세부 정보를 보고 티켓을 예매하고 싶으세요?",
+      "html": "<div>\t<div><button type=\"button\" class=\"\"></button> 더 부티크 목동현대백화점<a href=\"javascript:fn_theaterDetail('10','0041','더 부티크 목동현대백화점','23075200','20231117');\" class=\"righten\"></a></div><div>\t<p><strong>2D(자막)</strong><span><strong>컴포트 104호</strong> 115석</span></p>\t<div><div>\t<a id=\"time_0041_04_13301543\" href=\"javascript:void(0)\"><em>13:30</em><span>~15:43</span>\t</a>\t<p>62석</p></div>\t</div></div><div>\t<p><strong>2D(자막)</strong><span><strong>컴포트 106호</strong> 115석</span></p>\t<div><div>\t<a id=\"time_0041_06_16351848\" href=\"javascript:void(0)\"><em>16:35</em><span>~18:48</span>\t</a>\t<p>108석</p></div><div>\t<a id=\"time_0041_06_19102123\" href=\"javascript:void(0)\"><em>19:10</em><span>~21:23</span>\t</a>\t<p>110석</p></div><div>\t<a id=\"time_0041_06_21452358\" href=\"javascript:void(0)\"><em>21:45</em><span>~23:58</span>\t</a>\t<p>111석</p></div>\t</div></div></div>",
+      "options": [
+        "The text label for the given HTML element is \"더 부티크 목동현대백화점\".",
+        "2D(자막) - 컴포트 104호 115석 - 13:30 ~ 15:43 - 62석",
+        "2D(자막) - 컴포트 106호 115석"
+      ]
+    }
+  ],
+  [
+    "button,type=button",
+    {
+      "type": "click",
+      "i": 1904,
+      "content": "Click on the button to perform a specific action, such as submitting a form or triggering a JavaScript function, which is not specified in the given HTML.",
+      "question": "질문: 양식을 제출하시겠습니까?",
+      "html": "<button type=\"button\" class=\"\"></button>"
+    }
+  ],
+  [
+    "a,강동,href=javascript:void(0)",
+    {
+      "type": "click",
+      "i": 1876,
+      "content": "Click on the element \"강동\" to select the theater location for booking tickets for a specific movie screening.",
+      "question": "질문: 영화 상영을 위해 티켓을 예매하려는 극장 위치를 선택하고 싶으신가요?",
+      "html": "<a href=\"javascript:void(0)\"><div clickable=\"true\">강동</div></a>"
+    }
+  ],
+  [
+    "div,15:10\t\t~17:23\t\t248석\t,class=time-wrap",
+    {
+      "type": "select",
+      "i": 1913,
+      "content": "Select one movie screening time from the list to view the available seats and proceed with booking tickets for that specific movie screening.",
+      "question": "어떤 영화 상영 시간을 보고 티켓을 예매하고 싶으세요?",
+      "html": "<div><div>\t<a id=\"time_1341_01_15101723\" href=\"javascript:void(0)\"><em>15:10</em><span>~17:23</span>\t</a>\t<p>248석</p></div><div>\t<a id=\"time_1341_01_17502003\" href=\"javascript:void(0)\"><em>17:50</em><span>~20:03</span>\t</a>\t<p>246석</p></div><div>\t<a id=\"time_1341_01_20302243\" href=\"javascript:void(0)\"><em>20:30</em><span>~22:43</span>\t</a>\t<p>243석</p></div>\t</div>",
+      "options": [
+        "Movie Screening Time: 15:10 ~ 17:23\nNumber of Seats Available: 248",
+        "Movie Screening Time: 17:50 ~ 20:03\nNumber of Seats Available: 246",
+        "Movie Screening Time: 20:30 ~ 22:43\nNumber of Seats Available: 243"
+      ]
+    }
+  ],
+  [
+    "div,강동,class=item on",
+    {
+      "type": "click",
+      "i": 1877,
+      "content": "Click on the \"강동\" element to select the theater location for booking movie tickets in the 강동 area.",
+      "question": "질문: 강동 지역에서 영화 티켓 예매를 위해 어떤 극장 위치를 선택하고 싶으신가요?",
+      "html": "<div clickable=\"true\">강동</div>"
+    }
+  ],
+  [
+    "a,class=righten,href=javascript:fn_theaterDetail('10','1341','강동','23075200','20231117');",
+    {
+      "type": "click",
+      "i": 1905,
+      "content": "Click on the element with the class \"righten\" to view the details of the theater with the ID '10', located in '강동', and with a phone number of '23075200'. The purpose of this action is to provide the user with more information about the theater before making a booking decision.",
+      "question": "\"예약하기 전에 전화번호 23075200이 있는 강동의 극장에 대한 자세한 정보를 더 보시겠습니까?\"",
+      "html": "<a href=\"javascript:fn_theaterDetail('10','1341','강동','23075200','20231117');\" class=\"righten\"></a>"
+    }
+  ],
+  [
+    "a,더보기,class=btn-more-link,href=javascript:fn_moreMoviePost()",
+    {
+      "type": "click",
+      "i": 699,
+      "content": "Click on the \"더보기\" button to load more movie posts on the web page.",
+      "question": "질문: 더 많은 영화 게시물을 보고 싶으신가요?",
+      "html": "<a href=\"javascript:fn_moreMoviePost()\" class=\"btn-more-link\">더보기</a>"
+    }
+  ],
+  [
+    "ul,이용약관\n            위치기,class=link",
+    {
+      "type": "select",
+      "i": 948,
+      "content": "Select one item from the list to view and agree to the terms and conditions of using Megabox's services.",
+      "question": "질문: Megabox의 서비스 이용 약관에 동의하십니까?",
+      "html": "<ul><li><a href=\"javaScript:fn_mvMenu('AGREE')\">이용약관</a></li><li><a href=\"javaScript:fn_mvMenu('LCINFO')\">위치기반서비스 이용약관</a></li></ul>",
+      "options": [
+        "Terms and Conditions",
+        "Location-based service terms and conditions"
+      ]
+    }
+  ],
+  [
+    "a,,href=https://www.megabox.co.kr/event/detail?eventNo=13381",
+    {
+      "type": "click",
+      "i": 881,
+      "content": "Click on the element to navigate to the event details page for event number 13381 on the Megabox website.",
+      "question": "질문: Megabox 웹사이트에서 이벤트 번호 13381의 이벤트 세부 정보를 보시겠습니까?",
+      "html": "<a href=\"https://www.megabox.co.kr/event/detail?eventNo=13381\"></a>"
+    }
+  ],
+  [
+    "a,더보기,class=btn-more-link,href=javascript:fn_appVersion()",
+    {
+      "type": "click",
+      "i": 598,
+      "content": "Click on the \"더보기\" button to view more information or options related to the movie theater, such as additional movie listings, special offers, or theater amenities.",
+      "question": "질문: 영화관과 관련된 더 많은 정보나 옵션을 보고 싶으신가요?",
+      "html": "<a href=\"javascript:fn_appVersion()\" class=\"btn-more-link\">더보기</a>"
+    }
+  ],
+  [
+    "a,,href=https://megabox.co.kr/event/detail?eventNo=14405",
+    {
+      "type": "click",
+      "i": 889,
+      "content": "Click on the element to navigate to the event detail page for event number 14405 on the Megabox website.",
+      "question": "질문: Megabox 웹사이트에서 이벤트 번호 14405에 대한 자세한 내용을 더 보시겠습니까?",
+      "html": "<a href=\"https://megabox.co.kr/event/detail?eventNo=14405\"></a>"
+    }
+  ],
+  [
+    "div,무대인사              <서,class=swiper-wrapper",
+    {
+      "type": "select",
+      "i": 525,
+      "content": "Select one movie event from the list to view more details and information about the event.",
+      "question": "어떤 영화 이벤트에 대해 더 알고 싶으세요?",
+      "html": "<div><div><a href=\"javascript:void(0)\"><div clickable=\"true\"></div><div clickable=\"true\"><p><span>무대인사</span></p><p>&lt;서울의 봄&gt; 2주차 무대인사</p></div></a><div><a href=\"javascript:fn_goMoveDetail('23081200');\" class=\"movie-detail\">영화상세</a><a href=\"javascript:fn_goEventLink('14515', 'Y', 'N');\" class=\"vote-now\">일정보기</a></div></div><div><a href=\"javascript:void(0)\"><div clickable=\"true\"></div></a></div></div>",
+      "options": [
+        "Movie event: <서울의 봄> 2주차 무대인사",
+        "Movie Poster Image"
+      ]
+    }
+  ],
+  [
+    "a,,href=https://megabox.co.kr/event/detail?eventNo=14403",
+    {
+      "type": "click",
+      "i": 885,
+      "content": "Click on the element to navigate to the event details page for event number 14403 on the Megabox website.",
+      "question": "질문: Megabox 웹사이트에서 이벤트 번호 14403의 이벤트 세부 정보를 보시겠습니까?",
+      "html": "<a href=\"https://megabox.co.kr/event/detail?eventNo=14403\"><div clickable=\"true\"></div></a>"
+    }
+  ],
+  [
+    "div,\">,class=img",
+    {
+      "type": "click",
+      "i": 499,
+      "content": "Click the \">\" symbol to navigate to the next page or section of the Megabox website.",
+      "question": "질문: Megabox 웹사이트에서 더 많은 옵션을 보고 싶으세요 아니면 계속해서 둘러보시겠습니까?",
+      "html": "<div clickable=\"true\">\"&gt;</div>"
+    }
+  ],
+  [
+    "button,닫기,class=btn-close-main-notice,type=button",
+    {
+      "type": "click",
+      "i": 917,
+      "content": "Click the \"닫기\" button to close the main notice or pop-up on the web page.",
+      "question": "질문: \"닫기\" 버튼을 클릭하여 웹 페이지의 주 공지사항이나 팝업을 닫으시겠습니까?",
+      "html": "<button type=\"button\" class=\"btn-close-main-notice\">닫기</button>"
+    }
+  ],
+  [
+    "div,class=swiper-wrapper",
+    {
+      "type": "select",
+      "i": 920,
+      "content": "Select one event or promotion from the list by clicking on the corresponding image link.",
+      "question": "어떤 이벤트나 프로모션에 대해 더 알고 싶으신가요?",
+      "html": "<div><div><a href=\"https://www.megabox.co.kr/event/detail?eventNo=14528\"></a></div><div><a href=\"https://m.megabox.co.kr/event/detail?eventNo=14350\"></a></div></div>",
+      "options": [
+        "Image Link",
+        "Image Link"
+      ]
+    }
+  ],
+  [
+    "div,DOLBY CINEMATHE BOUT,class=swiper-wrapper",
+    {
+      "type": "select",
+      "i": 656,
+      "content": "Select one movie theater feature or experience from the list, such as Dolby Cinema or Dolby Atmos, by clicking on the corresponding item's link.",
+      "question": "어떤 영화관의 특징이나 경험에 대해 더 알고 싶으신가요?",
+      "html": "<div><div><a href=\"javascript:fn_goSpecialDetail('DBC','DOLBY CINEMA')\"><div clickable=\"true\"><div clickable=\"true\"></div></div><span>DOLBY CINEMA</span></a></div><div><a href=\"javascript:fn_goSpecialDetail('TBQ','THE BOUTIQUE')\"><div clickable=\"true\"><div clickable=\"true\"></div></div><span>THE BOUTIQUE</span></a></div><div><a href=\"javascript:fn_goSpecialDetail('MX','DOLBY ATMOS')\"><div clickable=\"true\"><div clickable=\"true\"></div></div><span>DOLBY ATMOS</span></a></div><div><a href=\"javascript:fn_goSpecialDetail('CFT','COMFORT')\"><div clickable=\"true\"><div clickable=\"true\"></div></div><span>COMFORT</span></a></div><div><a href=\"javascript:fn_goSpecialDetail('PTC','PUPPY CINEMA')\"><div clickable=\"true\"><div clickable=\"true\"></div></div><span>PUPPY CINEMA</span></a></div></div>",
+      "options": [
+        "DOLBY CINEMA",
+        "THE BOUTIQUE",
+        "DOLBY ATMOS",
+        "Movie: COMFORT",
+        "PUPPY CINEMA"
+      ]
+    }
+  ],
+  [
+    "div,포토카드\n\t              ,class=main-pagelink col-4",
+    {
+      "type": "select",
+      "i": 505,
+      "content": "Select one item from the list to navigate to a specific page or perform a specific action related to that item, such as viewing a photo card, accessing the theater information, or visiting the Megabox online store.",
+      "question": "어떤 항목을 선택하시겠습니까?",
+      "html": "<div><div><a href=\"javascript:fn_photoCard()\">포토카드</a></div><div><a href=\"javascript:AppDomain.Theater.list(AppDomain.Flag.isCloseAll);\">극장</a></div><div><a href=\"javascript:fn_appVersion();\">이벤트</a></div><div><a href=\"https://smartstore.naver.com/megaboxonline?isWebLink\">메가굿즈샵</a></div></div>",
+      "options": [
+        "Photo Card",
+        "The text label for the given HTML element is \"극장\" (which translates to \"Theater\" in English).",
+        "Event Link",
+        "Megabox Online Store Link: 메가굿즈샵"
+      ]
+    }
+  ],
+  [
+    "a,포스트 쓰기,class=post-write,href=javascript:fn_moviePosting()",
+    {
+      "type": "click",
+      "i": 703,
+      "content": "Clicking on the \"포스트 쓰기\" element will allow the user to write a post on the web page, likely for sharing their thoughts or opinions about a movie or the movie theater experience.",
+      "question": "영화나 영화관 경험에 대해 생각이나 의견을 공유하고 싶으신가요?",
+      "html": "<a href=\"javascript:fn_moviePosting()\" class=\"post-write\">포스트 쓰기</a>"
+    }
+  ],
+  [
+    "a,\">                  ,class=item,href=javascript:void(0);",
+    {
+      "type": "click",
+      "i": 498,
+      "content": "Click on the element to view more information about the currently highlighted movie, \"밤의 기사, 그 전설의 서막이 열린다!\"",
+      "question": "질문: \"밤의 기사, 그 전설의 서막이 열린다!\" 영화에 대해 추가 정보를 보기 전에 더 알고 싶으신가요?",
+      "html": "<a href=\"javascript:void(0);\" class=\"item\"><div clickable=\"true\">\"&gt;</div><dl><dt>지금 주목받는 영화 한 편</dt><dd>밤의 기사, 그 전설의 서막이 열린다! </dd></dl></a>"
+    }
+  ],
+  [
+    "ul,개인정보처리방침\n           ,class=link",
+    {
+      "type": "select",
+      "i": 953,
+      "content": "Select one item from the list to access specific information or perform an action related to that item, such as viewing the privacy policy or accessing the customer center.",
+      "question": "특정 정보에 액세스하거나 항목과 관련된 작업을 수행하기 전에 항목 번호 또는 이름을 제공해주세요.",
+      "html": "<ul><li><a href=\"javaScript:fn_mvMenu('INDVDLINFO')\">개인정보처리방침</a></li><li><a href=\"javaScript:fn_mvMenu('CSTMRINFO')\">고객센터</a></li><li><a href=\"javaScript:fn_mvMenu('PCVER')\" class=\"PCVER\">PC버전</a></li></ul>",
+      "options": [
+        "Privacy Policy",
+        "Customer Center",
+        "PC버전"
+      ]
+    }
+  ],
+  [
+    "div,2023.11.17 - 2023.12,class=swiper-wrapper",
+    {
+      "type": "select",
+      "i": 614,
+      "content": "Select one movie event from the list to view more details and potentially purchase tickets.",
+      "question": "어떤 영화 이벤트에 대해 더 알고 싶으시거나 티켓을 구매하고 싶으신가요?",
+      "html": "<div><div><a href=\"javascript:fn_goEventLink('14520', 'Y','N');\"><div clickable=\"true\"></div><div clickable=\"true\"><p>2023.11.17 - 2023.12.19</p></div></a></div><div><a href=\"javascript:fn_goEventLink('14528', 'Y','N');\"><div clickable=\"true\"></div><div clickable=\"true\"><p>2023.11.17 - 2023.12.15</p></div></a></div></div>",
+      "options": [
+        "Movie Event: 2023.11.17 - 2023.12.19",
+        "Movie event: 2023.11.17 - 2023.12.15"
+      ]
+    }
+  ],
+  [
+    "div,메가Pick      \t\t영화    ,id=eventTab,class=list-btn swiper-wrapper",
+    {
+      "type": "select",
+      "i": 601,
+      "content": "Select one option from the list to choose a specific feature or category related to movie information, events, or promotions at Megabox theater.",
+      "question": "어떤 영화 정보, 이벤트 또는 프로모션과 관련된 특정 기능 또는 카테고리를 Megabox 극장에서 선택하고 싶으신가요?",
+      "html": "<div><button type=\"button\" id=\"CED03\" class=\"btn swiper-slide on swiper-slide-active\"><span>메가Pick</span></button><button type=\"button\" id=\"CED01\" class=\"btn swiper-slide swiper-slide-next\"><span>영화</span></button><button type=\"button\" id=\"CED02\" class=\"btn swiper-slide\"><span>극장</span></button><button type=\"button\" id=\"CED05\" class=\"btn swiper-slide\"><span>제휴/할인</span></button><button type=\"button\" id=\"CED04\" class=\"btn swiper-slide\"><span>시사회/무대인사</span></button></div>",
+      "options": [
+        "Button: 메가Pick",
+        "Movie Button",
+        "The text label for the given HTML element is \"극장\" which translates to \"Theater\" in English.",
+        "Affiliate/Discount",
+        "Movie Premiere/Red Carpet Events"
+      ]
+    }
+  ],
+  [
+    "div,,class=section-box banner",
+    {
+      "type": "click",
+      "i": 886,
+      "content": "Click on the div element with the attribute \"clickable\" set to true to perform an action associated with it, such as navigating to a specific movie or event page, or triggering a promotional offer.",
+      "question": "\"이 영화/이벤트에 대해 더 알고 싶으세요 아니면 프로모션 제안을 활용하시겠습니까? 계속하려면 'clickable' 속성이 true로 설정된 div 요소를 클릭하세요.\"",
+      "html": "<div clickable=\"true\"></div>"
+    }
+  ],
+  [
+    "div,block97** 블루 자이언트파랑에,class=swiper-wrapper",
+    {
+      "type": "select",
+      "i": 705,
+      "content": "Select one movie or movie review from the list to view more details and potentially interact with it by liking or commenting.",
+      "question": "질문: 어떤 영화 또는 영화 리뷰에 대해 더 자세한 내용을 보거나 좋아요 또는 댓글로 상호 작용하고 싶으신가요?",
+      "html": "<div><div><a href=\"javascript:AppDomain.Movie.postDetail('238225')\"><div clickable=\"true\"></div><div clickable=\"true\"><div clickable=\"true\"><span>block97** </span></div><div clickable=\"true\">블루 자이언트</div><div clickable=\"true\">파랑에 물들은 열정을 따라 주인공들의 성장을 바라본다</div></div></a><div><button type=\"button\" class=\"postLikeBtn238225 like\" id=\"moviepost_238225\"><span>0</span></button><span> 0</span></div></div><div><a href=\"javascript:AppDomain.Movie.postDetail('238224')\"><div clickable=\"true\"></div><div clickable=\"true\"><div clickable=\"true\"><span>Sage061** </span></div><div clickable=\"true\">그대들은 어떻게 살 것인가</div><div clickable=\"true\">얼마나 오랜 시간을 거쳐야 온전히 이해할 수 있을지는 모르겠지만, 충분한 가치는 있었다.</div></div></a><div><button type=\"button\" class=\"postLikeBtn238224 like\" id=\"moviepost_238224\"><span>0</span></button><span> 0</span></div></div><div><a href=\"javascript:AppDomain.Movie.postDetail('238223')\"><div clickable=\"true\"></div><div clickable=\"true\"><div clickable=\"true\"><span>mynes1** </span></div><div clickable=\"true\">블루 자이언트</div><div clickable=\"true\">돌비 시네마에서 봤는데 음향이 좋았습니다. 초등 고학년 아이와 함께 보기에 좋았어요.</div></div></a><div><button type=\"button\" class=\"postLikeBtn238223 like\" id=\"moviepost_238223\"><span>0</span></button></div></div></div>",
+      "options": [
+        "Movie: 블루 자이언트\nDescription: 파랑에 물들은 열정을 따라 주인공들의 성장을 바라본다\nLikes: 0\nRipples: 0",
+        "Movie Review: 그대들은 어떻게 살 것인가\nReviewer: Sage061**\nReview Text: 얼마나 오랜 시간을 거쳐야 온전히 이해할 수 있을지는 모르겠지만, 충분한 가치는 있었다.\nLikes: 0\nRipples: 0",
+        "Movie Review: 블루 자이언트\nReviewer: mynes1**\nReview Text: 돌비 시네마에서 봤는데 음향이 좋았습니다. 초등 고학년 아이와 함께 보기에 좋았어요."
+      ]
+    }
+  ],
+  [
+    "a,href=https://www.megabox.co.kr/event/detail?eventNo=14528",
+    {
+      "type": "click",
+      "i": 934,
+      "content": "Click on the element to navigate to the event detail page with event number 14528 on the Megabox website.",
+      "question": "질문: Megabox 웹사이트에서 이벤트 번호 14528에 대한 자세한 내용을 더 보시겠습니까?",
+      "html": "<a href=\"https://www.megabox.co.kr/event/detail?eventNo=14528\"></a>"
+    }
   ]
 ]

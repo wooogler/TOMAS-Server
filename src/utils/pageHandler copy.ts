@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 import { JSDOM } from "jsdom";
-import puppeteer, { Browser, Page } from "puppeteer";
+import puppeteer, { Browser, Dialog, Page } from "puppeteer";
 import { ActionType, simplifyHtml } from "./htmlHandler";
 import {
   getModalDescription,
@@ -124,27 +124,26 @@ export class PageHandler {
     const page = await this.getPage();
     const { actions } = screenResult;
     for (const action of actions) {
-      if (action.type === "click") {
-        const element = await page.$(`[i="${action.i}"]`);
-        if (element) {
-          await page.evaluate((el) => {
-            (el as HTMLElement).style.border = "5px solid red";
-          }, element);
-        }
-      } else if (action.type === "select") {
-        const element = await page.$(`[i="${action.i}"]`);
-        if (element) {
-          await page.evaluate((el) => {
-            (el as HTMLElement).style.border = "5px solid blue";
-          }, element);
-        }
-      } else if (action.type === "input") {
-        const element = await page.$(`[i="${action.i}"]`);
-        if (element) {
-          await page.evaluate((el) => {
-            (el as HTMLElement).style.border = "5px solid green";
-          }, element);
-        }
+      const selector = `[i="${action.i}"]`;
+      const color =
+        action.type === "click"
+          ? "red"
+          : action.type === "select"
+          ? "blue"
+          : "green";
+      const element = await page.$(selector);
+      if (element) {
+        await page.evaluate(
+          ({ selector, color }) => {
+            const el = document.querySelector(selector);
+            if (el) {
+              (
+                el as HTMLElement
+              ).style.cssText = `border: 5px solid ${color} !important;`;
+            }
+          },
+          { selector, color }
+        );
       }
     }
   }
@@ -210,8 +209,6 @@ export class PageHandler {
     const actions = await parsingAgent({
       screenHtml: screen.html,
       screenDescription,
-      scrollablesX: screen.scrollablesX,
-      scrollablesY: screen.scrollablesY,
     });
 
     return {
@@ -360,8 +357,8 @@ export async function getHiddenElementIs(page: Page | null) {
           style.display === "none" ||
           isHiddenByClip ||
           isHiddenByClipPath ||
-          isOutOfViewport ||
-          isCovered
+          isCovered ||
+          isOutOfViewport
         );
       };
       const isAnyChildVisible = (parent: Element) => {
@@ -429,7 +426,7 @@ export async function addIAttribute(page: Page): Promise<void> {
   }
 }
 
-async function findModalsAndScrollables(
+async function findModalsAndScrolls(
   page: Page,
   hiddenElementIs: string[]
 ): Promise<{
@@ -438,12 +435,14 @@ async function findModalsAndScrollables(
     html: string;
     zIndex: number;
   }[];
-  scrollablesX: string[];
-  scrollablesY: string[];
+  scrolls: {
+    x: string[];
+    y: string[];
+  };
 }> {
   return await page.evaluate((hiddenElementIs) => {
     const MIN_MODAL_SIZE = 120;
-    const MIN_Z_INDEX = 5;
+    const MIN_Z_INDEX = 200;
 
     const filterHiddenElements = (
       html: string,
@@ -459,39 +458,33 @@ async function findModalsAndScrollables(
     };
 
     const modals: { i: string; html: string; zIndex: number }[] = [];
+    const scrolls: {
+      x: string[];
+      y: string[];
+    } = { x: [], y: [] };
     const elements = Array.from(document.body.querySelectorAll("*")).filter(
       (el) => {
         const iAttr = el.getAttribute("i");
         return iAttr && !hiddenElementIs.includes(iAttr);
       }
     );
-
-    const scrollablesX: string[] = [];
-    const scrollablesY: string[] = [];
-
-    const isScrollable = (el: HTMLElement, axis: "x" | "y"): boolean => {
-      const overflowStyle =
-        window.getComputedStyle(el)[axis === "x" ? "overflowX" : "overflowY"];
-      return overflowStyle === "scroll" || overflowStyle === "auto";
-    };
+    console.log(elements.map((el) => el.getAttribute("i")));
 
     elements.forEach((el) => {
       const htmlEl = el as HTMLElement;
       const style = window.getComputedStyle(el);
 
-      if (isScrollable(htmlEl, "x")) {
-        scrollablesX.push(htmlEl.getAttribute("i") || "");
-      }
-      if (isScrollable(htmlEl, "y")) {
-        scrollablesY.push(htmlEl.getAttribute("i") || "");
-      }
-
-      const isPositioned =
-        style.position === "fixed" || style.position === "absolute";
+      // Check if the element is a modal
+      const isPositioned = style.position === "absolute";
+      // const isPositioned = style.position === "fixed";
       const isLargeEnough =
         htmlEl.offsetWidth > MIN_MODAL_SIZE &&
         htmlEl.offsetHeight > MIN_MODAL_SIZE;
       const zIndex = parseInt(style.zIndex, 10);
+
+      if (el.getAttribute("i") === "606") {
+        console.log(isPositioned, isLargeEnough, zIndex);
+      }
 
       if (isPositioned && isLargeEnough && zIndex >= MIN_Z_INDEX) {
         const containsInteractiveElement =
@@ -507,11 +500,20 @@ async function findModalsAndScrollables(
           }
         }
       }
+
+      // Check if the element is a scrollable element
+      const overflowX = style.overflowX;
+      const overflowY = style.overflowY;
+      const isScrollableX = overflowX === "auto" || overflowX === "scroll";
+      const isScrollableY = overflowY === "auto" || overflowY === "scroll";
+
+      const iAttr = el.getAttribute("i");
+
+      if (isScrollableX && iAttr) scrolls.x.push(iAttr);
+      if (isScrollableY && iAttr) scrolls.y.push(iAttr);
     });
 
-    console.log(scrollablesX, scrollablesY);
-
-    return { modals, scrollablesX, scrollablesY };
+    return { modals, scrolls };
   }, hiddenElementIs);
 }
 
@@ -542,29 +544,30 @@ export async function trackModalChanges(
 ): Promise<{
   modalI: string | null;
   html: string;
-  scrollablesX?: string[];
-  scrollablesY?: string[];
 }> {
   // Initial check for modals
   const initialHiddenElementIs = await getHiddenElementIs(page);
-  const { modals: initialModals } = await findModalsAndScrollables(
+  const { modals: initialModals } = await findModalsAndScrolls(
     page,
     initialHiddenElementIs
   );
 
+  console.log("initialModals", initialModals);
+
   await action();
-  await new Promise((r) => setTimeout(r, 3000));
+  await new Promise((r) => setTimeout(r, 1000));
 
   await addIAttribute(page);
   await markClickableDivs(page);
 
   // Recheck for modals
   const finalHiddenElementIs = await getHiddenElementIs(page);
-  const {
-    modals: finalModals,
-    scrollablesX,
-    scrollablesY,
-  } = await findModalsAndScrollables(page, finalHiddenElementIs);
+  const { modals: finalModals, scrolls } = await findModalsAndScrolls(
+    page,
+    finalHiddenElementIs
+  );
+
+  console.log("finalModals", finalModals);
 
   const topmostModal = getTopmostModal(finalModals);
 
@@ -595,25 +598,21 @@ export async function trackModalChanges(
 
   // Compare initial and final modals to determine changes
   if (initialModals.length === 0 && finalModals.length === 0) {
-    return { modalI: null, html: filteredHtml, scrollablesX, scrollablesY };
+    return { modalI: null, html: filteredHtml };
   } else if (initialModals.length === 0 && finalModals.length > 0) {
     // New modal appeared
     return {
       modalI: topmostModal?.i || null,
       html: filteredHtml,
-      scrollablesX,
-      scrollablesY,
     };
   } else if (initialModals.length > 0 && finalModals.length === 0) {
     // Modal disappeared
-    return { modalI: null, html: filteredHtml, scrollablesX, scrollablesY };
+    return { modalI: null, html: filteredHtml };
   } else {
     // Modal changed or stayed the same
     return {
       modalI: topmostModal?.i || null,
       html: filteredHtml,
-      scrollablesX,
-      scrollablesY,
     };
   }
 }
