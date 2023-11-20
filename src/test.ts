@@ -22,9 +22,13 @@ async function main() {
 
   const resultFirst = await pageHandler.navigate(
     "https://m.megabox.co.kr/main",
-    true
+    false
   );
-  // const resultMain = await pageHandler.click(".btn-close-main-notice", false);
+  const resultMain = await pageHandler.click(".btn-close-main-notice", false);
+
+  const resultMovie = await pageHandler.select("#boxo_movie", false, true);
+
+  showScreenResults(resultMovie);
 
   // const resultBook = await pageHandler.click(
   //   "div.btn-bottom > button:nth-child(3)",
@@ -39,14 +43,14 @@ async function main() {
   //   false
   // );
   // const resultSelectTheater = await pageHandler.click(
-  //   "ul#branch_10 > li:nth-child(5) > a",
+  //   "ul#branch_10 > li:nth-child(4) > a",
   //   false
   // );
 
   // const resultSelect = await pageHandler.click("#theaterChoiceBtn", false);
 
   // const resultLogin = await pageHandler.click(
-  //   "div.time-wrap > div:nth-child(3) > a",
+  //   "div.time-wrap > div:nth-child(2) > a",
   //   false
   // );
 
@@ -55,7 +59,15 @@ async function main() {
 
   // const resultLoginBtn = await pageHandler.click("#loginBtn", true);
 
-  showScreenResults(resultFirst);
+  // const resultPeopleNumber = await pageHandler.click(
+  //   "div#seatPreviewWrap > div:nth-child(4) > button",
+  //   false
+  // );
+  // await pageHandler.click("#TKA_plus", false);
+
+  // const resultSeatSelect = await pageHandler.click("#seatSelectionBtn", true);
+
+  // showScreenResults(resultMain);
 
   // const resultDeparture = await pageHandler.click("#s_area", true);
   // const resultDate = await pageHandler.click(".day", true);

@@ -5,6 +5,7 @@ import { ActionType, simplifyHtml } from "./htmlHandler";
 import {
   getModalDescription,
   getPageDescription,
+  getScreenDescription,
   getSectionDescription,
 } from "../prompts/screenPrompts";
 import { Action, parsingAgent, parsingItemAgent } from "./parsingAgent";
@@ -20,7 +21,7 @@ export type ActionComponent = {
 
 export interface ScreenResult {
   id: string;
-  type: "page" | "section" | "modal";
+  type: string;
   screenDescription: string;
   actions: Action[];
 }
@@ -62,65 +63,67 @@ export class PageHandler {
     return parsedURL.origin + parsedURL.pathname;
   }
 
-  async navigate(url: string, parsing: boolean = true): Promise<ScreenResult> {
+  async highlightScreenResults(screenResult: ScreenResult) {
     const page = await this.getPage();
-    await page.setDefaultNavigationTimeout(0);
-    const screen = await trackModalChanges(page, async () => {
-      await page.goto(url, {
-        waitUntil: "networkidle0",
-      });
+    const { actions } = screenResult;
+
+    // 캔버스 요소 추가
+    await page.evaluate(() => {
+      const canvas = document.createElement("canvas");
+      canvas.id = "highlight-canvas";
+      canvas.width = window.innerWidth; // 실제 드로잉 영역의 크기 설정
+      canvas.height = window.innerHeight;
+      canvas.style.position = "absolute";
+      canvas.style.top = "0";
+      canvas.style.left = "0";
+      canvas.style.width = "100%";
+      canvas.style.height = "100%";
+      canvas.style.zIndex = "1000000";
+      canvas.style.pointerEvents = "none";
+      document.body.appendChild(canvas);
     });
-    if (parsing === false) {
-      if (screen.modalI) {
-        return {
-          type: "modal",
-          screenDescription: "",
-          actions: [],
-          id: `${this.extractBaseURL(page.url())}modal/${screen.modalI}`,
-        };
-      } else {
-        return {
-          type: "page",
-          screenDescription: "",
-          actions: [],
-          id: `${this.extractBaseURL(page.url())}`,
-        };
-      }
-    }
-    const pageSimpleHtml = simplifyHtml(await page.content(), true);
-    const pageDescription = await getPageDescription(pageSimpleHtml);
-    const screenSimpleHtml = simplifyHtml(screen.html, true);
-    if (screen.modalI) {
-      // if screen is a modal
-      const modalDescription = await getModalDescription(
-        screenSimpleHtml,
-        pageDescription
+
+    for (const action of actions) {
+      const selector = `[i="${action.i}"]`;
+      const color =
+        action.type === "click"
+          ? "red"
+          : action.type === "select"
+          ? "blue"
+          : "green";
+
+      // 캔버스에 하이라이트 그리기
+      await page.evaluate(
+        ({ selector, color, borderWidth }) => {
+          const el = document.querySelector(selector);
+          if (el) {
+            const canvasElement = document.getElementById("highlight-canvas");
+            // HTMLCanvasElement로 타입 캐스팅
+            if (canvasElement instanceof HTMLCanvasElement) {
+              const ctx = canvasElement.getContext("2d");
+              if (ctx) {
+                const rect = el.getBoundingClientRect();
+                ctx.strokeStyle = color;
+                ctx.lineWidth = borderWidth;
+                ctx.strokeRect(
+                  rect.left + borderWidth / 2,
+                  rect.top + borderWidth / 2,
+                  rect.width - borderWidth,
+                  rect.height - borderWidth
+                );
+              }
+            }
+          }
+        },
+        { selector, color, borderWidth: 4 }
       );
-      const actions = await parsingAgent({
-        screenHtml: screen.html,
-        screenDescription: modalDescription,
-      });
-      return {
-        type: "modal",
-        screenDescription: modalDescription,
-        actions,
-        id: `${this.extractBaseURL(page.url())}modal/${screen.modalI}`,
-      };
-    } else {
-      const actions = await parsingAgent({
-        screenHtml: screen.html,
-        screenDescription: pageDescription,
-      });
-      return {
-        type: "page",
-        screenDescription: pageDescription,
-        actions,
-        id: `${this.extractBaseURL(page.url())}`,
-      };
     }
+
+    // 필요하다면 캔버스 제거 기능 추가
+    // ...
   }
 
-  async highlightScreenResults(screenResult: ScreenResult) {
+  async highlightScreenResultsOriginal(screenResult: ScreenResult) {
     const page = await this.getPage();
     const { actions } = screenResult;
     for (const action of actions) {
@@ -139,7 +142,7 @@ export class PageHandler {
             if (el) {
               (
                 el as HTMLElement
-              ).style.cssText = `border: 5px solid ${color} !important;`;
+              ).style.cssText = `box-shadow: 0 0 2px ${color} !important;`;
             }
           },
           { selector, color }
@@ -185,49 +188,51 @@ export class PageHandler {
     action: () => Promise<void>
   ): Promise<ScreenResult> {
     const page = await this.getPage();
-    const screen = await trackModalChanges(page, action);
+    const { screen, scrolls } = await getScreen(page, action, true);
 
-    if (!parsing) {
+    if (parsing === false) {
       return {
-        type: screen.modalI ? "modal" : "page",
+        type: "page",
         screenDescription: "",
         actions: [],
-        id: `${this.extractBaseURL(page.url())}${
-          screen.modalI ? `modal/${screen.modalI}` : ""
-        }`,
+        id: `${this.extractBaseURL(page.url())}`,
       };
     }
-
-    const pageSimpleHtml = simplifyHtml(await page.content(), true);
-    const pageDescription = await getPageDescription(pageSimpleHtml);
-    const screenSimpleHtml = simplifyHtml(screen.html, true);
-
-    const screenDescription = screen.modalI
-      ? await getModalDescription(screenSimpleHtml, pageDescription)
-      : pageDescription;
-
+    const screenSimpleHtml = simplifyHtml(screen, true);
+    const screenDescription = await getScreenDescription(screenSimpleHtml);
     const actions = await parsingAgent({
-      screenHtml: screen.html,
+      screenHtml: screen,
       screenDescription,
     });
-
     return {
-      type: screen.modalI ? "modal" : "page",
+      type: "screen",
       screenDescription,
       actions,
-      id: `${this.extractBaseURL(page.url())}${
-        screen.modalI ? `modal/${screen.modalI}` : ""
-      }`,
+      id: `${this.extractBaseURL(page.url())}`,
     };
+  }
+
+  async navigate(url: string, parsing: boolean = true): Promise<ScreenResult> {
+    const page = await this.getPage();
+    return this.handleAction(parsing, async () => {
+      await await page.goto(url, {
+        waitUntil: "networkidle0",
+      });
+    });
   }
 
   async click(
     selector: string,
     parsing: boolean = true
   ): Promise<ScreenResult> {
+    const page = await this.getPage();
     const element = await this.getElement(selector);
     return this.handleAction(parsing, async () => {
       await element.click();
+      // alert 창이 나타날 때 자동으로 수락
+      page.on("dialog", async (dialog) => {
+        await dialog.accept();
+      });
     });
   }
 
@@ -253,8 +258,8 @@ export class PageHandler {
     parsing: boolean = true
   ): Promise<ScreenResult> {
     const page = await this.getPage();
-    const screen = await trackModalChanges(page, async () => {});
-    const dom = new JSDOM(screen.html);
+    const { screen } = await getScreen(page, async () => {}, false);
+    const dom = new JSDOM(screen);
     const element = dom.window.document.querySelector(selector);
     const elementSimpleHtml = simplifyHtml(element?.innerHTML || "", true);
     if (parsing === false) {
@@ -326,9 +331,13 @@ export class PageHandler {
   }
 }
 
-export async function getHiddenElementIs(page: Page | null) {
+//isOutHidden: true -> 밖에 있는 요소를 hidden으로 처리
+export async function getHiddenElementIs(
+  page: Page | null,
+  isOutHidden: boolean
+) {
   if (page) {
-    const hiddenElementIs = await page.evaluate(() => {
+    const hiddenElementIs = await page.evaluate((isOutHidden) => {
       const hiddenElementIs: string[] = [];
       const elements = document.body.querySelectorAll("*");
 
@@ -350,16 +359,26 @@ export async function getHiddenElementIs(page: Page | null) {
           const topElement = document.elementFromPoint(centerX, centerY);
           return topElement !== el && el.contains(topElement) === false;
         })();
-        return (
-          rect.width === 0 ||
-          rect.height === 0 ||
-          style.visibility === "hidden" ||
-          style.display === "none" ||
-          isHiddenByClip ||
-          isHiddenByClipPath ||
-          isCovered ||
-          isOutOfViewport
-        );
+        if (isOutHidden) {
+          return (
+            rect.width === 0 ||
+            rect.height === 0 ||
+            style.visibility === "hidden" ||
+            style.display === "none" ||
+            isHiddenByClip ||
+            isHiddenByClipPath ||
+            isCovered
+          );
+        } else {
+          return (
+            rect.width === 0 ||
+            rect.height === 0 ||
+            style.visibility === "hidden" ||
+            style.display === "none" ||
+            isHiddenByClip ||
+            isHiddenByClipPath
+          );
+        }
       };
       const isAnyChildVisible = (parent: Element) => {
         const children = parent.querySelectorAll("*");
@@ -383,7 +402,7 @@ export async function getHiddenElementIs(page: Page | null) {
       });
 
       return hiddenElementIs;
-    });
+    }, isOutHidden);
 
     return hiddenElementIs;
   }
@@ -424,6 +443,52 @@ export async function addIAttribute(page: Page): Promise<void> {
   } else {
     throw NO_PAGE_ERROR;
   }
+}
+
+async function findScreenAndScrolls(
+  page: Page,
+  hiddenElementIs: string[]
+): Promise<{ screen: string; scrolls: { x: string[]; y: string[] } }> {
+  return await page.evaluate((hiddenElementIs) => {
+    const clonedBody = document.body.cloneNode(true) as HTMLElement;
+
+    const removeHiddenElements = (
+      hiddenElementIs: string[],
+      context: HTMLElement
+    ) => {
+      hiddenElementIs.forEach((hiddenI) => {
+        const hiddenEl = context.querySelector(`[i="${hiddenI}"]`);
+        if (hiddenEl) hiddenEl.remove();
+      });
+    };
+
+    removeHiddenElements(hiddenElementIs, clonedBody);
+
+    const scrolls: {
+      x: string[];
+      y: string[];
+    } = { x: [], y: [] };
+
+    clonedBody.querySelectorAll("*").forEach((el) => {
+      if (el instanceof HTMLElement) {
+        const iAttr = el.getAttribute("i");
+        if (iAttr) {
+          const style = window.getComputedStyle(el);
+          const overflowX = style.overflowX;
+          const overflowY = style.overflowY;
+          const isScrollableX = overflowX === "auto" || overflowX === "scroll";
+          const isScrollableY = overflowY === "auto" || overflowY === "scroll";
+          if (isScrollableX) scrolls.x.push(iAttr);
+          if (isScrollableY) scrolls.y.push(iAttr);
+        }
+      }
+    });
+
+    return {
+      screen: clonedBody.innerHTML,
+      scrolls,
+    };
+  }, hiddenElementIs);
 }
 
 async function findModalsAndScrolls(
@@ -482,10 +547,6 @@ async function findModalsAndScrolls(
         htmlEl.offsetHeight > MIN_MODAL_SIZE;
       const zIndex = parseInt(style.zIndex, 10);
 
-      if (el.getAttribute("i") === "606") {
-        console.log(isPositioned, isLargeEnough, zIndex);
-      }
-
       if (isPositioned && isLargeEnough && zIndex >= MIN_Z_INDEX) {
         const containsInteractiveElement =
           el.querySelector("button, a, input, select, textarea") != null;
@@ -538,6 +599,26 @@ async function markClickableDivs(page: Page): Promise<void> {
   });
 }
 
+export async function getScreen(
+  page: Page,
+  action: () => Promise<void>,
+  isAction: boolean
+): Promise<{
+  screen: string;
+  scrolls: { x: string[]; y: string[] };
+}> {
+  await action();
+  await new Promise((r) => setTimeout(r, 1000));
+
+  await addIAttribute(page);
+  await markClickableDivs(page);
+
+  const hiddenElementIs = await getHiddenElementIs(page, isAction);
+  const { screen, scrolls } = await findScreenAndScrolls(page, hiddenElementIs);
+
+  return { screen, scrolls };
+}
+
 export async function trackModalChanges(
   page: Page,
   action: () => Promise<void>
@@ -546,7 +627,7 @@ export async function trackModalChanges(
   html: string;
 }> {
   // Initial check for modals
-  const initialHiddenElementIs = await getHiddenElementIs(page);
+  const initialHiddenElementIs = await getHiddenElementIs(page, false);
   const { modals: initialModals } = await findModalsAndScrolls(
     page,
     initialHiddenElementIs
@@ -561,7 +642,7 @@ export async function trackModalChanges(
   await markClickableDivs(page);
 
   // Recheck for modals
-  const finalHiddenElementIs = await getHiddenElementIs(page);
+  const finalHiddenElementIs = await getHiddenElementIs(page, false);
   const { modals: finalModals, scrolls } = await findModalsAndScrolls(
     page,
     finalHiddenElementIs

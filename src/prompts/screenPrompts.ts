@@ -21,6 +21,20 @@ ${html}`,
   return pageDescription;
 };
 
+export const getScreenDescription = async (html: string) => {
+  const describePageSystemPrompt: Prompt = {
+    role: "SYSTEM",
+    content: `Given the HTML code, briefly summarize the general purpose of the screen it represents in one sentence.
+    
+HTML code:
+${html}`,
+  };
+
+  const pageDescription = await getAiResponse([describePageSystemPrompt]);
+
+  return pageDescription;
+};
+
 export const getModalDescription = async (
   html: string,
   pageDescription: string

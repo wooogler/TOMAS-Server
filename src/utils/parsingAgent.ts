@@ -121,7 +121,7 @@ export async function parsingAgent({
 function findSelectableElements(screen: Element): Element[] {
   const elements: Element[] = [];
   const selectableTagNames = ["ul", "ol", "select", "fieldset", "table"];
-  const excludeClassKeywords = ["mask", "section", "swiper"];
+  const excludeClassKeywords = ["mask", "section", "swiper", "bot"];
 
   // Traverse the DOM and find all selectable elements
   function traverseAndFind(element: Element) {
@@ -148,21 +148,21 @@ function findSelectableElements(screen: Element): Element[] {
   traverseAndFind(screen);
 
   // Remove elements that are contained within other elements
-  const selectableElements = elements.filter((element, _, arr) => {
+  const repeatedElements = elements.filter((element, _, arr) => {
     return !arr.some(
       (otherElement) =>
         element !== otherElement && otherElement.contains(element)
     );
   });
 
-  // const selectableElements = repeatedElements.filter((element, _, arr) => {
-  //   let countClickable = 0;
-  //   const childElements = Array.from(element.children);
-  //   for (const childElement of childElements) {
-  //     findClickableElements(childElement).forEach(() => countClickable++);
-  //   }
-  //   return countClickable > arr.length * 2;
-  // });
+  const selectableElements = repeatedElements.filter((element, _, arr) => {
+    let countClickable = 0;
+    const childElements = Array.from(element.children);
+    for (const childElement of childElements) {
+      findClickableElements(childElement).forEach(() => countClickable++);
+    }
+    return countClickable > arr.length / 2;
+  });
 
   return selectableElements;
 }
