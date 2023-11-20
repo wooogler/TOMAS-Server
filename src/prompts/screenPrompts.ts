@@ -6,6 +6,7 @@ import {
   removeBeforeAndIncludingKeyword,
 } from "../utils/htmlHandler";
 import { Prompt, getAiResponse } from "../utils/langchainHandler";
+import { makeSectionDescriptionPrompt } from "./chatPrompts";
 
 export const getPageDescription = async (html: string) => {
   const describePageSystemPrompt: Prompt = {
@@ -30,9 +31,19 @@ HTML code:
 ${html}`,
   };
 
-  const pageDescription = await getAiResponse([describePageSystemPrompt]);
+  const describePageInKoreanPrompt: Prompt = {
+    role: "HUMAN",
+    content: `Generate a Korean description of the given screen that an older adult can understand.`,
+  };
 
-  return pageDescription;
+  const screenDescription = await getAiResponse([describePageSystemPrompt]);
+  const screenDescriptionKorean = await getAiResponse([
+    describePageSystemPrompt,
+    { content: screenDescription, role: "AI" },
+    describePageInKoreanPrompt,
+  ]);
+
+  return { screenDescription, screenDescriptionKorean };
 };
 
 export const getModalDescription = async (
@@ -56,7 +67,7 @@ ${html}`,
 
 export const getSectionDescription = async (
   html: string,
-  pageDescription: string
+  screenDescription: string
 ) => {
   const describeSectionSystemPrompt: Prompt = {
     role: "SYSTEM",
@@ -65,13 +76,18 @@ export const getSectionDescription = async (
 HTML of the section:
 ${html}
     
-The description on the webpage where the section is located: ${pageDescription}
+The description on the webpage where the section is located: ${screenDescription}
 `,
   };
 
   const sectionDescription = await getAiResponse([describeSectionSystemPrompt]);
+  const sectionDescriptionKorean = await getAiResponse([
+    describeSectionSystemPrompt,
+    { content: sectionDescription, role: "AI" },
+    makeSectionDescriptionPrompt(),
+  ]);
 
-  return sectionDescription;
+  return { sectionDescription, sectionDescriptionKorean };
 };
 
 export const getListDescription = async (
@@ -278,21 +294,21 @@ ${screenDescription}
 
 export const selectActionTemplate = ({
   options,
-  firstOptionHtml,
+  firstItemWithParentHtml,
   screenDescription,
 }: {
   options: string[];
-  firstOptionHtml: string;
+  firstItemWithParentHtml: string;
   screenDescription: string;
 }): Prompt => ({
   role: "SYSTEM",
   content: `A user is looking at the list on the web page screen. 
 
-Items in the list:
+items'text in the list:
 ${options.map((option) => `- ${option}`).join("\n")}
 
-HTML of the first item:
-${firstOptionHtml}
+HTML of the list with only first item:
+${firstItemWithParentHtml}
 
 Description of the screen where the list is located:
 ${screenDescription}

@@ -102,36 +102,26 @@ Describe the action on the web page in one sentence`,
 
 export interface SystemLog {
   id: string;
-  type: "page" | "modal" | "section" | "action";
+  type: string;
   screenDescription: string;
   actionDescription: string;
 }
 
 export async function getSystemContext(systemLogs: SystemLog[]) {
   let actionHistory: {
-    type: "page" | "modal" | "section" | "action";
+    type: string;
     description: string;
   }[] = [];
-  let prevId = "";
   systemLogs.forEach((log) => {
-    if (prevId !== log.id) {
-      // Action in new screen
-      actionHistory.push({
-        type: log.type,
-        description: log.screenDescription,
-      });
-      actionHistory.push({
-        type: "action",
-        description: log.actionDescription,
-      });
-      prevId = log.id;
-    } else {
-      // Action in prev screen
-      actionHistory.push({
-        type: "action",
-        description: log.actionDescription,
-      });
-    }
+    // Action in new screen
+    actionHistory.push({
+      type: log.type,
+      description: log.screenDescription,
+    });
+    actionHistory.push({
+      type: "action",
+      description: log.actionDescription,
+    });
   });
   // console.log(actionHistory);
 

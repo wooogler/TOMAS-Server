@@ -13,12 +13,12 @@ datasource db {
 }
 
 model Chat {
-  id          String                 @id @default(uuid())
-  createdAt   DateTime               @default(now())
-  role        Role
-  content     String
-  description String?
-  vector      Unsupported("vector")?
+  id        String                 @id @default(uuid())
+  createdAt DateTime               @default(now())
+  role      Role
+  content   String
+  type      String
+  vector    Unsupported("vector")?
 }
 
 enum Role {

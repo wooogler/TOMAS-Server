@@ -24,15 +24,11 @@ async function main() {
     "https://m.megabox.co.kr/main",
     false
   );
-  const resultMain = await pageHandler.click(".btn-close-main-notice", false);
-
-  const resultMovie = await pageHandler.select("#boxo_movie", false, true);
-
-  showScreenResults(resultMovie);
+  const resultMain = await pageHandler.click(".btn-close-main-notice", true);
 
   // const resultBook = await pageHandler.click(
   //   "div.btn-bottom > button:nth-child(3)",
-  //   false
+  //   true
   // );
   // const resultMovie = await pageHandler.click(
   //   ".item.movie > a:nth-child(1)",
@@ -67,7 +63,7 @@ async function main() {
 
   // const resultSeatSelect = await pageHandler.click("#seatSelectionBtn", true);
 
-  // showScreenResults(resultMain);
+  showScreenResults(resultMain);
 
   // const resultDeparture = await pageHandler.click("#s_area", true);
   // const resultDate = await pageHandler.click(".day", true);

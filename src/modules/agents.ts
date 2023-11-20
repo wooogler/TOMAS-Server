@@ -35,10 +35,6 @@ import { extractTextLabelFromHTML } from "../prompts/visualPrompts";
 import { loadCacheFromFile, saveCacheToFile } from "../utils/fileUtil";
 import { Action } from "../utils/parsingAgent";
 
-export interface TaskList {
-  i: string;
-  description: string;
-}
 export async function planningAgent(
   focusedSection: ScreenResult,
   userContext: string,
@@ -47,35 +43,22 @@ export async function planningAgent(
   const planningActionPromptForSystem: Prompt = {
     role: "SYSTEM",
     content: `
-You are the AI that creates a plan to interact with the main web page based on the user's and system's contexts.
+You are the AI that takes the following action on the smartphone screen based on the user's context and action history.
 
-Actions should be selected in order to achieve what the user wants based on the user's context. 
 ${userContext}
 
-You need to plan the most efficient action sequence using the following possible actions in the part of the current screen. 
+Action History:
+${systemContext}
+
+First, describe the process to choose the next action based on user's context and action history.
+
+Then, return one of the possible actions on the current screen to do what the user wants.
 Description of the current screen: ${focusedSection.screenDescription}
 Possible actions:
 ${focusedSection.actions
   .map((comp) => `- ${comp.content} (i=${comp.i})`)
   .join("\n")}
-
-The action plan should reflect the results of the interactions the system has executed before: 
-${systemContext}
-
-Please skip those actions that have been executed before and try different ways to achieve the user's objective.
-
-First, describe the most efficient interaction plan in natural language by referring to the user's and system's contexts. Do not add any useless actions to the plan.
-
-Then, return the plan as the list of actions as a numbered list in the format:
-
-#. <First action> (i=<i>)
-#. <Second action> (i=<i>)
-
-The entries must be consecutively numbered, starting with 1. The number of each entry must be followed by a period.
-Do not include any headers before your list or follow your list with any other output. No other information should be included in the output.
-
-If you cannot find any actions to achieve the user's objective with possible actions in this part, return "No plans".
-    `,
+`,
   };
   console.log(`
 ---------------
@@ -93,30 +76,13 @@ Planning Agent:
   ]);
   console.log(response);
 
-  // Here we assume the response is in the format:
-  // 1. <First action> (i=<i>)
-  // 2. <Second action> (i=<i>)
-  // ...
-  const filter: RegExp = /^\d+\./;
-  const tasks = response.split("\n").filter((line) => filter.test(line));
-  const taskList: TaskList[] = [];
-  for (const task of tasks) {
-    const match = task.match(/(\d+)\. (.*) \(i=(\d+)\)/);
-    if (match) {
-      const i = match[3];
-      const description = match[2];
-      taskList.push({ i, description });
-    }
+  const regex = /\(i=(\d+)\)/;
+  const match = response.match(regex);
+  if (match && match[1]) {
+    return match[1];
   }
 
-  // const firstItemI = extractFirstItemIValue(response);
-  // if (firstItemI) {
-  //   return components[firstItemI];
-  // } else {
-  //   throw new Error("No plans");
-  // }
-
-  return taskList;
+  return null;
 }
 
 export async function executionAgent({
@@ -149,7 +115,7 @@ Execution Agent:
       const question = action.question;
 
       // TODO: Ask the user the question, and get the answer. Then update chat history in the database.
-      await createAIChat({ content: question || "No Question" });
+      // await createAIChat({ content: question || "No Question" });
 
       chats = await getChats();
 
@@ -163,13 +129,13 @@ Execution Agent:
     actionValue = valueBasedOnHistory.value;
   } else if (action.type == "select") {
     const options = await page.select(`[i="${action.i}"]`);
-    createAIChat({
-      content: `Which one do you want?
-    Possible options could be:
-    ${options.actions.map(
-      (action) => `- ${action.content}\n (i=${action.i}))\n\n`
-    )}`,
-    });
+    // createAIChat({
+    //   content: `Which one do you want?
+    // Possible options could be:
+    // ${options.actions.map(
+    //   (action) => `- ${action.content}\n (i=${action.i}))\n\n`
+    // )}`,
+    // });
 
     // TODO: Wait for the user's answer. Then update chat history in the database.
     // suppose the answer is "<integer i>".
@@ -182,7 +148,7 @@ Execution Agent:
       screenDescription
     );
     // Add confirmation question to database. TODO: Get the answer.
-    createAIChat({ content: confirmationQuestion });
+    // createAIChat({ content: confirmationQuestion });
   }
 
   // Suppose the answer is "yes"/"no".

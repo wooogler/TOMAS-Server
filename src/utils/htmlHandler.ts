@@ -503,7 +503,11 @@ export function generateIdentifier(html: string): string {
   let identifierComponents = [];
   identifierComponents.push(element.tagName.toLowerCase());
   if (element.textContent) {
-    identifierComponents.push(element.textContent.trim().slice(0, 20));
+    const cleanedText = element.textContent
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 20);
+    identifierComponents.push(cleanedText);
   }
 
   for (const attr of representativeAttributes) {

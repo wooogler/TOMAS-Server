@@ -5,6 +5,7 @@ import { ActionType, simplifyHtml } from "./htmlHandler";
 import {
   getModalDescription,
   getPageDescription,
+  getScreenDescription,
   getSectionDescription,
 } from "../prompts/screenPrompts";
 import { Action, parsingAgent, parsingItemAgent } from "./parsingAgent";
@@ -20,8 +21,9 @@ export type ActionComponent = {
 
 export interface ScreenResult {
   id: string;
-  type: "page" | "section" | "modal";
+  type: string;
   screenDescription: string;
+  screenDescriptionKorean: string;
   actions: Action[];
 }
 
@@ -32,7 +34,7 @@ export class PageHandler {
     dotenv.config();
     this.browser = await puppeteer.launch({
       headless: false,
-      args: ["--app=https://example.com", "--window-size=390,844"],
+      args: ["--window-size=1000,1000"],
     });
 
     const pages = await this.browser.pages();
@@ -57,97 +59,161 @@ export class PageHandler {
     }
     return element;
   }
+
   private extractBaseURL(url: string) {
     const parsedURL = new URL(url);
     return parsedURL.origin + parsedURL.pathname;
   }
 
-  async navigate(url: string, parsing: boolean = true): Promise<ScreenResult> {
+  async handleAction(
+    parsing: boolean,
+    action: () => Promise<void>
+  ): Promise<ScreenResult> {
     const page = await this.getPage();
-    await page.setDefaultNavigationTimeout(0);
-    const screen = await trackModalChanges(page, async () => {
-      await page.goto(url, {
-        waitUntil: "networkidle0",
-      });
-    });
+    const { screen, scrolls } = await getScreen(page, action, true);
+
     if (parsing === false) {
-      if (screen.modalI) {
-        return {
-          type: "modal",
-          screenDescription: "",
-          actions: [],
-          id: `${this.extractBaseURL(page.url())}modal/${screen.modalI}`,
-        };
-      } else {
-        return {
-          type: "page",
-          screenDescription: "",
-          actions: [],
-          id: `${this.extractBaseURL(page.url())}`,
-        };
-      }
-    }
-    const pageSimpleHtml = simplifyHtml(await page.content(), true);
-    const pageDescription = await getPageDescription(pageSimpleHtml);
-    const screenSimpleHtml = simplifyHtml(screen.html, true);
-    if (screen.modalI) {
-      // if screen is a modal
-      const modalDescription = await getModalDescription(
-        screenSimpleHtml,
-        pageDescription
-      );
-      const actions = await parsingAgent({
-        screenHtml: screen.html,
-        screenDescription: modalDescription,
-      });
-      return {
-        type: "modal",
-        screenDescription: modalDescription,
-        actions,
-        id: `${this.extractBaseURL(page.url())}modal/${screen.modalI}`,
-      };
-    } else {
-      const actions = await parsingAgent({
-        screenHtml: screen.html,
-        screenDescription: pageDescription,
-      });
       return {
         type: "page",
-        screenDescription: pageDescription,
-        actions,
+        screenDescription: "",
+        screenDescriptionKorean: "",
+        actions: [],
         id: `${this.extractBaseURL(page.url())}`,
       };
     }
+    const screenSimpleHtml = simplifyHtml(screen, true);
+    const { screenDescription, screenDescriptionKorean } =
+      await getScreenDescription(screenSimpleHtml);
+    const actions = await parsingAgent({
+      screenHtml: screen,
+      screenDescription,
+    });
+    return {
+      type: "screen",
+      screenDescription,
+      screenDescriptionKorean,
+      actions,
+      id: `${this.extractBaseURL(page.url())}`,
+    };
   }
 
-  // 요소를 하이라이트하는 함수
+  async highlightScreenResults(screenResult: ScreenResult) {
+    const page = await this.getPage();
+    const { actions } = screenResult;
+
+    // 캔버스 요소 추가
+    await page.evaluate(() => {
+      const canvas = document.createElement("canvas");
+      canvas.id = "highlight-canvas";
+      canvas.width = window.innerWidth; // 실제 드로잉 영역의 크기 설정
+      canvas.height = window.innerHeight;
+      canvas.style.position = "absolute";
+      canvas.style.top = "0";
+      canvas.style.left = "0";
+      canvas.style.width = "100%";
+      canvas.style.height = "100%";
+      canvas.style.zIndex = "1000000";
+      canvas.style.pointerEvents = "none";
+      document.body.appendChild(canvas);
+    });
+
+    for (const action of actions) {
+      const selector = `[i="${action.i}"]`;
+      const color =
+        action.type === "click"
+          ? "red"
+          : action.type === "select"
+          ? "blue"
+          : "green";
+
+      // 캔버스에 하이라이트 그리기
+      await page.evaluate(
+        ({ selector, color, borderWidth }) => {
+          const el = document.querySelector(selector);
+          if (el) {
+            const canvasElement = document.getElementById("highlight-canvas");
+            // HTMLCanvasElement로 타입 캐스팅
+            if (canvasElement instanceof HTMLCanvasElement) {
+              const ctx = canvasElement.getContext("2d");
+              if (ctx) {
+                const rect = el.getBoundingClientRect();
+                ctx.strokeStyle = color;
+                ctx.lineWidth = borderWidth;
+                ctx.strokeRect(
+                  rect.left + borderWidth / 2,
+                  rect.top + borderWidth / 2,
+                  rect.width - borderWidth,
+                  rect.height - borderWidth
+                );
+              }
+            }
+          }
+        },
+        { selector, color, borderWidth: 4 }
+      );
+    }
+
+    // 필요하다면 캔버스 제거 기능 추가
+    // ...
+  }
+
   async highlight(selector: string) {
     const page = await this.getPage();
-    const elements = await page.$$(selector); // 모든 일치하는 요소들을 선택
-    for (const element of elements) {
-      await page.evaluate((el) => {
-        // 가장 가까운 div 부모 요소를 찾습니다.
-        const parentDiv = el.closest("div");
-        if (parentDiv) {
-          // 부모 div에 스타일을 적용합니다.
-          parentDiv.style.outline = "5px solid red";
-          parentDiv.classList.add("highlighted-element");
+    await page.evaluate(() => {
+      const canvas = document.createElement("canvas");
+      canvas.id = "highlight-canvas";
+      canvas.width = window.innerWidth; // 실제 드로잉 영역의 크기 설정
+      canvas.height = window.innerHeight;
+      canvas.style.position = "absolute";
+      canvas.style.top = "0";
+      canvas.style.left = "0";
+      canvas.style.width = "100%";
+      canvas.style.height = "100%";
+      canvas.style.zIndex = "1000000";
+      canvas.style.pointerEvents = "none";
+      document.body.appendChild(canvas);
+    });
+    await page.evaluate(
+      ({ selector, borderWidth }) => {
+        const element = document.querySelector(selector);
+        if (element) {
+          const canvas = document.getElementById("highlight-canvas");
+          if (canvas instanceof HTMLCanvasElement) {
+            const ctx = canvas.getContext("2d");
+            if (ctx) {
+              const rect = element.getBoundingClientRect();
+              ctx.strokeStyle = "red";
+              ctx.lineWidth = borderWidth;
+              ctx.strokeRect(
+                rect.left + borderWidth / 2,
+                rect.top + borderWidth / 2,
+                rect.width - borderWidth,
+                rect.height - borderWidth
+              );
+            }
+          }
         }
-      }, element);
-    }
+      },
+      { selector, borderWidth: 4 }
+    );
   }
 
   // 하이라이트를 제거하는 함수
   async removeHighlight() {
     const page = await this.getPage();
     await page.evaluate(() => {
-      const highlightedDivs = document.querySelectorAll(
-        "div.highlighted-element"
-      );
-      highlightedDivs.forEach((div) => {
-        // div 요소의 하이라이트 스타일을 제거합니다.
-        (div as HTMLElement).style.outline = "";
-        div.classList.remove("highlighted-element");
+      const canvas = document.getElementById("highlight-canvas");
+      if (canvas) {
+        canvas.remove();
+      }
+    });
+  }
+
+  async navigate(url: string, parsing: boolean = true): Promise<ScreenResult> {
+    const page = await this.getPage();
+    return this.handleAction(parsing, async () => {
+      await await page.goto(url, {
+        waitUntil: "networkidle0",
       });
     });
   }
@@ -158,121 +224,32 @@ export class PageHandler {
   ): Promise<ScreenResult> {
     const page = await this.getPage();
     const element = await this.getElement(selector);
-    const screen = await trackModalChanges(page, async () => {
+    return this.handleAction(parsing, async () => {
       await element.click();
+      // alert 창이 나타날 때 자동으로 수락
+      page.on("dialog", async (dialog) => {
+        await dialog.accept();
+      });
     });
-    if (parsing === false) {
-      if (screen.modalI) {
-        return {
-          type: "modal",
-          screenDescription: "",
-          actions: [],
-          id: `${this.extractBaseURL(page.url())}modal/${screen.modalI}`,
-        };
-      } else {
-        return {
-          type: "page",
-          screenDescription: "",
-          actions: [],
-          id: `${this.extractBaseURL(page.url())}`,
-        };
-      }
-    }
-    const pageSimpleHtml = simplifyHtml(await page.content(), true);
-    const pageDescription = await getPageDescription(pageSimpleHtml);
-    const screenSimpleHtml = simplifyHtml(screen.html, true);
-    if (screen.modalI) {
-      // if screen is a modal
-      const modalDescription = await getModalDescription(
-        screenSimpleHtml,
-        pageDescription
-      );
-      const actions = await parsingAgent({
-        screenHtml: screen.html,
-        screenDescription: modalDescription,
-      });
-      return {
-        type: "modal",
-        screenDescription: modalDescription,
-        actions,
-        id: `${this.extractBaseURL(page.url())}modal/${screen.modalI}`,
-      };
-    } else {
-      const actions = await parsingAgent({
-        screenHtml: screen.html,
-        screenDescription: pageDescription,
-      });
-      return {
-        type: "page",
-        screenDescription: pageDescription,
-        actions,
-        id: `${this.extractBaseURL(page.url())}`,
-      };
-    }
   }
+
   async inputText(
     selector: string,
     text: string,
     parsing: boolean = true
   ): Promise<ScreenResult> {
     const page = await this.getPage();
-    const element = await this.getElement(selector);
-    const screen = await trackModalChanges(page, async () => {
+    return this.handleAction(parsing, async () => {
       await page.$eval(
         selector,
         (input) => ((input as HTMLInputElement).value = "")
       );
-      await element.type(text);
+      await page.type(selector, text);
     });
-    if (parsing === false) {
-      if (screen.modalI) {
-        return {
-          type: "modal",
-          screenDescription: "",
-          actions: [],
-          id: `${this.extractBaseURL(page.url())}modal/${screen.modalI}`,
-        };
-      } else {
-        return {
-          type: "page",
-          screenDescription: "",
-          actions: [],
-          id: `${this.extractBaseURL(page.url())}`,
-        };
-      }
-    }
-    const pageSimpleHtml = simplifyHtml(await page.content(), true);
-    const pageDescription = await getPageDescription(pageSimpleHtml);
-    const screenSimpleHtml = simplifyHtml(screen.html, true);
-    if (screen.modalI) {
-      // if screen is a modal
-      const modalDescription = await getModalDescription(
-        screenSimpleHtml,
-        pageDescription
-      );
-      const actions = await parsingAgent({
-        screenHtml: screen.html,
-        screenDescription: modalDescription,
-      });
-      return {
-        type: "modal",
-        screenDescription: modalDescription,
-        actions,
-        id: `${this.extractBaseURL(page.url())}modal/${screen.modalI}`,
-      };
-    } else {
-      const actions = await parsingAgent({
-        screenHtml: screen.html,
-        screenDescription: pageDescription,
-      });
-      return {
-        type: "page",
-        screenDescription: pageDescription,
-        actions,
-        id: `${this.extractBaseURL(page.url())}`,
-      };
-    }
   }
+
+  //TODO: Fix the select function
+
   //select one item in the list
   async select(
     selector: string,
@@ -280,26 +257,26 @@ export class PageHandler {
     parsing: boolean = true
   ): Promise<ScreenResult> {
     const page = await this.getPage();
-    const screen = await trackModalChanges(page, async () => {});
-    const dom = new JSDOM(screen.html);
+    const { screen } = await getScreen(page, async () => {}, false);
+    const dom = new JSDOM(screen);
     const element = dom.window.document.querySelector(selector);
     const elementSimpleHtml = simplifyHtml(element?.innerHTML || "", true);
     if (parsing === false) {
       return {
         type: "section",
         screenDescription: "",
+        screenDescriptionKorean: "",
         actions: [],
         id: `${this.extractBaseURL(page.url())}section/${element?.getAttribute(
           "i"
         )}`,
       };
     }
-    const pageSimpleHtml = simplifyHtml(await page.content(), true);
-    const pageDescription = await getPageDescription(pageSimpleHtml);
-    const sectionDescription = await getSectionDescription(
-      elementSimpleHtml,
-      pageDescription
-    );
+    const screenSimpleHtml = simplifyHtml(screen, true);
+    const { screenDescription, screenDescriptionKorean } =
+      await getScreenDescription(screenSimpleHtml);
+    const { sectionDescription, sectionDescriptionKorean } =
+      await getSectionDescription(elementSimpleHtml, screenDescription);
     const actions = isFocus
       ? await parsingAgent({
           screenHtml: element?.outerHTML || "",
@@ -312,33 +289,38 @@ export class PageHandler {
     return {
       type: "section",
       screenDescription: sectionDescription,
+      screenDescriptionKorean: sectionDescriptionKorean,
       actions,
       id: `${this.extractBaseURL(page.url())}section/${element?.getAttribute(
         "i"
       )}`,
     };
   }
+
   async unfocus(parsing: boolean = true): Promise<ScreenResult> {
     const page = await this.getPage();
-    const screen = await trackModalChanges(page, async () => {});
-    const screenSimpleHtml = simplifyHtml(screen.html, true);
+    const { screen } = await getScreen(page, async () => {}, true);
+    const screenSimpleHtml = simplifyHtml(screen, true);
     const pageSimpleHtml = simplifyHtml(await page.content(), true);
     if (parsing === false) {
       return {
         type: "page",
         screenDescription: "",
+        screenDescriptionKorean: "",
         actions: [],
         id: `${this.extractBaseURL(page.url())}`,
       };
     }
-    const pageDescription = await getPageDescription(pageSimpleHtml);
+    const { screenDescription, screenDescriptionKorean } =
+      await getScreenDescription(pageSimpleHtml);
     const actions = await parsingAgent({
-      screenHtml: screen.html,
-      screenDescription: pageDescription,
+      screenHtml: screen,
+      screenDescription,
     });
     return {
       type: "page",
-      screenDescription: pageDescription,
+      screenDescription,
+      screenDescriptionKorean,
       actions,
       id: `${this.extractBaseURL(page.url())}`,
     };
@@ -353,9 +335,13 @@ export class PageHandler {
   }
 }
 
-export async function getHiddenElementIs(page: Page | null) {
+//isOutHidden: true -> 밖에 있는 요소를 hidden으로 처리
+export async function getHiddenElementIs(
+  page: Page | null,
+  isOutHidden: boolean
+) {
   if (page) {
-    const hiddenElementIs = await page.evaluate(() => {
+    const hiddenElementIs = await page.evaluate((isOutHidden) => {
       const hiddenElementIs: string[] = [];
       const elements = document.body.querySelectorAll("*");
 
@@ -364,7 +350,7 @@ export async function getHiddenElementIs(page: Page | null) {
         const style = window.getComputedStyle(el);
         const isHiddenByClip = style.clip === "rect(0px, 0px, 0px, 0px)";
         const isHiddenByClipPath = style.clipPath === "inset(100%)";
-        const margin = 2;
+        const margin = -10;
 
         const isOutOfViewport =
           rect.bottom < 0 + margin ||
@@ -377,16 +363,26 @@ export async function getHiddenElementIs(page: Page | null) {
           const topElement = document.elementFromPoint(centerX, centerY);
           return topElement !== el && el.contains(topElement) === false;
         })();
-        return (
-          rect.width === 0 ||
-          rect.height === 0 ||
-          style.visibility === "hidden" ||
-          style.display === "none" ||
-          isHiddenByClip ||
-          isHiddenByClipPath ||
-          isOutOfViewport ||
-          isCovered
-        );
+        if (isOutHidden) {
+          return (
+            rect.width === 0 ||
+            rect.height === 0 ||
+            style.visibility === "hidden" ||
+            style.display === "none" ||
+            isHiddenByClip ||
+            isHiddenByClipPath ||
+            isCovered
+          );
+        } else {
+          return (
+            rect.width === 0 ||
+            rect.height === 0 ||
+            style.visibility === "hidden" ||
+            style.display === "none" ||
+            isHiddenByClip ||
+            isHiddenByClipPath
+          );
+        }
       };
       const isAnyChildVisible = (parent: Element) => {
         const children = parent.querySelectorAll("*");
@@ -410,7 +406,7 @@ export async function getHiddenElementIs(page: Page | null) {
       });
 
       return hiddenElementIs;
-    });
+    }, isOutHidden);
 
     return hiddenElementIs;
   }
@@ -453,73 +449,50 @@ export async function addIAttribute(page: Page): Promise<void> {
   }
 }
 
-async function findModals(
+async function findScreenAndScrolls(
   page: Page,
   hiddenElementIs: string[]
-): Promise<{ i: string; html: string; zIndex: number }[]> {
+): Promise<{ screen: string; scrolls: { x: string[]; y: string[] } }> {
   return await page.evaluate((hiddenElementIs) => {
-    const MIN_MODAL_SIZE = 120;
-    const MIN_Z_INDEX = 5;
+    const clonedBody = document.body.cloneNode(true) as HTMLElement;
 
-    const filterHiddenElements = (
-      html: string,
-      hiddenElementIs: string[]
-    ): string => {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, "text/html");
+    const removeHiddenElements = (
+      hiddenElementIs: string[],
+      context: HTMLElement
+    ) => {
       hiddenElementIs.forEach((hiddenI) => {
-        const hiddenEl = doc.querySelector(`[i="${hiddenI}"]`);
+        const hiddenEl = context.querySelector(`[i="${hiddenI}"]`);
         if (hiddenEl) hiddenEl.remove();
       });
-      return doc.body.innerHTML; // <body> 태그 내부의 HTML만 반환
     };
 
-    const modals: { i: string; html: string; zIndex: number }[] = [];
-    const elements = Array.from(document.body.querySelectorAll("*")).filter(
-      (el) => {
+    removeHiddenElements(hiddenElementIs, clonedBody);
+
+    const scrolls: {
+      x: string[];
+      y: string[];
+    } = { x: [], y: [] };
+
+    clonedBody.querySelectorAll("*").forEach((el) => {
+      if (el instanceof HTMLElement) {
         const iAttr = el.getAttribute("i");
-        return iAttr && !hiddenElementIs.includes(iAttr);
-      }
-    );
-
-    elements.forEach((el) => {
-      const htmlEl = el as HTMLElement;
-      const style = window.getComputedStyle(el);
-      const isPositioned =
-        style.position === "fixed" || style.position === "absolute";
-      const isLargeEnough =
-        htmlEl.offsetWidth > MIN_MODAL_SIZE &&
-        htmlEl.offsetHeight > MIN_MODAL_SIZE;
-      const zIndex = parseInt(style.zIndex, 10);
-
-      if (isPositioned && isLargeEnough && zIndex >= MIN_Z_INDEX) {
-        const containsInteractiveElement =
-          el.querySelector("button, a, input, select, textarea") != null;
-        if (containsInteractiveElement) {
-          const i = el.getAttribute("i");
-          if (i) {
-            const filteredHtml = filterHiddenElements(
-              el.outerHTML,
-              hiddenElementIs
-            );
-            modals.push({ i, html: filteredHtml, zIndex });
-          }
+        if (iAttr) {
+          const style = window.getComputedStyle(el);
+          const overflowX = style.overflowX;
+          const overflowY = style.overflowY;
+          const isScrollableX = overflowX === "auto" || overflowX === "scroll";
+          const isScrollableY = overflowY === "auto" || overflowY === "scroll";
+          if (isScrollableX) scrolls.x.push(iAttr);
+          if (isScrollableY) scrolls.y.push(iAttr);
         }
       }
     });
 
-    return modals;
+    return {
+      screen: clonedBody.innerHTML,
+      scrolls,
+    };
   }, hiddenElementIs);
-}
-
-function getTopmostModal(
-  modals: { i: string; html: string; zIndex: number }[]
-): { i: string; html: string } | null {
-  if (modals.length === 0) return null;
-
-  return modals.reduce((topmost, current) => {
-    return current.zIndex > topmost.zIndex ? current : topmost;
-  });
 }
 
 async function markClickableDivs(page: Page): Promise<void> {
@@ -533,72 +506,23 @@ async function markClickableDivs(page: Page): Promise<void> {
   });
 }
 
-export async function trackModalChanges(
+// TODO: screen 전환 여부 확인할 수 있는 기능 추가
+export async function getScreen(
   page: Page,
-  action: () => Promise<void>
+  action: () => Promise<void>,
+  isAction: boolean
 ): Promise<{
-  modalI: string | null;
-  html: string;
+  screen: string;
+  scrolls: { x: string[]; y: string[] };
 }> {
-  // Initial check for modals
-  const initialHiddenElementIs = await getHiddenElementIs(page);
-  const initialModals = await findModals(page, initialHiddenElementIs);
-  const initialUrl = page.url();
-
   await action();
-  await new Promise((r) => setTimeout(r, 3000));
+  await new Promise((r) => setTimeout(r, 1000));
 
   await addIAttribute(page);
   await markClickableDivs(page);
 
-  // Recheck for modals
-  const finalHiddenElementIs = await getHiddenElementIs(page);
-  const finalModals = await findModals(page, finalHiddenElementIs);
+  const hiddenElementIs = await getHiddenElementIs(page, isAction);
+  const { screen, scrolls } = await findScreenAndScrolls(page, hiddenElementIs);
 
-  const topmostModal = getTopmostModal(finalModals);
-
-  const getFilteredHtml = async (
-    html: string,
-    hiddenElementIs: string[]
-  ): Promise<string> => {
-    return await page.evaluate(
-      (html, hiddenElementIs) => {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, "text/html");
-
-        hiddenElementIs.forEach((hiddenI) => {
-          const hiddenEl = doc.querySelector(`[i="${hiddenI}"]`);
-          if (hiddenEl) hiddenEl.remove();
-        });
-        return doc.body.innerHTML; // <body> 태그 내부의 HTML만 반환
-      },
-      html,
-      hiddenElementIs
-    );
-  };
-
-  const html = await page.content();
-  const filteredHtml = topmostModal
-    ? topmostModal.html
-    : await getFilteredHtml(html, finalHiddenElementIs);
-
-  // Compare initial and final modals to determine changes
-  if (initialModals.length === 0 && finalModals.length === 0) {
-    return { modalI: null, html: filteredHtml };
-  } else if (initialModals.length === 0 && finalModals.length > 0) {
-    // New modal appeared
-    return {
-      modalI: topmostModal?.i || null,
-      html: filteredHtml,
-    };
-  } else if (initialModals.length > 0 && finalModals.length === 0) {
-    // Modal disappeared
-    return { modalI: null, html: filteredHtml };
-  } else {
-    // Modal changed or stayed the same
-    return {
-      modalI: topmostModal?.i || null,
-      html: filteredHtml,
-    };
-  }
+  return { screen, scrolls };
 }

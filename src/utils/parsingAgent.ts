@@ -9,7 +9,9 @@ import {
   tableActionTemplate,
 } from "../prompts/screenPrompts";
 import {
-  makeQuestionTemplate,
+  makeElementDescriptionPrompt,
+  makeListDescriptionPrompt,
+  makeQuestionPrompt,
   translateQuestionTemplate,
 } from "../prompts/chatPrompts";
 import { Page } from "puppeteer";
@@ -17,12 +19,14 @@ import { Page } from "puppeteer";
 interface ActionableElement {
   i: string;
   type: string;
+  element: Element;
 }
 
 export interface Action {
   type: string;
   content: string;
   question?: string;
+  description?: string;
   i: number;
   html: string;
   options?: string[];
@@ -88,6 +92,7 @@ export async function parsingAgent({
     actionableElements.push({
       i: element.getAttribute("i") || "",
       type: "select",
+      element,
     });
   });
   screen = removeElementsFromScreen(screen, selectableElements);
@@ -97,6 +102,7 @@ export async function parsingAgent({
     actionableElements.push({
       i: element.getAttribute("i") || "",
       type: "click",
+      element,
     });
   });
   screen = removeElementsFromScreen(screen, clickableElements);
@@ -106,6 +112,7 @@ export async function parsingAgent({
     actionableElements.push({
       i: element.getAttribute("i") || "",
       type: "input",
+      element,
     });
   });
 
@@ -286,11 +293,10 @@ async function processElement(
   screenDescription: string,
   actionCache: ActionCache
 ): Promise<Action> {
-  const element = screenElement.querySelector(`[i="${elem.i}"]`);
-  const identifier = generateIdentifier(element?.outerHTML || "");
+  const identifier = generateIdentifier(elem.element?.outerHTML || "");
   let action = actionCache.get(identifier);
   if (!action) {
-    action = await createAction(elem, element, screenDescription);
+    action = await createAction(elem, screenElement, screenDescription);
     actionCache.set(identifier, action);
   }
   return action;
@@ -298,82 +304,60 @@ async function processElement(
 
 async function createAction(
   elem: ActionableElement,
-  element: Element | null,
+  screenElement: Element,
   screenDescription: string
 ): Promise<Action> {
-  if (!element) {
+  const element = elem.element;
+  if (!elem.element) {
     throw new Error("Element is null");
   }
 
-  const simplifiedElementHtml = simplifyHtml(element.outerHTML, true);
   const elementTagName = element.tagName.toLowerCase();
 
   if (elem.type === "select" && elementTagName !== "table") {
-    return await createSelectAction(
-      elem,
-      element,
-      screenDescription,
-      simplifiedElementHtml
-    );
+    return await createSelectAction(elem, screenElement, screenDescription);
   } else {
-    return await createSingleAction(
-      elem,
-      element,
-      screenDescription,
-      simplifiedElementHtml
-    );
+    return await createSingleAction(elem, screenElement, screenDescription);
   }
 }
 
 async function createSelectAction(
   elem: ActionableElement,
-  element: Element,
-  screenDescription: string,
-  simplifiedElementHtml: string
+  screenElement: Element,
+  screenDescription: string
 ): Promise<Action> {
-  const options = await extractOptions(element, screenDescription);
-  const selectActionContent = await getAiResponseForSelectAction(
-    options,
-    element,
-    screenDescription
-  );
-  const selectActionQuesion = await getAiResponseForQuestion(
-    selectActionContent
-  );
-  const selectActionQuestionTranslation = await translateQuestion(
-    selectActionQuesion
-  );
+  const { content, question, description, options } =
+    await getAiResponseForSelectAction(elem, screenElement, screenDescription);
 
   return {
     type: "select",
     i: Number(elem.i),
-    content: selectActionContent,
-    question: selectActionQuestionTranslation,
-    html: simplifiedElementHtml,
+    content,
+    question,
+    description,
+    html: simplifyHtml(elem.element.outerHTML, true, true),
     options,
   };
 }
 
 async function createSingleAction(
   elem: ActionableElement,
-  element: Element,
-  screenDescription: string,
-  simplifiedElementHtml: string
+  screenElement: Element,
+  screenDescription: string
 ): Promise<Action> {
-  const actionContent = await getAiResponseForSingleAction(
+  const { content, question, description } = await getAiResponseForSingleAction(
     elem,
-    element,
+    screenElement,
     screenDescription
   );
-  const actionQuestion = await getAiResponseForQuestion(actionContent);
-  const actionQuestionTranslation = await translateQuestion(actionQuestion);
 
   return {
     type: elem.type,
     i: Number(elem.i),
-    content: actionContent,
-    question: actionQuestionTranslation,
-    html: simplifiedElementHtml,
+    content,
+    question,
+    description,
+    html: simplifyHtml(elem.element.outerHTML, true),
   };
 }
 
@@ -382,64 +366,83 @@ async function extractOptions(
   screenDescription: string
 ): Promise<string[]> {
   const optionElements = Array.from(element.children);
-  const optionsPromises = optionElements.map((optionElement) =>
-    extractTextLabelFromHTML(optionElement.outerHTML, screenDescription)
-  );
-  return await Promise.all(optionsPromises);
+  return optionElements.map((option) => {
+    // 텍스트에서 개행, 탭 제거 및 연속된 공백을 단일 공백으로 변환
+    return option.textContent?.replace(/\s+/g, " ").trim() || "";
+  });
 }
 
 async function getAiResponseForSelectAction(
-  options: string[],
-  element: Element,
+  elem: ActionableElement,
+  screenElement: Element,
   screenDescription: string
-): Promise<string> {
-  const optionElements = Array.from(element.children);
-  const firstOptionHtml = simplifyHtml(optionElements[0].outerHTML, true);
+) {
+  const options = await extractOptions(elem.element, screenDescription);
+  const element = elem.element;
+  const firstChildClone = element.children[0].cloneNode(true) as Element;
+  while (element.firstChild) {
+    element.removeChild(element.firstChild);
+  }
+  element.appendChild(firstChildClone);
+  const firstItemWithParentHtml = simplifyHtml(element.outerHTML, true, true);
   const selectActionPrompt = selectActionTemplate({
     options,
-    firstOptionHtml,
+    firstItemWithParentHtml,
     screenDescription,
   });
-  return await getAiResponse([selectActionPrompt]);
+  const content = await getAiResponse([selectActionPrompt]);
+  const question = await getAiResponse([
+    selectActionPrompt,
+    { role: "AI", content: content },
+    makeQuestionPrompt(),
+  ]);
+  const description = await getAiResponse([
+    selectActionPrompt,
+    { role: "AI", content: content },
+    makeQuestionPrompt(),
+    { role: "AI", content: question },
+    makeListDescriptionPrompt(),
+  ]);
+
+  return { content, question, description, options };
 }
 
 async function getAiResponseForSingleAction(
   elem: ActionableElement,
-  element: Element,
+  screenElement: Element,
   screenDescription: string
-): Promise<string> {
+) {
+  const element = elem.element;
   const tableActionPrompt: Prompt = tableActionTemplate({
     screenDescription,
     simplifiedElementHtml: simplifyHtml(element.outerHTML, true),
-    simplifiedScreenHtml: simplifyHtml(element.outerHTML, true),
+    simplifiedScreenHtml: simplifyHtml(screenElement.outerHTML, true),
   });
   const singleActionPrompt: Prompt = singleActionTemplate({
     actionType: elem.type,
     screenDescription,
     simplifiedElementHtml: simplifyHtml(element.outerHTML, true),
-    simplifiedScreenHtml: simplifyHtml(element.outerHTML, true),
+    simplifiedScreenHtml: simplifyHtml(screenElement.outerHTML, true),
   });
   const actionPrompt =
     element.tagName.toLowerCase() === "table"
       ? tableActionPrompt
       : singleActionPrompt;
-  return await getAiResponse([actionPrompt]);
-}
-
-async function getAiResponseForQuestion(content: string): Promise<string> {
-  const makeQuestionPrompt: Prompt = makeQuestionTemplate();
-  return await getAiResponse([
-    { role: "AI", content: `Action: ${content}` },
-    makeQuestionPrompt,
+  const content = await getAiResponse([actionPrompt]);
+  const question = await getAiResponse([
+    actionPrompt,
+    { role: "AI", content: content },
+    makeQuestionPrompt(),
   ]);
-}
-
-async function translateQuestion(question: string): Promise<string> {
-  const translateQuestionPrompt: Prompt = translateQuestionTemplate();
-  return await getAiResponse([
-    { role: "AI", content: `Question: ${question}` },
-    translateQuestionPrompt,
+  const description = await getAiResponse([
+    actionPrompt,
+    { role: "AI", content: content },
+    makeQuestionPrompt(),
+    { role: "AI", content: question },
+    makeElementDescriptionPrompt(),
   ]);
+
+  return { content, question, description };
 }
 
 class ActionCache {
@@ -464,111 +467,6 @@ class ActionCache {
   }
 }
 
-async function getActionsOriginal(
-  actionableElements: ActionableElement[],
-  screenElement: Element,
-  screenDescription: string
-): Promise<Action[]> {
-  const cacheFileName = "actionCache.json";
-  const actionCache = loadCacheFromFile(cacheFileName);
-
-  const capitalizeFirstCharacter = (str: string) =>
-    str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-  const simplifiedScreenHtml = simplifyHtml(screenElement.outerHTML, true);
-  const makeQuestionPrompt: Prompt = makeQuestionTemplate();
-  const translateQuestionPrompt: Prompt = translateQuestionTemplate();
-
-  const actionsPromises = actionableElements.map(async (elem) => {
-    const element = screenElement.querySelector(`[i="${elem.i}"]`);
-    const identifier = generateIdentifier(element?.outerHTML || "");
-
-    let action = actionCache.get(identifier) as Action | undefined;
-
-    if (action) {
-      return action;
-    }
-
-    const elementTagName = element?.tagName.toLowerCase();
-    const simplifiedElementHtml = simplifyHtml(element?.outerHTML || "", true);
-    if (element && elem.type === "select" && elementTagName !== "table") {
-      const optionElements = Array.from(element.children);
-      const optionsPromises = optionElements.map((optionElement) =>
-        extractTextLabelFromHTML(optionElement.outerHTML, screenDescription)
-      );
-      const options = await Promise.all(optionsPromises);
-
-      const firstOptionHtml = simplifyHtml(optionElements[0].outerHTML, true);
-      const selectActionPrompt = selectActionTemplate({
-        options,
-        firstOptionHtml,
-        screenDescription,
-      });
-      const selectActionContent = await getAiResponse([selectActionPrompt]);
-      const selectActionQuestion = await getAiResponse([
-        selectActionPrompt,
-        { role: "AI", content: `Action: ${selectActionContent}` },
-        makeQuestionPrompt,
-      ]);
-      const selectActionQuestionTranslation = await getAiResponse([
-        selectActionPrompt,
-        { role: "AI", content: `Action: ${selectActionContent}` },
-        makeQuestionPrompt,
-        { role: "AI", content: `Question: ${selectActionQuestion}` },
-        translateQuestionPrompt,
-      ]);
-      action = {
-        type: "select",
-        i: Number(elem.i),
-        content: selectActionContent,
-        question: selectActionQuestionTranslation,
-        html: simplifiedElementHtml,
-        options,
-      };
-    } else {
-      const tableActionPrompt: Prompt = tableActionTemplate({
-        screenDescription,
-        simplifiedElementHtml,
-        simplifiedScreenHtml,
-      });
-      const singleActionPrompt: Prompt = singleActionTemplate({
-        actionType: capitalizeFirstCharacter(elem.type),
-        screenDescription,
-        simplifiedElementHtml,
-        simplifiedScreenHtml,
-      });
-      const actionPrompt =
-        elementTagName === "table" ? tableActionPrompt : singleActionPrompt;
-      const actionContent = await getAiResponse([actionPrompt]);
-      const actionQuestion = await getAiResponse([
-        actionPrompt,
-        { role: "AI", content: `Action: ${actionContent}` },
-        makeQuestionPrompt,
-      ]);
-      const actionQuestionTranslation = await getAiResponse([
-        actionPrompt,
-        { role: "AI", content: `Action: ${actionContent}` },
-        makeQuestionPrompt,
-        { role: "AI", content: `Question: ${actionQuestion}` },
-        translateQuestionPrompt,
-      ]);
-      action = {
-        type: elem.type,
-        i: Number(elem.i),
-        content: actionContent,
-        question: actionQuestionTranslation,
-        html: simplifiedElementHtml,
-      };
-    }
-    actionCache.set(identifier, action);
-    return action;
-  });
-
-  const actions = await Promise.all(actionsPromises);
-
-  saveCacheToFile(actionCache, cacheFileName);
-  return actions;
-}
-
 export function generateIdentifier(html: string): string {
   const dom = new JSDOM(html);
   const element = dom.window.document.body.firstElementChild as Element;
@@ -585,7 +483,11 @@ export function generateIdentifier(html: string): string {
   let identifierComponents = [];
   identifierComponents.push(element.tagName.toLowerCase());
   if (element.textContent) {
-    identifierComponents.push(element.textContent.trim().slice(0, 20));
+    const cleanedText = element.textContent
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 20);
+    identifierComponents.push(cleanedText);
   }
 
   for (const attr of representativeAttributes) {

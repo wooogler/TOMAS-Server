@@ -23,7 +23,7 @@ import {
 export async function createHumanChatHandler(
   request: FastifyRequest<{ Body: CreateHumanChatInput }>
 ) {
-  const chat = await createHumanChat({ ...request.body });
+  const chat = await createHumanChat({ ...request.body }, "HUMAN");
   return chat;
 }
 

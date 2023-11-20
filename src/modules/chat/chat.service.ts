@@ -48,20 +48,25 @@ const page = new PageHandler();
 let focusSection: ScreenResult;
 let actionLogs: SystemLog[] = [];
 
-export async function createHumanChat(input: CreateHumanChatInput) {
+export async function createHumanChat(
+  input: CreateHumanChatInput,
+  type: string
+) {
   await prisma.chat.create({
     data: {
       role: "HUMAN",
       content: input.content,
+      type,
     },
   });
 }
 
-export async function createAIChat(input: CreateHumanChatInput) {
+export async function createAIChat(input: CreateHumanChatInput, type: string) {
   await prisma.chat.create({
     data: {
       role: "AI",
       content: input.content,
+      type,
     },
   });
 }
@@ -88,9 +93,9 @@ export async function navigate(
   try {
     await page.initialize();
     focusSection = await page.navigate(input.url);
-    createAIChat({ content: "어떻게 도와드릴까요? " });
+    createAIChat({ content: "어떻게 도와드릴까요?" }, "navigate");
     return {
-      screenDescription: focusSection.screenDescription,
+      screenDescription: focusSection.screenDescriptionKorean,
       type: "navigate",
     };
   } catch (error: any) {
@@ -131,7 +136,7 @@ export async function firstOrder(
   input: CreateHumanChatInput
 ): Promise<AnswerResponse | SelectResponse> {
   console.log("firstOrder");
-  await createHumanChat(input);
+  await createHumanChat(input, "firstOrder");
   const response = await planningAndAsk();
   if (response) {
     return response;
@@ -152,21 +157,21 @@ async function planningAndAsk(): Promise<
     const actions = focusSection.actions;
 
     const systemContext = await getSystemContext(actionLogs);
-    const taskList = await planningAgent(
+    const taskI = await planningAgent(
       focusSection,
       userContext,
       actionLogs.length !== 0 ? systemContext : "No action history"
     );
 
-    const task = taskList[0];
-    if (task) {
-      page.highlight(`[i="${task.i}"]`);
-      const action = actions.find((item) => item.i === Number(task.i));
+    if (taskI) {
+      page.highlight(`[i="${taskI}"]`);
+      const action = actions.find((item) => item.i === Number(taskI));
       const screenDescription = focusSection.screenDescription;
+      const screenDescriptionKorean = focusSection.screenDescriptionKorean;
       if (action) {
         const component: AnswerResponse["component"] = {
           i: action.i.toString(),
-          description: action.content,
+          description: action.description,
           html: action.html,
           actionType: action.type,
           question: action.question || "No Question",
@@ -185,34 +190,63 @@ async function planningAndAsk(): Promise<
           // If user context is not enough to answer the question
           if (actionValue === null || actionValue === "") {
             const question = action.question;
-            await createAIChat({ content: question || "No Question" });
-            return { component, type: "questionForInput" };
+            await createAIChat(
+              {
+                content: question || "No Question",
+              },
+              "questionForInput"
+            );
+            return {
+              component,
+              type: "questionForInput",
+              screenDescription: screenDescriptionKorean,
+            };
           } else {
             const confirmationQuestion = await makeQuestionForConfirmation(
               action,
               screenDescription,
               actionValue
             );
-            await createAIChat({ content: confirmationQuestion });
-            return { component, type: "requestConfirmation", actionValue };
+            await createAIChat(
+              {
+                content: confirmationQuestion,
+              },
+              "confirmForInput"
+            );
+            return {
+              component,
+              type: "requestConfirmation",
+              actionValue,
+              screenDescription: screenDescriptionKorean,
+            };
           }
         } else if (component.actionType === "select") {
           const question = action.question;
           const options = await page.select(`[i="${component.i}"]`);
-          await createAIChat({
-            content: `${question}`,
-          });
+          await createAIChat(
+            {
+              content: `${question}`,
+            },
+            "questionForSelect"
+          );
           return {
             components: await getDataFromHTML(options),
             type: `questionForSelect`,
+            screenDescription: screenDescriptionKorean,
           };
         } else {
-          const confirmationQuestion = await makeQuestionForConfirmation(
-            action,
-            screenDescription
+          const question = action.question;
+          await createAIChat(
+            {
+              content: `${question}`,
+            },
+            "confirmForClick"
           );
-          await createAIChat({ content: confirmationQuestion });
-          return { component, type: "requestConfirmation" };
+          return {
+            component,
+            type: "requestConfirmation",
+            screenDescription: screenDescriptionKorean,
+          };
         }
       }
     } else {
@@ -232,10 +266,11 @@ export async function answerForInput(
   if (page) {
     page.removeHighlight();
   }
-  await createHumanChat(input);
+  await createHumanChat({ content: input.content }, "answerForInput");
   const chats = await getChats();
   const userContext = await getUserContext(chats);
   const screenDescription = focusSection.screenDescription;
+  const screenDescriptionKorean = focusSection.screenDescriptionKorean;
   const component = input.component;
   const action: Action = {
     type: component.actionType,
@@ -259,8 +294,17 @@ export async function answerForInput(
     if (actionValue === null) {
       console.log("actionValue is null");
       const question = action.question;
-      await createAIChat({ content: question || "No Question" });
-      return { component, type: "questionForInput" };
+      await createAIChat(
+        {
+          content: question || "No Question",
+        },
+        "questionForInput"
+      );
+      return {
+        component,
+        type: "questionForInput",
+        screenDescription: screenDescriptionKorean,
+      };
     } else {
       console.log("actionValue is " + actionValue);
       const confirmationQuestion = await makeQuestionForConfirmation(
@@ -268,8 +312,18 @@ export async function answerForInput(
         screenDescription,
         actionValue
       );
-      await createAIChat({ content: confirmationQuestion });
-      return { component, type: "requestConfirmation", actionValue };
+      await createAIChat(
+        {
+          content: confirmationQuestion,
+        },
+        "confirmForInput"
+      );
+      return {
+        component,
+        type: "requestConfirmation",
+        actionValue,
+        screenDescription: screenDescriptionKorean,
+      };
     }
   } else {
     throw new Error("No Component!");
@@ -283,19 +337,27 @@ export async function answerForSelect(
   if (page) {
     page.removeHighlight();
   }
-  await createHumanChat({
-    ...input,
-    content: input.content,
-  });
+  await createHumanChat(
+    {
+      content: input.content,
+    },
+    "answerForSelect"
+  );
 
   const component = input.component;
   const screenDescription = focusSection.screenDescription;
+  const screenDescriptionKorean = focusSection.screenDescriptionKorean;
   const confirmationQuestion = await makeQuestionForSelectConfirmation(
     component.description || "",
     screenDescription,
     input.content
   );
-  await createAIChat({ content: confirmationQuestion });
+  await createAIChat(
+    {
+      content: confirmationQuestion,
+    },
+    "confirmForSelect"
+  );
   page.highlight(`[i="${component.i}"]`);
   return {
     component: {
@@ -306,6 +368,7 @@ export async function answerForSelect(
     },
     type: "requestConfirmation",
     actionValue: component.i + "---" + component.description,
+    screenDescription: screenDescriptionKorean,
   };
 }
 
@@ -316,7 +379,10 @@ export async function confirm(
   if (page) {
     page.removeHighlight();
   }
-  await createHumanChat(input);
+  await createHumanChat(
+    { content: input.content === "yes" ? "예" : "아니오" },
+    "confirm"
+  );
   const component = input.component;
   const action: Action = {
     type: component.actionType,
@@ -337,10 +403,10 @@ export async function confirm(
         actionLogs.push({
           type: focusSection.type,
           id: focusSection.id,
-          screenDescription: focusSection.screenDescription,
+          screenDescription: focusSection.screenDescriptionKorean,
           actionDescription,
         });
-        // saveObjectArrayToFile(actionLogs, "actionLogs.json");
+        saveObjectArrayToFile(actionLogs, "actionLogs.json");
         focusSection = await page.inputText(
           `[i="${component.i}"]`,
           input.actionValue
@@ -351,7 +417,7 @@ export async function confirm(
         actionLogs.push({
           type: focusSection.type,
           id: focusSection.id,
-          screenDescription: focusSection.screenDescription,
+          screenDescription: focusSection.screenDescriptionKorean,
           actionDescription,
         });
         saveObjectArrayToFile(actionLogs, "actionLogs.json");
@@ -391,7 +457,7 @@ export async function confirm(
     actionLogs.push({
       type: focusSection.type,
       id: focusSection.id,
-      screenDescription: focusSection.screenDescription,
+      screenDescription: focusSection.screenDescriptionKorean,
       actionDescription,
     });
     saveObjectArrayToFile(actionLogs, "actionLogs.json");

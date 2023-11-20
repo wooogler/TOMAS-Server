@@ -8,6 +8,7 @@ const navigateSchema = z.object({
 const chatInput = {
   role: z.enum(["AI", "HUMAN"]),
   content: z.string(),
+  type: z.string(),
 };
 
 const chatGenerated = {
@@ -53,6 +54,7 @@ const navigateResponseSchema = z.object({
 const answerResponseSchema = z.object({
   component: ActionComponentSchema,
   type: z.string(),
+  screenDescription: z.string().optional(),
   actionValue: z.string().optional(),
 });
 

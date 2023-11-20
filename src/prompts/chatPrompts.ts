@@ -28,7 +28,8 @@ export const getUserObjective = async (chats: Chat[]) => {
 };
 
 export async function getUserContext(chats: Chat[]) {
-  const converationPrompt: Prompt = makeConversationPrompt(chats);
+  const actionChats = chats.filter((chat) => !chat.type.startsWith("confirm"));
+  const converationPrompt: Prompt = makeConversationPrompt(actionChats);
   const findUserContextPrompt: Prompt = {
     role: "SYSTEM",
     content: `Based on the conversation between the system and the user, describe the user's context. Please keep all useful information from the conversation in the context considering the user's goal. Start with "User's Context: "`,
@@ -153,10 +154,28 @@ The description of the screen: ${screenDescription}`,
   ]);
 }
 
-export const makeQuestionTemplate = (): Prompt => ({
+export const makeQuestionPrompt = (): Prompt => ({
   role: "HUMAN",
   content:
-    "Create a natural language question to ask to the user before doing the given action on the screen.",
+    "Create a Korean question only to ask an elderly Korean if they want to perform the given action on the screen.",
+});
+
+export const makeElementDescriptionPrompt = (): Prompt => ({
+  role: "HUMAN",
+  content:
+    "Generate a Korean description to explain the following element to an elderly Korean",
+});
+
+export const makeListDescriptionPrompt = (): Prompt => ({
+  role: "HUMAN",
+  content:
+    "Generate a Korean description to explain the following list to an elderly Korean",
+});
+
+export const makeSectionDescriptionPrompt = (): Prompt => ({
+  role: "HUMAN",
+  content:
+    "Generate a Korean description to explain the following section to an elderly Korean",
 });
 
 export const translateQuestionTemplate = (): Prompt => ({

@@ -1,38 +1,14 @@
 [
   {
-    "type": "page",
-    "id": "https://www.greyhound.com/",
-    "screenDescription": "The general purpose of the web page is to provide information and services related to bus travel, including booking tickets, managing bookings, tracking buses, and accessing travel information and resources.",
-    "actionDescription": "The system clicked on the \"Round Trip\" radio button to select the option for booking a round trip."
+    "type": "screen",
+    "id": "https://m.megabox.co.kr/",
+    "screenDescription": "이 화면은 공지나 알림을 나타내며, 닫기 버튼과 하루 동안 보지 않기 옵션이 있습니다.",
+    "actionDescription": "The system clicked on the 'close' button to close a notification or announcement."
   },
   {
-    "type": "page",
-    "id": "https://www.greyhound.com/",
-    "screenDescription": "The general purpose of the web page is to provide information and services related to bus travel, including booking tickets, managing bookings, tracking buses, and accessing travel information and resources.",
-    "actionDescription": "The system clicked on the \"Departing from Los Angeles, CA\" button to select the departure location for the bus travel search."
-  },
-  {
-    "type": "modal",
-    "id": "https://www.greyhound.com/modal/1023",
-    "screenDescription": "The general purpose of the modal in the web page is to allow the user to select a departure location for their bus travel.",
-    "actionDescription": "The system inputted the text 'Chicago' into the \"Departing from\" input field."
-  },
-  {
-    "type": "section",
-    "id": "https://www.greyhound.com/section/1238",
-    "screenDescription": "The purpose of this section is to provide the location information for Chicago, IL in the context of bus travel.",
-    "actionDescription": "The system clicked on the element with the text \"Chicago, IL\" to view more information about bus locations in Chicago, IL."
-  },
-  {
-    "type": "page",
-    "id": "https://www.greyhound.com/",
-    "screenDescription": "The general purpose of the web page is to provide information and services related to bus travel, including booking tickets, managing bookings, tracking buses, and accessing travel information and resources.",
-    "actionDescription": "The system did not click the \"Open main site navigation\" button to open the main site navigation menu."
-  },
-  {
-    "type": "page",
-    "id": "https://www.greyhound.com/",
-    "screenDescription": "The general purpose of the web page is to provide information and services related to bus travel, including booking tickets, managing bookings, tracking buses, and accessing travel information and resources.",
-    "actionDescription": "The system clicked on the \"Arriving at Las Vegas, NV\" button to select the destination for the bus trip."
+    "type": "screen",
+    "id": "https://m.megabox.co.kr/",
+    "screenDescription": "이 화면은 영화 티켓 예매 웹사이트나 애플리케이션을 나타냅니다. 여기에서 로그인하고 영화 이벤트를 확인하며 웹사이트의 다른 섹션으로 이동할 수 있습니다.",
+    "actionDescription": "The system clicked on the \"예매\" button to proceed with the movie ticket reservation process."
   }
 ]

@@ -77,8 +77,8 @@ async function createAction(
 }
 
 export async function navigate(input: NavigateInput) {
-  createAIChat({ content: "How can I help you?" });
-  createHumanChat({ content: "I want to book a ticket." });
+  // createAIChat({ content: "How can I help you?" });
+  // createHumanChat({ content: "I want to book a ticket." });
   try {
     let page = await new PageHandler();
     await page.initialize();
@@ -110,18 +110,17 @@ export async function navigate(input: NavigateInput) {
 
       const systemContext = await getSystemContext(actionLogs);
       // Get task list
-      const taskList = await planningAgent(
+      const taskI = await planningAgent(
         focusSection,
         userContext,
         systemContext
       );
 
       // Get first task
-      const task = taskList[0];
-      if (task) {
+      if (taskI) {
         focusSection = await executionAgent({
           page,
-          action: actions.find((item) => item.i === Number(task.i))!,
+          action: actions.find((item) => item.i === Number(taskI))!,
           screenDescription: focusSection.screenDescription,
           currentFocusedSection: focusSection,
           systemLogs: actionLogs,
