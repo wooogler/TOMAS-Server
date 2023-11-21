@@ -8,7 +8,13 @@ import {
   getScreenDescription,
   getSectionDescription,
 } from "../prompts/screenPrompts";
-import { Action, parsingAgent, parsingItemAgent } from "./parsingAgent";
+import {
+  Action,
+  findClickableElements,
+  parsingAgent,
+  parsingItemAgent,
+  parsingListAgent,
+} from "./parsingAgent";
 
 const NO_PAGE_ERROR = new Error("Cannot find a page.");
 
@@ -248,8 +254,80 @@ export class PageHandler {
     });
   }
 
-  //select one item in the list
+  async focus(
+    selector: string,
+    parsing: boolean = false
+  ): Promise<ScreenResult> {
+    const page = await this.getPage();
+    const { screen } = await getScreen(page, async () => {}, false);
+    const dom = new JSDOM(screen);
+    const element = dom.window.document.querySelector(selector);
+    const screenSimpleHtml = simplifyHtml(screen, true);
+    const { screenDescription, screenDescriptionKorean } =
+      await getScreenDescription(screenSimpleHtml);
+
+    if (parsing === false) {
+      return {
+        type: "item",
+        screenDescription: "",
+        screenDescriptionKorean: "",
+        actions: [],
+        id: `${this.extractBaseURL(page.url())}`,
+      };
+    }
+
+    const actions = await parsingItemAgent({
+      elementHtml: element?.outerHTML || "",
+      screenDescription,
+    });
+
+    return {
+      type: "item",
+      screenDescription,
+      screenDescriptionKorean,
+      actions,
+      id: `${this.extractBaseURL(page.url())}`,
+    };
+  }
+
   async select(
+    selector: string,
+    parsing: boolean = false
+  ): Promise<ScreenResult> {
+    const page = await this.getPage();
+    const { screen } = await getScreen(page, async () => {}, false);
+    const dom = new JSDOM(screen);
+    const element = dom.window.document.querySelector(selector);
+    const elementSimpleHtml = simplifyHtml(element?.innerHTML || "", true);
+    if (parsing === false) {
+      return {
+        type: "section",
+        screenDescription: "",
+        screenDescriptionKorean: "",
+        actions: [],
+        id: `${this.extractBaseURL(page.url())}`,
+      };
+    }
+    const screenSimpleHtml = simplifyHtml(screen, true);
+    const { screenDescription, screenDescriptionKorean } =
+      await getScreenDescription(screenSimpleHtml);
+
+    const actions = await parsingListAgent({
+      listHtml: element?.outerHTML || "",
+    });
+    return {
+      type: "section",
+      screenDescription: screenDescription,
+      screenDescriptionKorean: screenDescriptionKorean,
+      actions,
+      id: `${this.extractBaseURL(page.url())}section/${element?.getAttribute(
+        "i"
+      )}`,
+    };
+  }
+
+  //select one item in the list
+  async selectOriginal(
     selector: string,
     isFocus: boolean = false, // focus on the selected item
     parsing: boolean = true
@@ -281,7 +359,7 @@ export class PageHandler {
           screenDescription: sectionDescription,
         })
       : await parsingItemAgent({
-          screenHtml: element?.outerHTML || "",
+          elementHtml: element?.outerHTML || "",
           screenDescription: sectionDescription,
         });
     return {
@@ -411,14 +489,16 @@ export async function getHiddenElementIs(
   throw NO_PAGE_ERROR;
 }
 
-export async function addIAttribute(page: Page): Promise<void> {
+export async function addIAttribute(page: Page) {
   if (page) {
-    await page.evaluate(() => {
+    return await page.evaluate(() => {
       let idCounter = 0;
       const elements = Array.from(document.body.querySelectorAll("*"));
+      const addedAttributes = [];
 
       // Add 'i' attribute to the body element
       document.body.setAttribute("i", String(idCounter));
+      addedAttributes.push(String(idCounter));
       idCounter++;
 
       // Check existing 'i' attribute values and set the start value
@@ -438,9 +518,12 @@ export async function addIAttribute(page: Page): Promise<void> {
       elements.forEach((el: Element) => {
         if (!el.hasAttribute("i")) {
           el.setAttribute("i", String(idCounter));
+          addedAttributes.push(String(idCounter));
           idCounter++;
         }
       });
+
+      return addedAttributes;
     });
   } else {
     throw NO_PAGE_ERROR;
@@ -504,6 +587,12 @@ async function markClickableDivs(page: Page): Promise<void> {
   });
 }
 
+export type ScreenChangeType =
+  | "OPEN_LAYER"
+  | "CLOSE_LAYER"
+  | "STATE_CHANGE"
+  | "URL_CHANGE";
+
 export async function getScreen(
   page: Page,
   action: () => Promise<void>,
@@ -511,15 +600,44 @@ export async function getScreen(
 ): Promise<{
   screen: string;
   scrolls: { x: string[]; y: string[] };
+  screenChangeType: ScreenChangeType;
 }> {
+  const oldUrl = page.url();
+  const oldHiddenElementIs = await getHiddenElementIs(page, isAction);
+
   await action();
   await new Promise((r) => setTimeout(r, 1000));
 
-  await addIAttribute(page);
+  const newUrl = page.url();
+  const urlChanged = oldUrl !== newUrl;
+
+  const addedI = await addIAttribute(page);
   await markClickableDivs(page);
 
   const hiddenElementIs = await getHiddenElementIs(page, isAction);
+
+  let screenChangeType: ScreenChangeType;
+
+  if (urlChanged) {
+    screenChangeType = "URL_CHANGE";
+  } else {
+    const hidden = hiddenElementIs.filter(
+      (item) => !oldHiddenElementIs.includes(item)
+    );
+    const appear = oldHiddenElementIs.filter(
+      (item) => !hiddenElementIs.includes(item)
+    );
+
+    if (addedI.length > 5) {
+      screenChangeType = "OPEN_LAYER";
+    } else if (appear.length > 10 && hidden.length < 10) {
+      screenChangeType = "CLOSE_LAYER";
+    } else {
+      screenChangeType = "STATE_CHANGE";
+    }
+  }
+
   const { screen, scrolls } = await findScreenAndScrolls(page, hiddenElementIs);
 
-  return { screen, scrolls };
+  return { screen, scrolls, screenChangeType };
 }

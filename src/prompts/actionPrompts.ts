@@ -1,7 +1,7 @@
 import { AnswerResponse } from "../modules/chat/chat.schema";
 import { editActionType } from "../utils/htmlHandler";
 import { Prompt, getAiResponse } from "../utils/langchainHandler";
-import { ActionComponent } from "../utils/pageHandler";
+import { ActionComponent, ScreenChangeType } from "../utils/pageHandler";
 import { Action } from "../utils/parsingAgent";
 
 export async function findInputTextValue(
@@ -105,6 +105,7 @@ export interface SystemLog {
   type: string;
   screenDescription: string;
   actionDescription: string;
+  screenChangeType: ScreenChangeType;
 }
 
 export async function getSystemContext(systemLogs: SystemLog[]) {
@@ -114,10 +115,12 @@ export async function getSystemContext(systemLogs: SystemLog[]) {
   }[] = [];
   systemLogs.forEach((log) => {
     // Action in new screen
-    actionHistory.push({
-      type: log.type,
-      description: log.screenDescription,
-    });
+    if (log.screenChangeType !== "STATE_CHANGE") {
+      actionHistory.push({
+        type: log.type,
+        description: log.screenDescription,
+      });
+    }
     actionHistory.push({
       type: "action",
       description: log.actionDescription,

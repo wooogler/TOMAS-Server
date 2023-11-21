@@ -25,15 +25,15 @@ ${html}`,
 export const getScreenDescription = async (html: string) => {
   const describePageSystemPrompt: Prompt = {
     role: "SYSTEM",
-    content: `Given the HTML code, briefly summarize the general purpose of the screen it represents in one sentence.
+    content: `Describe the screen and its purpose briefly.
     
-HTML code:
+HTML code of the screen:
 ${html}`,
   };
 
   const describePageInKoreanPrompt: Prompt = {
     role: "HUMAN",
-    content: `Generate a Korean description of the given screen that an older adult can understand.`,
+    content: `Summarize the main purpose of the described webpage in one Korean sentence, focusing on its function and the type of information it provides, without detailing the specific elements or layout of the page.`,
   };
 
   const screenDescription = await getAiResponse([describePageSystemPrompt]);
@@ -123,11 +123,11 @@ export const getComponentInfo = async ({
 }) => {
   const extractComponentSystemPrompt: Prompt = {
     role: "SYSTEM",
-    content: `An user is looking at the web page screen. 
+    content: `A user is looking at the web page screen. 
 
 Describe the action that the user can take on the given element with its purpose, starting with '${editActionType(
       actionType
-    )} ' in a sentence.
+    )} ' in one sentence briefly.
 
 HTML of the element:
 ${componentHtml}
@@ -152,7 +152,7 @@ ${extractSurroundingHtml(screenHtml, componentHtml)}
 
   const modifyActionPrompt: Prompt = {
     role: "HUMAN",
-    content: `Don't mention the value in the element to describe the action. Don't apologize.`,
+    content: `Don't mention the attributes of the element to describe the action. Don't apologize.`,
   };
 
   // const modifyActionPrompt: Prompt = {
@@ -162,8 +162,8 @@ ${extractSurroundingHtml(screenHtml, componentHtml)}
 
   const componentDescription = await getAiResponse([
     extractComponentSystemPrompt,
-    firstActionPrompt,
-    modifyActionPrompt,
+    // firstActionPrompt,
+    // modifyActionPrompt,
   ]);
 
   return componentDescription;
@@ -352,9 +352,7 @@ export const singleActionTemplate = ({
   simplifiedScreenHtml: string;
 }): Prompt => ({
   role: "SYSTEM",
-  content: `A user is looking at the web page screen. 
-
-Describe the action that the user can take on the given element with its purpose, starting with '${actionType} ' in a sentence.
+  content: `Describe an action that a user can take on an element with its purpose, starting with '${actionType} ' in one sentence.
 
 HTML of the element:
 ${simplifiedElementHtml}

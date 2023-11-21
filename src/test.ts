@@ -20,28 +20,58 @@ async function main() {
   // const resultDataInput = await pageHandler.click("#dateInput-from", true);
   // const resultPassengers = await pageHandler.click("#productSummary", true);
 
+  console.log("주소 이동");
   const resultFirst = await pageHandler.navigate(
     "https://m.megabox.co.kr/main",
     false
   );
-  const resultMain = await pageHandler.click(".btn-close-main-notice", true);
-
+  console.log("메인 공지 닫기");
+  const resultMain = await pageHandler.click(".btn-close-main-notice", false);
   // const resultBook = await pageHandler.click(
-  //   "div.btn-bottom > button:nth-child(3)",
+  //   "#boxo_movie > div:nth-child(1) > div > div.btn-area > a",
+  //   false
+  // );
+  // const resultLocationChange = await pageHandler.click(
+  //   "#branch_area_35 > a",
+  //   false
+  // );
+
+  // const resultMovies = await pageHandler.select
+
+  console.log("영화 예매 클릭");
+  const resultBook = await pageHandler.click(
+    "div.btn-bottom > button:nth-child(3)",
+    false
+  );
+
+  const resultMovies = await pageHandler.select(".rec-block-wrap", true);
+  // const resultMovie = await pageHandler.focus(
+  //   "body > div.container.reserve-main-con.pb55 > div.reserve-wrap > div > div:nth-child(2) > div:nth-child(1)",
   //   true
   // );
+  showScreenResults(resultMovies);
+  // console.log("영화 별 예매 클릭");
   // const resultMovie = await pageHandler.click(
   //   ".item.movie > a:nth-child(1)",
   //   false
   // );
+  // console.log("영화 선택");
   // const resultSelectMovie = await pageHandler.click(
-  //   "ul#movieBlockList > li:nth-child(3) > a",
+  //   "ul#movieBlockList > li:nth-child(1) > a",
   //   false
   // );
+  // console.log("위치 선택");
+  // const resultSelectLocation = await pageHandler.click(
+  //   "#branch_area_30 > a",
+  //   false
+  // );
+  // console.log("극장 선택");
   // const resultSelectTheater = await pageHandler.click(
-  //   "ul#branch_10 > li:nth-child(4) > a",
+  //   "#branch_sub_0039 > a",
   //   false
   // );
+  // console.log("선택 완료");
+  // const resultComplete = await pageHandler.click("#theaterChoiceBtn", false);
 
   // const resultSelect = await pageHandler.click("#theaterChoiceBtn", false);
 
@@ -62,8 +92,6 @@ async function main() {
   // await pageHandler.click("#TKA_plus", false);
 
   // const resultSeatSelect = await pageHandler.click("#seatSelectionBtn", true);
-
-  showScreenResults(resultMain);
 
   // const resultDeparture = await pageHandler.click("#s_area", true);
   // const resultDate = await pageHandler.click(".day", true);

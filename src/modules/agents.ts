@@ -43,18 +43,19 @@ export async function planningAgent(
   const planningActionPromptForSystem: Prompt = {
     role: "SYSTEM",
     content: `
-You are the AI that takes the following action on the smartphone screen based on the user's context and action history.
+You are the AI that will take the next action on the smartphone screen on behalf of a user.
 
 ${userContext}
 
-Action History:
+Action Logs:
 ${systemContext}
 
-First, describe the process to choose the next action based on user's context and action history.
+First, describe the logical thinking process to choose the next action based on the user's context and your action logs.
 
-Then, return one of the possible actions on the current screen to do what the user wants.
+Then, return one action from the available actions on the current screen.
+
 Description of the current screen: ${focusedSection.screenDescription}
-Possible actions:
+Available actions:
 ${focusedSection.actions
   .map((comp) => `- ${comp.content} (i=${comp.i})`)
   .join("\n")}
@@ -174,6 +175,7 @@ Execution Agent:
         type: "action",
         screenDescription: screenDescription,
         actionDescription: actionHistoryDescription,
+        screenChangeType: "STATE_CHANGE",
       });
 
       return await page.click(`[i="${action.i}"]`);

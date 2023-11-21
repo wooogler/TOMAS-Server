@@ -157,25 +157,32 @@ The description of the screen: ${screenDescription}`,
 export const makeQuestionPrompt = (): Prompt => ({
   role: "HUMAN",
   content:
-    "Create a Korean question only to ask an elderly Korean if they want to perform the given action on the screen.",
+    "Create a Korean question that asks for user confirmation to perform the action described in the input. Do not mention the English translation in the output.",
+  // "Create a Korean question that ask older adults if they want to perform the given action. Do not mention the English translation in the output.",
+});
+
+export const makeSelectQuestionPrompt = (): Prompt => ({
+  role: "HUMAN",
+  content:
+    "Create a Korean question that asks older adults to choose an option based on the context. Do not mention the English translation in the output.",
 });
 
 export const makeElementDescriptionPrompt = (): Prompt => ({
   role: "HUMAN",
   content:
-    "Generate a Korean description to explain the following element to an elderly Korean",
+    "Generate a Korean description explaining the action preformed by interacting with the element on a webpage. Focus on describing the function without detailing what the element represents or where it is located.",
 });
 
 export const makeListDescriptionPrompt = (): Prompt => ({
   role: "HUMAN",
   content:
-    "Generate a Korean description to explain the following list to an elderly Korean",
+    "Generate a Korean description explaining the action preformed by selecting an item in the list on a webpage. Focus on describing the function without detailing what the list represents or where it is located.",
 });
 
 export const makeSectionDescriptionPrompt = (): Prompt => ({
   role: "HUMAN",
   content:
-    "Generate a Korean description to explain the following section to an elderly Korean",
+    "Generate a Korean description explaining the action preformed by seeing the section on a webpage. Focus on describing the function without detailing what the section represents or where it is located.",
 });
 
 export const translateQuestionTemplate = (): Prompt => ({

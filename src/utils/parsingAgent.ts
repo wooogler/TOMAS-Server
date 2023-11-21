@@ -12,11 +12,12 @@ import {
   makeElementDescriptionPrompt,
   makeListDescriptionPrompt,
   makeQuestionPrompt,
+  makeSelectQuestionPrompt,
   translateQuestionTemplate,
 } from "../prompts/chatPrompts";
 import { Page } from "puppeteer";
 
-interface ActionableElement {
+export interface ActionableElement {
   i: string;
   type: string;
   element: Element;
@@ -32,7 +33,34 @@ export interface Action {
   options?: string[];
 }
 
-export async function parsingItemAgent({
+export async function parsingListAgent({ listHtml }: { listHtml: string }) {
+  const dom = new JSDOM(listHtml);
+  const listElement = dom.window.document.body.firstElementChild as Element;
+  const itemElements = Array.from(listElement.children);
+  const itemActions: Action[] = await itemElements.reduce(
+    async (prevPromise, itemElement) => {
+      const prevActions = await prevPromise;
+      const clickableElements = findClickableElements(itemElement);
+      const itemText = itemElement.textContent?.replace(/\s+/g, " ").trim();
+      const itemI = itemElement.getAttribute("i");
+      if (clickableElements.length > 0) {
+        prevActions.push({
+          type: "focus",
+          content: itemText || "",
+          question: `Do you want to select ${itemText}?`,
+          i: Number(itemI),
+          html: simplifyHtml(itemElement.outerHTML, true),
+        });
+      }
+      return prevActions;
+    },
+    Promise.resolve([] as Action[])
+  );
+
+  return itemActions;
+}
+
+export async function parsingItemAgentOriginal({
   screenHtml,
   screenDescription,
 }: {
@@ -73,6 +101,35 @@ export async function parsingItemAgent({
   );
 
   return itemActions;
+}
+
+export async function parsingItemAgent({
+  elementHtml,
+  screenDescription,
+}: {
+  elementHtml: string;
+  screenDescription: string;
+}) {
+  const dom = new JSDOM(elementHtml);
+  const element = dom.window.document.body as Element;
+  const actionableElements: ActionableElement[] = [];
+
+  const clickableElements = findClickableElements(element);
+  clickableElements.forEach((element) => {
+    actionableElements.push({
+      i: element.getAttribute("i") || "",
+      type: "click",
+      element,
+    });
+  });
+
+  const actions = await getActions(
+    actionableElements,
+    element,
+    screenDescription
+  );
+
+  return actions.sort((a, b) => a.i - b.i);
 }
 
 export async function parsingAgent({
@@ -201,7 +258,7 @@ function createFrequencyMap(
 }
 
 // Find all clickable elements
-function findClickableElements(screen: Element): Element[] {
+export function findClickableElements(screen: Element): Element[] {
   const clickableTagNames = ["a", "button", "input"];
   const clickableElements = Array.from(
     screen.querySelectorAll(clickableTagNames.join(","))
@@ -394,12 +451,12 @@ async function getAiResponseForSelectAction(
   const question = await getAiResponse([
     selectActionPrompt,
     { role: "AI", content: content },
-    makeQuestionPrompt(),
+    makeSelectQuestionPrompt(),
   ]);
   const description = await getAiResponse([
     selectActionPrompt,
     { role: "AI", content: content },
-    makeQuestionPrompt(),
+    makeSelectQuestionPrompt(),
     { role: "AI", content: question },
     makeListDescriptionPrompt(),
   ]);

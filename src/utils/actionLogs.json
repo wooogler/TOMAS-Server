@@ -2,13 +2,15 @@
   {
     "type": "screen",
     "id": "https://m.megabox.co.kr/",
-    "screenDescription": "이 화면은 공지나 알림을 나타내며, 닫기 버튼과 하루 동안 보지 않기 옵션이 있습니다.",
-    "actionDescription": "The system clicked on the 'close' button to close a notification or announcement."
+    "screenDescription": "The screen is a pop-up notice with a close button and a link to an event. It also has a checkbox option to hide the notice for a day.",
+    "actionDescription": "The system clicked on the pop-up notice to close it.",
+    "screenChangeType": "URL_CHANGE"
   },
   {
     "type": "screen",
     "id": "https://m.megabox.co.kr/",
-    "screenDescription": "이 화면은 영화 티켓 예매 웹사이트나 애플리케이션을 나타냅니다. 여기에서 로그인하고 영화 이벤트를 확인하며 웹사이트의 다른 섹션으로 이동할 수 있습니다.",
-    "actionDescription": "The system clicked on the \"예매\" button to proceed with the movie ticket reservation process."
+    "screenDescription": "The screen is a webpage with a header, a list of events, a list of movies, a section for movie feeds, and a navigation bar at the bottom. Its purpose is to provide information about current events and movies, allow users to navigate to different sections of the website, and provide quick access to important features such as logging in and viewing notifications.",
+    "actionDescription": "The system clicked on the element to perform the function of booking movie tickets.",
+    "screenChangeType": "CLOSE_LAYER"
   }
 ]

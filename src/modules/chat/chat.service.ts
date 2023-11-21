@@ -403,8 +403,9 @@ export async function confirm(
         actionLogs.push({
           type: focusSection.type,
           id: focusSection.id,
-          screenDescription: focusSection.screenDescriptionKorean,
+          screenDescription: focusSection.screenDescription,
           actionDescription,
+          screenChangeType: focusSection.screenChangeType,
         });
         saveObjectArrayToFile(actionLogs, "actionLogs.json");
         focusSection = await page.inputText(
@@ -417,8 +418,9 @@ export async function confirm(
         actionLogs.push({
           type: focusSection.type,
           id: focusSection.id,
-          screenDescription: focusSection.screenDescriptionKorean,
+          screenDescription: focusSection.screenDescription,
           actionDescription,
+          screenChangeType: focusSection.screenChangeType,
         });
         saveObjectArrayToFile(actionLogs, "actionLogs.json");
         focusSection = await page.click(`[i="${component.i}"]`);
@@ -446,10 +448,10 @@ export async function confirm(
           throw new Error("No action value for select");
         }
         console.log("confirm for focus");
-        const selected = input.actionValue.split("---");
+        const selected = input.actionValue;
         const iAttr = selected[0];
         const description = selected[1];
-        focusSection = await page.select(`[i="${iAttr}"]`, true);
+        focusSection = await page.focus(`[i="${iAttr}"]`);
       }
     }
   } else {
@@ -457,8 +459,9 @@ export async function confirm(
     actionLogs.push({
       type: focusSection.type,
       id: focusSection.id,
-      screenDescription: focusSection.screenDescriptionKorean,
+      screenDescription: focusSection.screenDescription,
       actionDescription,
+      screenChangeType: focusSection.screenChangeType,
     });
     saveObjectArrayToFile(actionLogs, "actionLogs.json");
   }

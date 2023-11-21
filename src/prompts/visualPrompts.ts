@@ -101,8 +101,8 @@ export async function getDataFromHTML(screen: ScreenResult) {
 
   let results = [];
 
-  if (longElementDescType === "label") {
-    results = actions.map((comp) => comp.content?.split("-")[1]);
+  if (true) {
+    results = actions.map((comp) => comp.content);
   } else {
     const attrValue = await getAttrValueFromItem(
       longComponent,

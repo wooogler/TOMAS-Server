@@ -87,12 +87,6 @@ export async function navigate(input: NavigateInput) {
 
     let focusSection = await page.navigate(input.url); // Current focused section. Can be a page, a modal or a section.
     let actionLogs: SystemLog[] = []; // List of actions that have been executed
-    actionLogs.push({
-      id: focusSection.id,
-      type: focusSection.type,
-      screenDescription: focusSection.screenDescription,
-      actionDescription: `Navigate to the page: ${focusSection.screenDescription}`,
-    });
     while (true) {
       //   const simpleHtml = await simplifyHtml(focusSection.html, false);
       //   const screenDescription = await getScreenDescription(simpleHtml);
