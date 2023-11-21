@@ -42,7 +42,7 @@ import {
   loadObjectArrayFromFile,
   saveObjectArrayToFile,
 } from "../../utils/fileUtil";
-import { Action } from "../../utils/parsingAgent";
+import { Action, ActionCache } from "../../utils/parsingAgent";
 
 const page = new PageHandler();
 let focusSection: ScreenResult;
@@ -330,7 +330,24 @@ export async function answerForInput(
   }
 }
 
-export async function answerForSelect(
+export async function answerForSelect(input: SelectInput) {
+  console.log("answerForSelect");
+  if (page) {
+    page.removeHighlight();
+  }
+  await createHumanChat(
+    {
+      content: input.content,
+    },
+    "answerForSelect"
+  );
+
+  const component = input.component;
+  focusSection = await page.focus(`[i="${component.i}"]`);
+  return await planningAndAsk();
+}
+
+export async function answerForSelectOriginal(
   input: SelectInput
 ): Promise<AnswerResponse> {
   console.log("answerForSelect");
@@ -478,4 +495,7 @@ export async function closePage() {
 
 export function deleteLogs() {
   actionLogs = [];
+  saveObjectArrayToFile(actionLogs, "actionLogs.json");
+  const actionCache = new ActionCache("actionCache.json");
+  actionCache.clear();
 }

@@ -2,15 +2,36 @@
   {
     "type": "screen",
     "id": "https://m.megabox.co.kr/",
-    "screenDescription": "The screen is a pop-up notice with a close button and a link to an event. It also has a checkbox option to hide the notice for a day.",
-    "actionDescription": "The system clicked on the pop-up notice to close it.",
+    "screenDescription": "The screen is a pop-up notice with a close button and a link to an event. It also has a checkbox option to not show the notice for a day.",
+    "actionDescription": "The system clicked the 'close' button to close the popup.",
     "screenChangeType": "URL_CHANGE"
   },
   {
     "type": "screen",
     "id": "https://m.megabox.co.kr/",
-    "screenDescription": "The screen is a webpage with a header, a list of events, a list of movies, a section for movie feeds, and a navigation bar at the bottom. Its purpose is to provide information about current events and movies, allow users to navigate to different sections of the website, and provide quick access to important features such as logging in and viewing notifications.",
-    "actionDescription": "The system clicked on the element to perform the function of booking movie tickets.",
+    "screenDescription": "The screen is a webpage with a header, a list of events, a list of movies, and a footer with navigation buttons. Its purpose is to display information about upcoming events and movies, and provide navigation options for the user.",
+    "actionDescription": "The system clicked on an element that allows users to book movies or events.",
     "screenChangeType": "CLOSE_LAYER"
+  },
+  {
+    "type": "item",
+    "id": "https://m.megabox.co.kr/booking",
+    "screenDescription": "The screen is a movie ticket booking page. It includes a header with a title and buttons for login, notifications, and menu options. Below the header, there is a section displaying the currently showing movies with links to reserve tickets for each movie. There is also a section with options to choose a theater, choose a movie, or book a private screening. At the bottom of the screen, there is a footer with links to terms of service, privacy policy, customer support, and a PC version of the website. There are also contact information and copyright information displayed in the footer. Finally, there are buttons at the bottom of the screen for quick access to the home page, store, ticket booking, events, and user account.",
+    "actionDescription": "The system clicked on the element to initiate the action of reserving tickets for Seoul's spring movies.",
+    "screenChangeType": "STATE_CHANGE"
+  },
+  {
+    "type": "item",
+    "id": "https://m.megabox.co.kr/booking/movie",
+    "screenDescription": "The screen is a theater selection screen. Its purpose is to allow the user to choose a theater from a list of options. The screen displays a header with the title \"극장 선택\" (Theater Selection) and a close button. Below the header, there is a message informing the user that they can select up to 3 theaters. The screen also includes two tabs: \"지역별\" (By Region) and \"특별관\" (Special Theater). The user can switch between these tabs to view different theater options. \n\nUnder the tabs, there is a list of regions and their corresponding theaters. Each region is represented by a clickable link, and the number of theaters in each region is displayed next to the region name. The user can click on a theater to select it. At the bottom of the screen, there is a \"선택 완료\" (Selection Complete) button that the user can click to confirm their theater choices.",
+    "actionDescription": "The system clicked on the element to select a theater in the specified region.",
+    "screenChangeType": "STATE_CHANGE"
+  },
+  {
+    "type": "item",
+    "id": "https://m.megabox.co.kr/booking/movie",
+    "screenDescription": "The screen is a theater selection screen. Its purpose is to allow the user to choose a theater from a list of options. The screen displays a header with the title \"극장 선택\" (Theater Selection) and a close button. Below the header, there is a message informing the user that they can select up to 3 theaters. The screen also includes two tabs: \"지역별\" (By Region) and \"특별관\" (Special Theater). The user can switch between these tabs to view different theater options. \n\nUnder the tabs, there is a list of regions with the number of theaters available in each region. The user can click on a region to view the theaters in that region. Each theater is displayed as a clickable item with its name. At the bottom of the screen, there is a \"선택 완료\" (Complete Selection) button that the user can click to confirm their theater choices.",
+    "actionDescription": "The system clicked on one of the theaters in the Seoul area, allowing the user to select their desired theater on the webpage.",
+    "screenChangeType": "STATE_CHANGE"
   }
 ]

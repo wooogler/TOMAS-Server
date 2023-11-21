@@ -256,7 +256,7 @@ export class PageHandler {
 
   async focus(
     selector: string,
-    parsing: boolean = false
+    parsing: boolean = true
   ): Promise<ScreenResult> {
     const page = await this.getPage();
     const { screen } = await getScreen(page, async () => {}, false);

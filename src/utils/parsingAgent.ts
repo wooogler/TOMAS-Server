@@ -414,6 +414,7 @@ async function createSingleAction(
     content,
     question,
     description,
+    // html: elem.element.outerHTML,
     html: simplifyHtml(elem.element.outerHTML, true),
   };
 }
@@ -502,7 +503,7 @@ async function getAiResponseForSingleAction(
   return { content, question, description };
 }
 
-class ActionCache {
+export class ActionCache {
   private cache: Map<string, object>;
   private cacheFileName: string;
 
@@ -521,6 +522,10 @@ class ActionCache {
 
   save() {
     saveCacheToFile(this.cache, this.cacheFileName);
+  }
+
+  clear() {
+    this.cache.clear();
   }
 }
 

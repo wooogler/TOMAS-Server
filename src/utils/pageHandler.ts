@@ -8,7 +8,12 @@ import {
   getScreenDescription,
   getSectionDescription,
 } from "../prompts/screenPrompts";
-import { Action, parsingAgent, parsingItemAgent } from "./parsingAgent";
+import {
+  Action,
+  parsingAgent,
+  parsingItemAgent,
+  parsingListAgent,
+} from "./parsingAgent";
 
 const NO_PAGE_ERROR = new Error("Cannot find a page.");
 
@@ -256,7 +261,7 @@ export class PageHandler {
   //TODO: Fix the select function
 
   //select one item in the list
-  async select(
+  async selectOriginal(
     selector: string,
     isFocus: boolean = false, // focus on the selected item
     parsing: boolean = true
@@ -305,6 +310,81 @@ export class PageHandler {
       id: `${this.extractBaseURL(page.url())}section/${element?.getAttribute(
         "i"
       )}`,
+    };
+  }
+
+  async select(
+    selector: string,
+    parsing: boolean = true
+  ): Promise<ScreenResult> {
+    const page = await this.getPage();
+    const { screen } = await getScreen(page, async () => {}, false);
+    const dom = new JSDOM(screen);
+    const element = dom.window.document.querySelector(selector);
+    const elementSimpleHtml = simplifyHtml(element?.innerHTML || "", true);
+    if (parsing === false) {
+      return {
+        type: "section",
+        screenDescription: "",
+        screenDescriptionKorean: "",
+        actions: [],
+        id: `${this.extractBaseURL(page.url())}`,
+        screenChangeType: "STATE_CHANGE",
+      };
+    }
+    const screenSimpleHtml = simplifyHtml(screen, true);
+    const { screenDescription, screenDescriptionKorean } =
+      await getScreenDescription(screenSimpleHtml);
+
+    const actions = await parsingListAgent({
+      listHtml: element?.outerHTML || "",
+    });
+    return {
+      type: "section",
+      screenDescription: screenDescription,
+      screenDescriptionKorean: screenDescriptionKorean,
+      actions,
+      id: `${this.extractBaseURL(page.url())}section/${element?.getAttribute(
+        "i"
+      )}`,
+      screenChangeType: "STATE_CHANGE",
+    };
+  }
+  async focus(
+    selector: string,
+    parsing: boolean = true
+  ): Promise<ScreenResult> {
+    const page = await this.getPage();
+    const { screen } = await getScreen(page, async () => {}, false);
+    const dom = new JSDOM(screen);
+    const element = dom.window.document.querySelector(selector);
+    const screenSimpleHtml = simplifyHtml(screen, true);
+    const { screenDescription, screenDescriptionKorean } =
+      await getScreenDescription(screenSimpleHtml);
+
+    if (parsing === false) {
+      return {
+        type: "item",
+        screenDescription: "",
+        screenDescriptionKorean: "",
+        actions: [],
+        id: `${this.extractBaseURL(page.url())}`,
+        screenChangeType: "STATE_CHANGE",
+      };
+    }
+
+    const actions = await parsingItemAgent({
+      elementHtml: element?.outerHTML || "",
+      screenDescription,
+    });
+
+    return {
+      type: "item",
+      screenDescription,
+      screenDescriptionKorean,
+      actions,
+      id: `${this.extractBaseURL(page.url())}`,
+      screenChangeType: "STATE_CHANGE",
     };
   }
 
