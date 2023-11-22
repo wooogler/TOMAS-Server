@@ -125,9 +125,6 @@ export class PageHandler {
         { selector, color, borderWidth: 4 }
       );
     }
-
-    // 필요하다면 캔버스 제거 기능 추가
-    // ...
   }
 
   async highlight(selector: string) {
@@ -339,6 +336,7 @@ export class PageHandler {
     const actions = await parsingListAgent({
       listHtml: element?.outerHTML || "",
     });
+
     return {
       type: "section",
       screenDescription: screenDescription,
@@ -350,6 +348,7 @@ export class PageHandler {
       screenChangeType: "STATE_CHANGE",
     };
   }
+
   async focus(
     selector: string,
     parsing: boolean = true

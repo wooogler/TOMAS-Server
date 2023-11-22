@@ -25,7 +25,7 @@ ${html}`,
 export const getScreenDescription = async (html: string) => {
   const describePageSystemPrompt: Prompt = {
     role: "SYSTEM",
-    content: `Describe the screen and its purpose briefly.
+    content: `Describe the purpose of the screen in one sentence, focusing on its function and the type of information it provides, without detailing the specific elements or layout of the page.
     
 HTML code of the screen:
 ${html}`,
@@ -294,21 +294,21 @@ ${screenDescription}
 
 export const selectActionTemplate = ({
   options,
-  firstItemWithParentHtml,
+  firstTwoItemsWithParentHtml,
   screenDescription,
 }: {
   options: string[];
-  firstItemWithParentHtml: string;
+  firstTwoItemsWithParentHtml: string;
   screenDescription: string;
 }): Prompt => ({
   role: "SYSTEM",
   content: `A user is looking at the list on the web page screen. 
 
+HTML around the list with first two items:
+${firstTwoItemsWithParentHtml}
+
 items'text in the list:
 ${options.map((option) => `- ${option}`).join("\n")}
-
-HTML of the list with only first item:
-${firstItemWithParentHtml}
 
 Description of the screen where the list is located:
 ${screenDescription}

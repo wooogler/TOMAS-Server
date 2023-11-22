@@ -157,11 +157,15 @@ async function planningAndAsk(): Promise<
     const actions = focusSection.actions;
 
     const systemContext = await getSystemContext(actionLogs);
-    const taskI = await planningAgent(
-      focusSection,
-      userContext,
-      actionLogs.length !== 0 ? systemContext : "No action history"
-    );
+
+    const taskI =
+      actions.length === 1
+        ? actions[0].i.toString()
+        : await planningAgent(
+            focusSection,
+            userContext,
+            actionLogs.length !== 0 ? systemContext : "No action history"
+          );
 
     if (taskI) {
       page.highlight(`[i="${taskI}"]`);
@@ -172,6 +176,7 @@ async function planningAndAsk(): Promise<
         const component: AnswerResponse["component"] = {
           i: action.i.toString(),
           description: action.description,
+          content: action.content,
           html: action.html,
           actionType: action.type,
           question: action.question || "No Question",
@@ -382,6 +387,7 @@ export async function answerForSelectOriginal(
       description: component.description,
       html: "",
       actionType: component.actionType as ActionType,
+      content: component.content,
     },
     type: "requestConfirmation",
     actionValue: component.i + "---" + component.description,
@@ -403,7 +409,8 @@ export async function confirm(
   const component = input.component;
   const action: Action = {
     type: component.actionType,
-    content: component.description || "",
+    content: component.content || "",
+    description: component.description,
     html: component.html,
     i: Number(component.i),
   };
@@ -413,10 +420,7 @@ export async function confirm(
         if (!input.actionValue) {
           throw new Error("No action value for input");
         }
-        const actionDescription = await getActionHistory(
-          action,
-          input.actionValue
-        );
+        const actionDescription = getActionHistory(action, input.actionValue);
         actionLogs.push({
           type: focusSection.type,
           id: focusSection.id,
@@ -431,7 +435,7 @@ export async function confirm(
         );
       } else if (component.actionType === "click") {
         console.log("confirm for click");
-        const actionDescription = await getActionHistory(action, "yes");
+        const actionDescription = getActionHistory(action, "yes");
         actionLogs.push({
           type: focusSection.type,
           id: focusSection.id,
@@ -496,6 +500,4 @@ export async function closePage() {
 export function deleteLogs() {
   actionLogs = [];
   saveObjectArrayToFile(actionLogs, "actionLogs.json");
-  const actionCache = new ActionCache("actionCache.json");
-  actionCache.clear();
 }

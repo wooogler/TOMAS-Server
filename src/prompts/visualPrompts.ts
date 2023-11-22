@@ -148,8 +148,9 @@ export async function getDataFromHTML(screen: ScreenResult) {
     return {
       data: item,
       i: actions[index].i.toString(),
-      description: actions[index].content,
+      description: actions[index].description,
       actionType: actions[index].type,
+      content: actions[index].content,
     };
   });
   return data;

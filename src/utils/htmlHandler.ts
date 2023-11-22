@@ -24,6 +24,12 @@ export const removeAttributes = (
   if (!excludeTags.includes(element.tagName.toLowerCase())) {
     const attributes = Array.from(element.attributes);
     for (const attribute of attributes) {
+      // if (
+      //   attribute.name === "href" &&
+      //   attribute.value.toLowerCase().startsWith("javascript:")
+      // ) {
+      //   element.removeAttribute(attribute.name);
+      // } else
       if (!attributesToKeep.includes(attribute.name)) {
         element.removeAttribute(attribute.name);
       }
@@ -197,6 +203,7 @@ export const simplifyHtml = (
       "clickable",
       "class",
       "id",
+      "disabled",
     ];
     if (isClass === true) {
       attributesToKeepForActionComps.push("class");

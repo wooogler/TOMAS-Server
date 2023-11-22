@@ -263,11 +263,23 @@ export function findClickableElements(screen: Element): Element[] {
   const clickableElements = Array.from(
     screen.querySelectorAll(clickableTagNames.join(","))
   ).filter((element) => {
+    // 클래스에 'on'이 포함되어 있는 경우 제외
+    if (element.classList.contains("on")) {
+      return false;
+    }
+    if (
+      element.tagName.toLowerCase() === "button" &&
+      element.hasAttribute("disabled")
+    ) {
+      return false;
+    }
+
     if (element.tagName.toLowerCase() === "input") {
       const inputType = element.getAttribute("type");
       const clickableType = ["button", "submit", "radio", "checkbox"];
       return clickableType.includes(inputType || "");
     }
+
     return true;
   });
 
@@ -282,7 +294,27 @@ export function findClickableElements(screen: Element): Element[] {
     return true;
   });
 
-  return [...clickableElements, ...clickableDivs];
+  // clickableElements의 모든 요소를 결과 리스트에 추가
+  const combinedClickableElements = [...clickableElements];
+
+  for (const div of clickableDivs) {
+    let isUnique = true;
+
+    for (const elem of clickableElements) {
+      if (elem.contains(div) || div.contains(elem)) {
+        // clickableElements의 어떤 요소와 겹치는 경우, div를 추가하지 않음
+        isUnique = false;
+        break;
+      }
+    }
+
+    // 겹치지 않는 clickableDivs의 요소만 결과 리스트에 추가
+    if (isUnique) {
+      combinedClickableElements.push(div);
+    }
+  }
+
+  return combinedClickableElements;
 }
 
 // Find all inputable elements
@@ -339,7 +371,9 @@ async function getActions(
     processElement(elem, screenElement, screenDescription, actionCache)
   );
 
-  const actions = await Promise.all(actionsPromises);
+  const actions = (await Promise.all(actionsPromises)).filter(
+    (action) => action !== null
+  ) as Action[];
   actionCache.save();
   return actions;
 }
@@ -349,14 +383,16 @@ async function processElement(
   screenElement: Element,
   screenDescription: string,
   actionCache: ActionCache
-): Promise<Action> {
+): Promise<Action | null> {
   const identifier = generateIdentifier(elem.element?.outerHTML || "");
   let action = actionCache.get(identifier);
   if (!action) {
     action = await createAction(elem, screenElement, screenDescription);
     actionCache.set(identifier, action);
+  } else {
+    action.i = Number(elem.i);
   }
-  return action;
+  return action.content === "" ? null : action;
 }
 
 async function createAction(
@@ -436,16 +472,33 @@ async function getAiResponseForSelectAction(
   screenDescription: string
 ) {
   const options = await extractOptions(elem.element, screenDescription);
-  const element = elem.element;
-  const firstChildClone = element.children[0].cloneNode(true) as Element;
-  while (element.firstChild) {
-    element.removeChild(element.firstChild);
+  const elemI = elem.element.getAttribute("i");
+
+  const element = screenElement.querySelector(`[i="${elemI}"]`) as Element;
+  const elementClone = element.cloneNode(true) as Element;
+
+  while (elementClone.children.length > 2) {
+    const lastChild = elementClone.lastChild;
+    if (lastChild) {
+      elementClone.removeChild(lastChild);
+    }
   }
-  element.appendChild(firstChildClone);
-  const firstItemWithParentHtml = simplifyHtml(element.outerHTML, true, true);
+
+  const parentElement = element.parentElement;
+
+  const originalElementInParent = parentElement?.querySelector(
+    `[i="${elemI}"]`
+  );
+  parentElement?.replaceChild(elementClone, originalElementInParent as Element);
+
+  const firstTwoItemsWithParentHtml = simplifyHtml(
+    parentElement?.outerHTML || "",
+    true,
+    true
+  );
   const selectActionPrompt = selectActionTemplate({
     options,
-    firstItemWithParentHtml,
+    firstTwoItemsWithParentHtml,
     screenDescription,
   });
   const content = await getAiResponse([selectActionPrompt]);
@@ -526,6 +579,7 @@ export class ActionCache {
 
   clear() {
     this.cache.clear();
+    saveCacheToFile(this.cache, this.cacheFileName);
   }
 }
 

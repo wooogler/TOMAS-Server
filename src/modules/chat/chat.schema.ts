@@ -20,6 +20,7 @@ const ActionComponentSchema = z.object({
   i: z.string(),
   actionType: z.string(),
   description: z.string().optional(),
+  content: z.string(),
   html: z.string(),
   question: z.string().optional(),
 });
@@ -68,6 +69,7 @@ const selectSchema = z.object({
   description: z.string().optional(),
   data: optionSchema,
   actionType: z.string(),
+  content: z.string(),
 });
 
 const selectResponseSchema = z.object({

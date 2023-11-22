@@ -72,7 +72,24 @@ OR
   return response;
 }
 
-export async function getActionHistory(action: Action, actionValue: string) {
+export function getActionHistory(action: Action, actionValue: string) {
+  const actionType = action.type;
+  const actionContent = action.content;
+  if (actionType === "click") {
+    if (actionValue === "yes") {
+      return `${actionContent}`;
+    } else {
+      return `Not ${actionContent.toLowerCase()}`;
+    }
+  } else {
+    return `Input ${actionValue} for ${actionContent.toLowerCase()}`;
+  }
+}
+
+export async function getActionHistoryOriginal(
+  action: Action,
+  actionValue: string
+) {
   let actionDone = "";
   const actionType = action.type;
   if (actionType === "click") {

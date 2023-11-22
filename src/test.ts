@@ -26,7 +26,8 @@ async function main() {
     false
   );
   console.log("메인 공지 닫기");
-  const resultMain = await pageHandler.click(".btn-close-main-notice", false);
+  const resultMain = await pageHandler.click(".btn-close-main-notice", true);
+  showScreenResults(resultMain);
   // const resultBook = await pageHandler.click(
   //   "#boxo_movie > div:nth-child(1) > div > div.btn-area > a",
   //   false
@@ -44,15 +45,15 @@ async function main() {
   //   false
   // );
 
-  const resultMovie = await pageHandler.focus(
-    "#boxo_movie > div:nth-child(1)",
-    true
-  );
-  // const resultMovie = await pageHandler.focus(
+  // const resultMovie = await pageHandler.click(
+  //   "#boxo_movie > div:nth-child(1)",
+  //   true
+  // );
+  // const resultMovie = await pageHandler.click(
   //   "body > div.container.reserve-main-con.pb55 > div.reserve-wrap > div > div:nth-child(2) > div:nth-child(1)",
   //   true
   // );
-  showScreenResults(resultMovie);
+  // showScreenResults(resultMovie);
   // console.log("영화 별 예매 클릭");
   // const resultMovie = await pageHandler.click(
   //   ".item.movie > a:nth-child(1)",
