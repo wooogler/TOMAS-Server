@@ -33,11 +33,7 @@ import {
   makeQuestionForConfirmation,
   makeQuestionForSelectConfirmation,
 } from "../../prompts/chatPrompts";
-import {
-  getUsefulAttrFromList,
-  getListFromSelectResult,
-  getDataFromHTML,
-} from "../../prompts/visualPrompts";
+import { getDataFromHTML } from "../../prompts/visualPrompts";
 import {
   loadObjectArrayFromFile,
   saveObjectArrayToFile,
@@ -100,34 +96,6 @@ export async function navigate(
     };
   } catch (error: any) {
     console.error("Failed to navigate to the webpage.", error);
-    throw error;
-  }
-}
-
-export async function convertSelectResultIntoTable(
-  actionComponents: ActionComponent[],
-  screenDescription: string
-): Promise<
-  ({ i: string; description: string } & Record<string, string | string[]>)[]
-> {
-  const attrList = await getUsefulAttrFromList(
-    actionComponents,
-    screenDescription
-  );
-
-  try {
-    const jsList = await Promise.all(
-      actionComponents.map((comp) =>
-        getListFromSelectResult(comp, screenDescription, attrList)
-      )
-    );
-
-    return jsList.filter(Boolean) as ({
-      i: string;
-      description: string;
-    } & Record<string, string | string[]>)[];
-  } catch (error) {
-    console.log(error);
     throw error;
   }
 }
@@ -240,7 +208,7 @@ async function planningAndAsk(): Promise<
             type: `questionForSelect`,
             screenDescription: screenDescriptionKorean,
           };
-        } else {
+        } else if (component.actionType === "click") {
           const question = action.question;
           await createAIChat(
             {
@@ -249,7 +217,10 @@ async function planningAndAsk(): Promise<
             "confirmForClick"
           );
           return {
-            component,
+            component: {
+              ...component,
+              actionType: actions.length === 1 ? "pass" : "click",
+            },
             type: "requestConfirmation",
             screenDescription: screenDescriptionKorean,
           };
@@ -500,6 +471,9 @@ export async function confirm(
         const iAttr = selected[0];
         const description = selected[1];
         focusSection = await page.focus(`[i="${iAttr}"]`);
+      } else if (component.actionType === "pass") {
+        console.log("confirm for pass");
+        focusSection = await page.click(`[i="${component.i}"]`);
       }
     }
   } else {

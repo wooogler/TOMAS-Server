@@ -167,7 +167,6 @@ export const simplifyHtml = (
   const document = dom.window.document;
   const rootElement = document.body;
   if (rootElement) {
-    removeComments(rootElement);
     removeSpecificTags(rootElement, [
       "script",
       "style",

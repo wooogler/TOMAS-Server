@@ -28,15 +28,18 @@ export const getUserObjective = async (chats: Chat[]) => {
 };
 
 export async function getUserContext(chats: Chat[]) {
-  const actionChats = chats.filter((chat) => !chat.type.startsWith("confirm"));
-  const converationPrompt: Prompt = makeConversationPrompt(actionChats);
+  const actionChats = chats.filter(
+    (chat) => !chat.type.startsWith("confirm") || chat.content !== "선택안함"
+  );
+  const conversationPrompt: Prompt = makeConversationPrompt(actionChats);
+  console.log(conversationPrompt.content);
   const findUserContextPrompt: Prompt = {
     role: "SYSTEM",
     content: `Based on the conversation between the system and the user, describe the user's context. Please keep all useful information from the conversation in the context considering the user's goal. Start with "User's Context: "`,
   };
   const userContext = await getAiResponse([
     findUserContextPrompt,
-    converationPrompt,
+    conversationPrompt,
   ]);
   return userContext;
 }
@@ -164,7 +167,7 @@ export const makeQuestionPrompt = (): Prompt => ({
 export const makeSelectQuestionPrompt = (): Prompt => ({
   role: "HUMAN",
   content:
-    "Create a Korean question that asks older adults to choose an option based on the context. Do not mention the English translation in the output.",
+    "Create a Korean question that asks users to choose an option based on the context. Do not mention the English translation in the output.",
 });
 
 export const makeElementDescriptionPrompt = (): Prompt => ({

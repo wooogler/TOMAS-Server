@@ -41,6 +41,9 @@ export async function parsingListAgent({ listHtml }: { listHtml: string }) {
     async (prevPromise, itemElement) => {
       const prevActions = await prevPromise;
       const clickableElements = findClickableElements(itemElement);
+      const selectableElements = findSelectableElements(itemElement);
+      itemElement = removeElementsFromScreen(itemElement, selectableElements);
+
       const itemText = itemElement.textContent?.replace(/\s+/g, " ").trim();
       const itemI = itemElement.getAttribute("i");
       if (clickableElements.length > 0) {
@@ -49,51 +52,8 @@ export async function parsingListAgent({ listHtml }: { listHtml: string }) {
           content: itemText || "",
           question: `Do you want to select ${itemText}?`,
           i: Number(itemI),
-          html: simplifyHtml(itemElement.outerHTML, true),
+          html: simplifyHtml(itemElement.outerHTML, true, true),
         });
-      }
-      return prevActions;
-    },
-    Promise.resolve([] as Action[])
-  );
-
-  return itemActions;
-}
-
-export async function parsingItemAgentOriginal({
-  screenHtml,
-  screenDescription,
-}: {
-  screenHtml: string;
-  screenDescription: string;
-}): Promise<Action[]> {
-  const dom = new JSDOM(screenHtml);
-  const screen = dom.window.document.body as Element;
-  const itemElements = Array.from(screen.firstElementChild?.children || []);
-  const itemActions: Action[] = await itemElements.reduce(
-    async (prevPromise, itemElement) => {
-      const prevActions = await prevPromise;
-      const actions = await parsingAgent({
-        screenHtml: itemElement.outerHTML,
-        screenDescription,
-      });
-
-      if (actions.length > 1) {
-        const textLabel = await extractTextLabelFromHTML(
-          itemElement.outerHTML,
-          screenDescription
-        );
-        const itemI = itemElement.getAttribute("i");
-        prevActions.push({
-          type: "focus",
-          content: `label-${textLabel}`,
-          question: `Do you want to select ${textLabel}?`,
-          i: Number(itemI),
-          html: simplifyHtml(itemElement.outerHTML, true),
-        });
-      } else if (actions.length === 1) {
-        const action = actions[0];
-        prevActions.push(action);
       }
       return prevActions;
     },
@@ -111,8 +71,18 @@ export async function parsingItemAgent({
   screenDescription: string;
 }) {
   const dom = new JSDOM(elementHtml);
-  const element = dom.window.document.body as Element;
+  let element = dom.window.document.body as Element;
   const actionableElements: ActionableElement[] = [];
+
+  const selectableElements = findSelectableElements(element);
+  selectableElements.forEach((element) => {
+    actionableElements.push({
+      i: element.getAttribute("i") || "",
+      type: "select",
+      element,
+    });
+  });
+  element = removeElementsFromScreen(element, selectableElements);
 
   const clickableElements = findClickableElements(element);
   clickableElements.forEach((element) => {
@@ -200,6 +170,29 @@ function findSelectableElements(screen: Element): Element[] {
           break;
         }
       }
+      // 가장 높은 빈도수를 가진 클래스/데이터 속성 찾기
+      // let maxFrequency = 0;
+      // let maxFrequencyClassOrAttr = "";
+      // for (const [key, frequency] of frequencyMap.entries()) {
+      //   if (frequency > maxFrequency) {
+      //     maxFrequency = frequency;
+      //     maxFrequencyClassOrAttr = key;
+      //   }
+      // }
+
+      // // 해당 클래스/데이터 속성을 가진 자식 요소만 포함하는 새로운 요소 생성
+      // if (maxFrequency >= 2) {
+      //   const newElement = document.createElement("div");
+      //   for (const childElement of element.children) {
+      //     if (
+      //       childElement.classList.contains(maxFrequencyClassOrAttr) ||
+      //       childElement.getAttribute(maxFrequencyClassOrAttr) !== null
+      //     ) {
+      //       newElement.appendChild(childElement.cloneNode(true));
+      //     }
+      //   }
+      //   elements.push(newElement);
+      // }
     } else if (selectableTagNames.includes(tagName)) {
       // If the element is a selectable tag, add it to the list of selectable elements
       elements.push(element);
@@ -466,14 +459,8 @@ async function extractOptions(
   });
 }
 
-async function getAiResponseForSelectAction(
-  elem: ActionableElement,
-  screenElement: Element,
-  screenDescription: string
-) {
-  const options = await extractOptions(elem.element, screenDescription);
-  const elemI = elem.element.getAttribute("i");
-
+export function modifySelectAction(elem: Element, screenElement: Element) {
+  const elemI = elem.getAttribute("i");
   const element = screenElement.querySelector(`[i="${elemI}"]`) as Element;
   const elementClone = element.cloneNode(true) as Element;
 
@@ -483,7 +470,6 @@ async function getAiResponseForSelectAction(
       elementClone.removeChild(lastChild);
     }
   }
-
   const parentElement = element.parentElement;
 
   const originalElementInParent = parentElement?.querySelector(
@@ -491,6 +477,16 @@ async function getAiResponseForSelectAction(
   );
   parentElement?.replaceChild(elementClone, originalElementInParent as Element);
 
+  return parentElement;
+}
+
+async function getAiResponseForSelectAction(
+  elem: ActionableElement,
+  screenElement: Element,
+  screenDescription: string
+) {
+  const options = await extractOptions(elem.element, screenDescription);
+  const parentElement = modifySelectAction(elem.element, screenElement);
   const firstTwoItemsWithParentHtml = simplifyHtml(
     parentElement?.outerHTML || "",
     true,

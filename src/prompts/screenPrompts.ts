@@ -25,7 +25,7 @@ ${html}`,
 export const getScreenDescription = async (html: string) => {
   const describePageSystemPrompt: Prompt = {
     role: "SYSTEM",
-    content: `Describe the purpose of the screen in one sentence, focusing on its function and the type of information it provides, without detailing the specific elements or layout of the page.
+    content: `Describe the general purpose of the screen in one sentence, focusing on its function and the type of information it provides, without detailing the specific elements or layout of the screen.
     
 HTML code of the screen:
 ${html}`,
@@ -33,7 +33,7 @@ ${html}`,
 
   const describePageInKoreanPrompt: Prompt = {
     role: "HUMAN",
-    content: `Summarize the main purpose of the described webpage in one Korean sentence, focusing on its function and the type of information it provides, without detailing the specific elements or layout of the page.`,
+    content: `Summarize the main purpose of the described webpage in one Korean sentence, focusing on its function and the type of information it provides, without detailing the specific elements or layout of the screen.`,
   };
 
   const screenDescription = await getAiResponse([describePageSystemPrompt]);
@@ -65,49 +65,29 @@ ${html}`,
   return screenDescription;
 };
 
-export const getSectionDescription = async (
+export const getListDescription = async (
   html: string,
   screenDescription: string
 ) => {
-  const describeSectionSystemPrompt: Prompt = {
-    role: "SYSTEM",
-    content: `Summarize the purpose of the section.
-
-HTML of the section:
-${html}
-    
-The description on the webpage where the section is located: ${screenDescription}
-`,
-  };
-
-  const sectionDescription = await getAiResponse([describeSectionSystemPrompt]);
-  const sectionDescriptionKorean = await getAiResponse([
-    describeSectionSystemPrompt,
-    { content: sectionDescription, role: "AI" },
-    makeSectionDescriptionPrompt(),
-  ]);
-
-  return { sectionDescription, sectionDescriptionKorean };
-};
-
-export const getListDescription = async (
-  html: string,
-  pageDescription: string
-) => {
   const describeListSystemPrompt: Prompt = {
     role: "SYSTEM",
-    content: `Summarize the purpose of the list.
+    content: `Summarize the general purpose of the list.
 
 HTML of the list:
 ${html}
     
-The description on the webpage where the list is located: ${pageDescription}
+The description on the webpage where the list is located: ${screenDescription}
 `,
   };
 
   const listDescription = await getAiResponse([describeListSystemPrompt]);
+  const listDescriptionKorean = await getAiResponse([
+    describeListSystemPrompt,
+    { content: listDescription, role: "AI" },
+    makeSectionDescriptionPrompt(),
+  ]);
 
-  return listDescription;
+  return { listDescription, listDescriptionKorean };
 };
 
 export const getComponentInfo = async ({

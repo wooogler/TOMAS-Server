@@ -1,25 +1,28 @@
 import dotenv from "dotenv";
 import { JSDOM } from "jsdom";
 import puppeteer, { Browser, Page } from "puppeteer";
-import { ActionType, simplifyHtml } from "./htmlHandler";
+import { simplifyHtml, simplifyItemHtml } from "./htmlHandler";
 import {
+  getListDescription,
   getModalDescription,
   getPageDescription,
   getScreenDescription,
-  getSectionDescription,
 } from "../prompts/screenPrompts";
 import {
   Action,
+  modifySelectAction,
   parsingAgent,
   parsingItemAgent,
   parsingListAgent,
 } from "./parsingAgent";
 
+import { Prompt, getAiResponse, getGpt4Response } from "./langchainHandler";
+
 const NO_PAGE_ERROR = new Error("Cannot find a page.");
 
 export type ActionComponent = {
   i: string;
-  actionType: ActionType;
+  actionType: string;
   description?: string;
   html: string;
 };
@@ -255,61 +258,6 @@ export class PageHandler {
     });
   }
 
-  //TODO: Fix the select function
-
-  //select one item in the list
-  async selectOriginal(
-    selector: string,
-    isFocus: boolean = false, // focus on the selected item
-    parsing: boolean = true
-  ): Promise<ScreenResult> {
-    const page = await this.getPage();
-    const { screen, screenChangeType } = await getScreen(
-      page,
-      async () => {},
-      false
-    );
-    const dom = new JSDOM(screen);
-    const element = dom.window.document.querySelector(selector);
-    const elementSimpleHtml = simplifyHtml(element?.innerHTML || "", true);
-    if (parsing === false) {
-      return {
-        type: "section",
-        screenDescription: "",
-        screenDescriptionKorean: "",
-        actions: [],
-        screenChangeType,
-        id: `${this.extractBaseURL(page.url())}section/${element?.getAttribute(
-          "i"
-        )}`,
-      };
-    }
-    const screenSimpleHtml = simplifyHtml(screen, true);
-    const { screenDescription, screenDescriptionKorean } =
-      await getScreenDescription(screenSimpleHtml);
-    const { sectionDescription, sectionDescriptionKorean } =
-      await getSectionDescription(elementSimpleHtml, screenDescription);
-    const actions = isFocus
-      ? await parsingAgent({
-          screenHtml: element?.outerHTML || "",
-          screenDescription: sectionDescription,
-        })
-      : await parsingItemAgent({
-          elementHtml: element?.outerHTML || "",
-          screenDescription: sectionDescription,
-        });
-    return {
-      type: "section",
-      screenDescription: sectionDescription,
-      screenDescriptionKorean: sectionDescriptionKorean,
-      actions,
-      screenChangeType,
-      id: `${this.extractBaseURL(page.url())}section/${element?.getAttribute(
-        "i"
-      )}`,
-    };
-  }
-
   async select(
     selector: string,
     parsing: boolean = true
@@ -317,8 +265,8 @@ export class PageHandler {
     const page = await this.getPage();
     const { screen } = await getScreen(page, async () => {}, false);
     const dom = new JSDOM(screen);
-    const element = dom.window.document.querySelector(selector);
-    const elementSimpleHtml = simplifyHtml(element?.innerHTML || "", true);
+    const screenElement = dom.window.document.body as Element;
+    const listElement = dom.window.document.querySelector(selector) as Element;
     if (parsing === false) {
       return {
         type: "section",
@@ -333,18 +281,25 @@ export class PageHandler {
     const { screenDescription, screenDescriptionKorean } =
       await getScreenDescription(screenSimpleHtml);
 
+    const listHtml = modifySelectAction(listElement, screenElement);
+    const listSimpleHtml = simplifyHtml(listHtml?.outerHTML || "", true);
+    const { listDescription, listDescriptionKorean } = await getListDescription(
+      listSimpleHtml,
+      screenDescription
+    );
+
     const actions = await parsingListAgent({
-      listHtml: element?.outerHTML || "",
+      listHtml: listElement?.outerHTML || "",
     });
 
     return {
       type: "section",
-      screenDescription: screenDescription,
-      screenDescriptionKorean: screenDescriptionKorean,
+      screenDescription: listDescription,
+      screenDescriptionKorean: listDescriptionKorean,
       actions,
-      id: `${this.extractBaseURL(page.url())}section/${element?.getAttribute(
-        "i"
-      )}`,
+      id: `${this.extractBaseURL(
+        page.url()
+      )}section/${listElement?.getAttribute("i")}`,
       screenChangeType: "STATE_CHANGE",
     };
   }

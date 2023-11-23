@@ -8,204 +8,6 @@ import { ActionComponent, ScreenResult } from "../utils/pageHandler";
 import { JSDOM } from "jsdom";
 import { Action } from "../utils/parsingAgent";
 
-export async function getUsefulAttrFromList(
-  actionComponents: ActionComponent[],
-  screenDescription: string
-) {
-  const optionList = actionComponents
-    .map((item) => {
-      return `"i": ${item.i}, "description": ${item.description}, "html": ${item.html}`;
-    })
-    .join("\n");
-  const makeListPrompts: Prompt[] = [
-    {
-      role: "SYSTEM",
-      content: `You are the AI assistant who sees a list of items in webpage. For each item, there's a description and full html.
-As a database developer, we want to create a table for those items to keep all useful information in html for user, and help user to select from those items.
-Please help us to choose which attributes to keep.
-Remember, our ultimate goal is to help the user to make their decision from those options based on the attribute we keep. 
-Only keep the name of attributes. You do not have to keep an example of the attribute value.
-The description of the webpage:${screenDescription}
-The output should be like:
-- <attr1>
-- <attr2>
-- ...
-
-Please do not include any other information in the output.`,
-    },
-    {
-      role: "HUMAN",
-      content: `
-              options: ${optionList}
-            `,
-    },
-  ];
-  const confirmation = await getAiResponse(makeListPrompts);
-  const array = confirmation
-    .split("\n")
-    .filter((item) => item.startsWith("-"))
-    .map((item) => item.replace(/^- */, "").trim());
-  return array;
-}
-
-async function getAttrValueFromItem(
-  longComponent: Action,
-  screenDescription: string
-) {
-  const simpleItemHtml = simplifyItemHtml(longComponent.html);
-
-  const makeListPrompts: Prompt[] = [
-    {
-      role: "SYSTEM",
-      content: `Extract all useful information the users can see on the web browser for them to select the item they want. 
-
-Description of the section where the list is located:
-${screenDescription}
-
-HTML of one item in the list:
-${simpleItemHtml}
-
-Output the attributes and values in the following JSON format:
-
-{
-  <Attribute 1>: <value 1>,
-  <Attribute 2>: <value 2>,
-  ...
-}
-
-Please do not include any other information in the output.`,
-    },
-  ];
-
-  console.log(makeListPrompts[0].content);
-
-  const attrValue = await getGpt4Response(makeListPrompts);
-  return attrValue;
-}
-
-export async function getDataFromHTML(screen: ScreenResult) {
-  // console.log(
-  //   `actionDescriptions: ${screen.actionComponents
-  //     .map((item) => item.description)
-  //     .join("\n")}`
-  // );
-
-  const { actions, screenDescription } = screen;
-
-  const longComponent = actions.reduce((longestItem, current) => {
-    return current.html.length > longestItem.html.length
-      ? current
-      : longestItem;
-  });
-  const longElementDescType = longComponent.content?.split("-")[0];
-
-  let results = [];
-
-  if (true) {
-    results = actions.map((comp) => comp.content);
-  } else {
-    const attrValue = await getAttrValueFromItem(
-      longComponent,
-      screenDescription
-    );
-
-    async function processComponent(component: Action) {
-      const simpleItemHtml = simplifyItemHtml(component.html);
-      const makeItemPrompts: Prompt[] = [
-        {
-          role: "SYSTEM",
-          content: `Extract the information from the given HTML element using the same attribute with the example.
-  
-  Here is an example of another element in the same list.
-  ${attrValue}
-  
-  HTML of the element:
-  ${simpleItemHtml}
-  
-  Output the attributes and values in the following JSON format:
-  
-  {
-    <attr1>: <val1>,
-    <attr2>: <val2>,
-    ...
-  }
-  
-  Please do not include any other information in the output.
-  `,
-        },
-      ];
-
-      const jsonString = await getAiResponse(makeItemPrompts);
-      const jsonObject = JSON.parse(jsonString);
-
-      return jsonObject;
-    }
-
-    results = await Promise.all(actions.map(processComponent));
-  }
-
-  const data = results.map((item, index) => {
-    return {
-      data: item,
-      i: actions[index].i.toString(),
-      description: actions[index].description,
-      actionType: actions[index].type,
-      content: actions[index].content,
-    };
-  });
-  return data;
-}
-
-export async function getListFromSelectResult(
-  option: ActionComponent,
-  screenDescription: string,
-  attrList: string[]
-) {
-  const makeListPrompts: Prompt[] = [
-    {
-      role: "SYSTEM",
-      content: `
-You are the AI assistant who sees an option in a list from webpage. For this option, there's a description and full html.
-
-Please find all value of corresponding attributes in attribute list for this option.
-
-The attrList is: ${attrList.map((item) => `"${item}"`).join(", ")}
-
-Output your result in JSON format.
-
-The json should be in the following format:
-{
-    "i": <value of i>,
-    "description": <description>,
-    <attr1>: <value1>,
-    <attr2>: <value2>, 
-    <attr3>: [<value3_1>, <value3_2>...]
-    ...
-}
-
-The description of the webpage:
-${screenDescription}
-`,
-    },
-    {
-      role: "HUMAN",
-      content: `
-            option html: ${option.html}
-            option description: ${option.description}
-          `,
-    },
-  ];
-  const confirmation = await getAiResponse(makeListPrompts);
-  try {
-    return JSON.parse(confirmation) as {
-      i: string;
-      description: string;
-    } & Record<string, string | string[]>;
-  } catch (error) {
-    console.log("error in parsing json: ", error);
-  }
-}
-
 export async function extractTextLabelFromHTML(
   itemHtml: string,
   screenDescription: string
@@ -225,4 +27,206 @@ ${simpleItemHtml}`,
     },
   ];
   return await getAiResponse(makeTextLabelPrompts);
+}
+
+function removeAllElementsWithoutText(html: string): string {
+  const dom = new JSDOM(html);
+  const document = dom.window.document;
+
+  // 모든 요소 순회
+  const elements = document.querySelectorAll("*");
+
+  elements.forEach((el) => {
+    // textContent가 비어있는지 확인
+    if (!el.textContent || el.textContent.trim() === "") {
+      el.remove(); // textContent가 비어있다면 요소 제거
+    } else if (el.tagName.toLowerCase() === "a") {
+      el.removeAttribute("href"); // <a> 태그의 href 속성 제거
+    }
+    el.removeAttribute("clickable");
+  });
+
+  // 변경된 HTML 반환
+  return document.body.innerHTML;
+}
+
+function createIdentifierFromTagStructure(html: string): string {
+  const dom = new JSDOM(html);
+  const document = dom.window.document;
+  const rootElement = document.body.firstChild as HTMLElement;
+
+  // 재귀적으로 태그 이름을 추출하는 함수
+  function extractTagNames(element: HTMLElement | ChildNode): string {
+    if (!element || element.nodeType !== dom.window.Node.ELEMENT_NODE) {
+      return "";
+    }
+
+    const el = element as HTMLElement;
+    const tagName = el.tagName.toLowerCase();
+    let identifier = tagName;
+
+    // i와 div 태그를 제외한 태그의 클래스 이름 추가
+    if (tagName !== "i" && tagName !== "div") {
+      const classAttr = el.getAttribute("class");
+      if (classAttr) {
+        identifier += `.${classAttr.split(" ").join(".")}`;
+      }
+    }
+
+    // 모든 자식 요소에 대해 재귀 호출
+    element.childNodes.forEach((child) => {
+      const childIdentifier = extractTagNames(child);
+      if (childIdentifier) {
+        identifier += `(${childIdentifier})`;
+      }
+    });
+
+    return identifier;
+  }
+
+  return extractTagNames(rootElement);
+}
+
+function classifyHTMLsByStructure(htmls: string[]): Record<string, string[]> {
+  const classifiedHTMLs: Record<string, string[]> = {};
+
+  htmls.forEach((html) => {
+    const identifier = createIdentifierFromTagStructure(html);
+
+    if (!classifiedHTMLs[identifier]) {
+      classifiedHTMLs[identifier] = [];
+    }
+
+    classifiedHTMLs[identifier].push(html);
+  });
+
+  return classifiedHTMLs;
+}
+
+async function getAttrFromList(listHtml: string, screenDescription: string) {
+  const getAttrFromListPrompts: Prompt = {
+    role: "SYSTEM",
+    content: `Given multiple HTML snippets in a screen, extract key information and present it in a structured JSON Array format. Ignore any scripting, styling, or link/button elements.
+
+Description of the list:
+${screenDescription}
+
+HTML Snippets:
+${listHtml}
+
+Extract and format the information in one-level JSON Array as follows:
+
+Output: 
+[
+  {
+      // Details extracted from the first snippet
+  },
+  {
+      // Details extracted from the second snippet
+  },
+  ..
+]`,
+  };
+  console.log(getAttrFromListPrompts.content);
+  const jsonString = await getGpt4Response([getAttrFromListPrompts]);
+  console.log(jsonString);
+  const jsonArray = JSON.parse(jsonString);
+
+  const allAttributes = new Set<string>();
+  jsonArray
+    .filter((item: object) => Object.keys(item).length > 1)
+    .forEach((json: Record<string, string>) => {
+      Object.keys(json).forEach((attr) => {
+        allAttributes.add(attr);
+      });
+    });
+
+  return Array.from(allAttributes);
+}
+
+function hasOnlyOneTextContent(htmlString: string): boolean {
+  const dom = new JSDOM(htmlString);
+
+  function countTextNodes(node: Node): number {
+    let count = 0;
+
+    node.childNodes.forEach((child) => {
+      if (
+        child.nodeType === dom.window.Node.TEXT_NODE &&
+        child.textContent &&
+        child.textContent.trim().length > 0
+      ) {
+        count++;
+      } else {
+        count += countTextNodes(child);
+      }
+    });
+
+    return count;
+  }
+
+  const textContentCount = countTextNodes(dom.window.document.body);
+
+  console.log(textContentCount);
+
+  return textContentCount === 1;
+}
+
+export async function getDataFromHTML(screen: ScreenResult) {
+  const { actions, screenDescription } = screen;
+
+  const actionHtml = actions.map((action) => {
+    return removeAllElementsWithoutText(action.html);
+  });
+
+  let results = [];
+
+  if (hasOnlyOneTextContent(actionHtml[0])) {
+    results = actions.map((action) => action.content);
+  } else {
+    const classified = classifyHTMLsByStructure(actionHtml);
+    const listHtml = Object.values(classified)
+      .map((item) => {
+        return item[0];
+      })
+      .join("\n");
+
+    const attrList = await getAttrFromList(listHtml, screenDescription);
+
+    async function extractInfoFromAction(action: Action) {
+      const simpleActionHtml = removeAllElementsWithoutText(action.html);
+      const extractInfoPrompt: Prompt = {
+        role: "SYSTEM",
+        content: `
+      Given a HTML snippet, extract key information in a structured JSON format.
+
+HTML Snippet:
+${simpleActionHtml}
+
+Extract and format the information in one-level JSON as follows:
+
+Output: 
+{
+  ${attrList.map((attr) => `"${attr}": {${attr}} or null`).join(",\n")}
+}
+`,
+      };
+      const jsonString = await getAiResponse([extractInfoPrompt]);
+      const jsonObject = JSON.parse(jsonString);
+      return jsonObject;
+    }
+
+    results = await Promise.all(actions.map(extractInfoFromAction));
+  }
+
+  const data = results.map((item, index) => {
+    return {
+      data: item,
+      i: actions[index].i.toString(),
+      description: actions[index].description,
+      actionType: actions[index].type,
+      content: actions[index].content,
+    };
+  });
+  return data;
 }

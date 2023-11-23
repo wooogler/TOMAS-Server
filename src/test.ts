@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import { PageHandler, ScreenResult } from "./utils/pageHandler copy";
+import { getDataFromHTML } from "./prompts/visualPrompts";
 dotenv.config();
 
 async function main() {
@@ -28,17 +29,31 @@ async function main() {
   console.log("메인 공지 닫기");
   const resultMain = await pageHandler.click(".btn-close-main-notice", true);
 
-  // const resultBook = await pageHandler.click(
-  //   "#boxo_movie > div:nth-child(1) > div > div.btn-area > a",
-  //   false
-  // );
+  const resultBook = await pageHandler.click(
+    "#boxo_movie > div:nth-child(1) > div > div.btn-area > a",
+    false
+  );
+
+  const location = await pageHandler.select(
+    "#branchTheatherList > div.district-list > ul",
+    true
+  );
+
+  showScreenResults(location);
+  const data = await getDataFromHTML(location);
+  console.log(data);
+
   // const resultLocationChange = await pageHandler.click(
   //   "#branch_area_35 > a",
   //   false
   // );
 
-  const resultMovies = await pageHandler.select("#boxo_movie", true);
-  console.log(resultMovies.actions[0].html);
+  // const resultMovies = await pageHandler.select("#boxo_movie", true);
+  // const resultMoreMovies = await pageHandler.click(".btn-more-movie", false);
+  // const resultMovies = await pageHandler.select("#movieList > ul", true);
+
+  // const data = await getDataFromHTML(resultMovies);
+  // console.log(data);
 
   // console.log("영화 예매 클릭");
   // const resultBook = await pageHandler.click(

@@ -1,26 +1,27 @@
 import dotenv from "dotenv";
 import { JSDOM } from "jsdom";
 import puppeteer, { Browser, Page } from "puppeteer";
-import { ActionType, simplifyHtml } from "./htmlHandler";
+import { simplifyHtml, simplifyItemHtml } from "./htmlHandler";
 import {
+  getListDescription,
   getModalDescription,
   getPageDescription,
   getScreenDescription,
-  getSectionDescription,
 } from "../prompts/screenPrompts";
 import {
   Action,
-  findClickableElements,
+  modifySelectAction,
   parsingAgent,
   parsingItemAgent,
   parsingListAgent,
 } from "./parsingAgent";
+import { Prompt, getAiResponse, getGpt4Response } from "./langchainHandler";
 
 const NO_PAGE_ERROR = new Error("Cannot find a page.");
 
 export type ActionComponent = {
   i: string;
-  actionType: ActionType;
+  actionType: string;
   description?: string;
   html: string;
 };
@@ -30,6 +31,7 @@ export interface ScreenResult {
   type: string;
   screenDescription: string;
   screenDescriptionKorean: string;
+  screenChangeType: ScreenChangeType;
   actions: Action[];
 }
 
@@ -70,39 +72,6 @@ export class PageHandler {
     const parsedURL = new URL(url);
     return parsedURL.origin + parsedURL.pathname;
   }
-
-  async handleAction(
-    parsing: boolean,
-    action: () => Promise<void>
-  ): Promise<ScreenResult> {
-    const page = await this.getPage();
-    const { screen, scrolls } = await getScreen(page, action, true);
-
-    if (parsing === false) {
-      return {
-        type: "page",
-        screenDescription: "",
-        screenDescriptionKorean: "",
-        actions: [],
-        id: `${this.extractBaseURL(page.url())}`,
-      };
-    }
-    const screenSimpleHtml = simplifyHtml(screen, true);
-    const { screenDescription, screenDescriptionKorean } =
-      await getScreenDescription(screenSimpleHtml);
-    const actions = await parsingAgent({
-      screenHtml: screen,
-      screenDescription,
-    });
-    return {
-      type: "screen",
-      screenDescription,
-      screenDescriptionKorean,
-      actions,
-      id: `${this.extractBaseURL(page.url())}`,
-    };
-  }
-
   async highlightScreenResults(screenResult: ScreenResult) {
     const page = await this.getPage();
     const { actions } = screenResult;
@@ -158,9 +127,6 @@ export class PageHandler {
         { selector, color, borderWidth: 4 }
       );
     }
-
-    // 필요하다면 캔버스 제거 기능 추가
-    // ...
   }
 
   async highlight(selector: string) {
@@ -204,7 +170,6 @@ export class PageHandler {
     );
   }
 
-  // 하이라이트를 제거하는 함수
   async removeHighlight() {
     const page = await this.getPage();
     await page.evaluate(() => {
@@ -213,6 +178,44 @@ export class PageHandler {
         canvas.remove();
       }
     });
+  }
+
+  async handleAction(
+    parsing: boolean,
+    action: () => Promise<void>
+  ): Promise<ScreenResult> {
+    const page = await this.getPage();
+    const { screen, scrolls, screenChangeType } = await getScreen(
+      page,
+      action,
+      true
+    );
+
+    if (parsing === false) {
+      return {
+        type: "page",
+        screenDescription: "",
+        screenDescriptionKorean: "",
+        actions: [],
+        screenChangeType: "STATE_CHANGE",
+        id: `${this.extractBaseURL(page.url())}`,
+      };
+    }
+    const screenSimpleHtml = simplifyHtml(screen, true);
+    const { screenDescription, screenDescriptionKorean } =
+      await getScreenDescription(screenSimpleHtml);
+    const actions = await parsingAgent({
+      screenHtml: screen,
+      screenDescription,
+    });
+    return {
+      type: "screen",
+      screenDescription,
+      screenDescriptionKorean,
+      screenChangeType,
+      actions,
+      id: `${this.extractBaseURL(page.url())}`,
+    };
   }
 
   async navigate(url: string, parsing: boolean = true): Promise<ScreenResult> {
@@ -254,6 +257,52 @@ export class PageHandler {
     });
   }
 
+  async select(
+    selector: string,
+    parsing: boolean = true
+  ): Promise<ScreenResult> {
+    const page = await this.getPage();
+    const { screen } = await getScreen(page, async () => {}, false);
+    const dom = new JSDOM(screen);
+    const screenElement = dom.window.document.body as Element;
+    const listElement = dom.window.document.querySelector(selector) as Element;
+    if (parsing === false) {
+      return {
+        type: "section",
+        screenDescription: "",
+        screenDescriptionKorean: "",
+        actions: [],
+        id: `${this.extractBaseURL(page.url())}`,
+        screenChangeType: "STATE_CHANGE",
+      };
+    }
+    const screenSimpleHtml = simplifyHtml(screen, true);
+    const { screenDescription, screenDescriptionKorean } =
+      await getScreenDescription(screenSimpleHtml);
+
+    const listHtml = modifySelectAction(listElement, screenElement);
+    const listSimpleHtml = simplifyHtml(listHtml?.outerHTML || "", true);
+    const { listDescription, listDescriptionKorean } = await getListDescription(
+      listSimpleHtml,
+      screenDescription
+    );
+
+    const actions = await parsingListAgent({
+      listHtml: listElement?.outerHTML || "",
+    });
+
+    return {
+      type: "section",
+      screenDescription: listDescription,
+      screenDescriptionKorean: listDescriptionKorean,
+      actions,
+      id: `${this.extractBaseURL(
+        page.url()
+      )}section/${listElement?.getAttribute("i")}`,
+      screenChangeType: "STATE_CHANGE",
+    };
+  }
+
   async focus(
     selector: string,
     parsing: boolean = true
@@ -273,6 +322,7 @@ export class PageHandler {
         screenDescriptionKorean: "",
         actions: [],
         id: `${this.extractBaseURL(page.url())}`,
+        screenChangeType: "STATE_CHANGE",
       };
     }
 
@@ -287,95 +337,17 @@ export class PageHandler {
       screenDescriptionKorean,
       actions,
       id: `${this.extractBaseURL(page.url())}`,
-    };
-  }
-
-  async select(
-    selector: string,
-    parsing: boolean = false
-  ): Promise<ScreenResult> {
-    const page = await this.getPage();
-    const { screen } = await getScreen(page, async () => {}, false);
-    const dom = new JSDOM(screen);
-    const element = dom.window.document.querySelector(selector);
-    const elementSimpleHtml = simplifyHtml(element?.innerHTML || "", true);
-    if (parsing === false) {
-      return {
-        type: "section",
-        screenDescription: "",
-        screenDescriptionKorean: "",
-        actions: [],
-        id: `${this.extractBaseURL(page.url())}`,
-      };
-    }
-    const screenSimpleHtml = simplifyHtml(screen, true);
-    const { screenDescription, screenDescriptionKorean } =
-      await getScreenDescription(screenSimpleHtml);
-
-    const actions = await parsingListAgent({
-      listHtml: element?.outerHTML || "",
-    });
-    return {
-      type: "section",
-      screenDescription: screenDescription,
-      screenDescriptionKorean: screenDescriptionKorean,
-      actions,
-      id: `${this.extractBaseURL(page.url())}section/${element?.getAttribute(
-        "i"
-      )}`,
-    };
-  }
-
-  //select one item in the list
-  async selectOriginal(
-    selector: string,
-    isFocus: boolean = false, // focus on the selected item
-    parsing: boolean = true
-  ): Promise<ScreenResult> {
-    const page = await this.getPage();
-    const { screen } = await getScreen(page, async () => {}, false);
-    const dom = new JSDOM(screen);
-    const element = dom.window.document.querySelector(selector);
-    const elementSimpleHtml = simplifyHtml(element?.innerHTML || "", true);
-    if (parsing === false) {
-      return {
-        type: "section",
-        screenDescription: "",
-        screenDescriptionKorean: "",
-        actions: [],
-        id: `${this.extractBaseURL(page.url())}section/${element?.getAttribute(
-          "i"
-        )}`,
-      };
-    }
-    const screenSimpleHtml = simplifyHtml(screen, true);
-    const { screenDescription, screenDescriptionKorean } =
-      await getScreenDescription(screenSimpleHtml);
-    const { sectionDescription, sectionDescriptionKorean } =
-      await getSectionDescription(elementSimpleHtml, screenDescription);
-    const actions = isFocus
-      ? await parsingAgent({
-          screenHtml: element?.outerHTML || "",
-          screenDescription: sectionDescription,
-        })
-      : await parsingItemAgent({
-          elementHtml: element?.outerHTML || "",
-          screenDescription: sectionDescription,
-        });
-    return {
-      type: "section",
-      screenDescription: sectionDescription,
-      screenDescriptionKorean: sectionDescriptionKorean,
-      actions,
-      id: `${this.extractBaseURL(page.url())}section/${element?.getAttribute(
-        "i"
-      )}`,
+      screenChangeType: "STATE_CHANGE",
     };
   }
 
   async unfocus(parsing: boolean = true): Promise<ScreenResult> {
     const page = await this.getPage();
-    const { screen } = await getScreen(page, async () => {}, true);
+    const { screen, screenChangeType } = await getScreen(
+      page,
+      async () => {},
+      true
+    );
     const screenSimpleHtml = simplifyHtml(screen, true);
     const pageSimpleHtml = simplifyHtml(await page.content(), true);
     if (parsing === false) {
@@ -383,6 +355,7 @@ export class PageHandler {
         type: "page",
         screenDescription: "",
         screenDescriptionKorean: "",
+        screenChangeType,
         actions: [],
         id: `${this.extractBaseURL(page.url())}`,
       };
@@ -397,6 +370,7 @@ export class PageHandler {
       type: "page",
       screenDescription,
       screenDescriptionKorean,
+      screenChangeType,
       actions,
       id: `${this.extractBaseURL(page.url())}`,
     };

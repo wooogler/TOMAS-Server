@@ -43,18 +43,19 @@ export async function planningAgent(
   const planningActionPromptForSystem: Prompt = {
     role: "SYSTEM",
     content: `
-You are the AI that will take the next action on the smartphone screen on behalf of a user.
+    You are an AI planning agent. Based on the user's context and action logs, first describe your plan for proceeding to the next screen.
 
 ${userContext}
 
 Action Logs:
 ${systemContext}
 
-First, based on the user's context and your action logs, describe the logical thinking process to choose the next action to proceed to the next screen.
+Describe your thought process and reasoning for how to proceed to the next screen, considering the user's needs and the current screen context.
 
-Then, return one action from the available actions on the current screen.
+Then, choose one action from the available actions on the current screen that aligns best with the user's goal and provides a smooth transition to the next screen.
 
 Description of the current screen: ${focusedSection.screenDescription}
+
 Available actions:
 ${focusedSection.actions
   .map((comp) => `- ${comp.content} (i=${comp.i})`)
@@ -308,7 +309,7 @@ export async function parsingItemAgent(params: {
 }): Promise<ActionComponent[]> {
   const { screenHtml, screenDescription } = params;
   const dom = new JSDOM(screenHtml);
-  const listDescription = await getListDescription(
+  const { listDescription } = await getListDescription(
     screenHtml,
     screenDescription
   );
