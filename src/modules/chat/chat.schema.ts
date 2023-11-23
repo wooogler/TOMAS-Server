@@ -74,11 +74,14 @@ const selectSchema = z.object({
 
 const selectResponseSchema = z.object({
   components: z.array(selectSchema),
+  component: ActionComponentSchema,
+  screenDescription: z.string().optional(),
   type: z.string(),
 });
 
 const selectInputSchema = z.object({
-  component: selectSchema,
+  component: ActionComponentSchema,
+  option: selectSchema.nullable(),
   content: z.string(),
 });
 

@@ -81,8 +81,10 @@ export function getActionHistory(action: Action, actionValue: string) {
     } else {
       return `Not ${actionContent.toLowerCase()}`;
     }
-  } else {
+  } else if (actionType === "input") {
     return `Input ${actionValue} for ${actionContent.toLowerCase()}`;
+  } else {
+    return `Select ${actionValue} for ${actionContent.toLowerCase()}`;
   }
 }
 

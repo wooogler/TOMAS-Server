@@ -50,7 +50,7 @@ ${userContext}
 Action Logs:
 ${systemContext}
 
-First, describe the logical thinking process to choose the next action based on the user's context and your action logs.
+First, based on the user's context and your action logs, describe the logical thinking process to choose the next action to proceed to the next screen.
 
 Then, return one action from the available actions on the current screen.
 

@@ -235,6 +235,7 @@ async function planningAndAsk(): Promise<
             "questionForSelect"
           );
           return {
+            component,
             components: await getDataFromHTML(options),
             type: `questionForSelect`,
             screenDescription: screenDescriptionKorean,
@@ -279,7 +280,7 @@ export async function answerForInput(
   const component = input.component;
   const action: Action = {
     type: component.actionType,
-    content: component.description || "",
+    content: component.content || "",
     html: component.html,
     i: Number(component.i),
     question: component.question,
@@ -347,8 +348,34 @@ export async function answerForSelect(input: SelectInput) {
     "answerForSelect"
   );
 
+  const option = input.option;
   const component = input.component;
-  focusSection = await page.focus(`[i="${component.i}"]`);
+  const action: Action = {
+    type: component.actionType,
+    content: component.content || "",
+    html: component.html,
+    i: Number(component.i),
+    question: component.question,
+  };
+
+  actionLogs = loadObjectArrayFromFile<SystemLog>("actionLogs.json");
+  const actionDescription = getActionHistory(
+    action,
+    option !== null ? option.content : "no option"
+  );
+  actionLogs.push({
+    type: focusSection.type,
+    id: focusSection.id,
+    screenDescription: focusSection.screenDescription,
+    actionDescription,
+    screenChangeType: focusSection.screenChangeType,
+  });
+  saveObjectArrayToFile(actionLogs, "actionLogs.json");
+
+  if (option) {
+    focusSection = await page.focus(`[i="${option.i}"]`);
+  }
+
   return await planningAndAsk();
 }
 

@@ -27,7 +27,7 @@ async function main() {
   );
   console.log("메인 공지 닫기");
   const resultMain = await pageHandler.click(".btn-close-main-notice", true);
-  showScreenResults(resultMain);
+
   // const resultBook = await pageHandler.click(
   //   "#boxo_movie > div:nth-child(1) > div > div.btn-area > a",
   //   false
@@ -37,7 +37,8 @@ async function main() {
   //   false
   // );
 
-  // const resultMovies = await pageHandler.select
+  const resultMovies = await pageHandler.select("#boxo_movie", true);
+  console.log(resultMovies.actions[0].html);
 
   // console.log("영화 예매 클릭");
   // const resultBook = await pageHandler.click(
