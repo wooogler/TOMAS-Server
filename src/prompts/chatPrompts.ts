@@ -27,21 +27,38 @@ export const getUserObjective = async (chats: Chat[]) => {
   return getAiResponse([findTaskObjectiveSystemPrompt, conversationPrompt]);
 };
 
-export async function getUserContext(chats: Chat[]) {
-  const actionChats = chats.filter(
-    (chat) => !chat.type.startsWith("confirm") || chat.content !== "선택안함"
-  );
+// 사용자의 목표를 추출하는 함수
+export async function getUserGoal(chats: Chat[]): Promise<string> {
+  const actionChats = chats;
   const conversationPrompt: Prompt = makeConversationPrompt(actionChats);
-  console.log(conversationPrompt.content);
-  const findUserContextPrompt: Prompt = {
+
+  const findUserGoalPrompt: Prompt = {
     role: "SYSTEM",
-    content: `Based on the conversation between the system and the user, describe the user's context. Please keep all useful information from the conversation in the context considering the user's goal. Start with "User's Context: "`,
+    content: `Based on the conversation between the system and the user, describe the user's goal.`,
   };
-  const userContext = await getAiResponse([
-    findUserContextPrompt,
+
+  const userGoalResponse = await getAiResponse([
+    findUserGoalPrompt,
     conversationPrompt,
   ]);
-  return userContext;
+  return userGoalResponse;
+}
+
+// 사용자 정보를 추출하는 함수
+export async function getUserInfo(chats: Chat[]): Promise<string> {
+  const actionChats = chats;
+  const conversationPrompt: Prompt = makeConversationPrompt(actionChats);
+
+  const findUserInfoPrompt: Prompt = {
+    role: "SYSTEM",
+    content: `Based on the conversation, extract any relevant user information and present it in a list format. Each item should be in the format "{key} : {value}"."`,
+  };
+
+  const userInfoResponse = await getAiResponse([
+    findUserInfoPrompt,
+    conversationPrompt,
+  ]);
+  return userInfoResponse;
 }
 
 export async function makeQuestionForActionValue(
@@ -157,29 +174,34 @@ The description of the screen: ${screenDescription}`,
   ]);
 }
 
-export const makeQuestionPrompt = (): Prompt => ({
-  role: "HUMAN",
-  content:
-    "Create a Korean question that asks for user confirmation to perform the action described in the input. Do not mention the English translation in the output.",
-  // "Create a Korean question that ask older adults if they want to perform the given action. Do not mention the English translation in the output.",
-});
-
 export const makeSelectQuestionPrompt = (): Prompt => ({
   role: "HUMAN",
   content:
-    "Create a Korean question that asks users to choose an option based on the context. Do not mention the English translation in the output.",
+    "Based on the 'select' action described in the input, create a Korean question that asks the user which item they wish to choose from a specific list. The question should directly inquire about the user's choice regarding the item to be selected from the list. Avoid including any English translation in the output.",
+});
+
+export const makeInputQuestionPrompt = (): Prompt => ({
+  role: "HUMAN",
+  content:
+    "Given the 'input' action described, generate a Korean directive asking the user to input the specified information. The directive should clearly prompt the user to enter the information related to the input action. Avoid providing any English translation in the output.",
+});
+
+export const makeClickQuestionPrompt = (): Prompt => ({
+  role: "HUMAN",
+  content:
+    "Given the 'click' action described in the input, create a Korean question that asks the user whether they wish to proceed with the click action. The question should directly inquire about the user's intention to perform the specific click action mentioned. Refrain from including any English translation in the output.",
 });
 
 export const makeElementDescriptionPrompt = (): Prompt => ({
   role: "HUMAN",
   content:
-    "Generate a Korean description explaining the action preformed by interacting with the element on a webpage. Focus on describing the function without detailing what the element represents or where it is located.",
+    "Generate a Korean description of the specific element on a webpage. Emphasize the immediate outcome or effect of this interaction, focusing on the functionality of the action. Avoid going into details about the nature, representation, or location of the element itself. The description should be clear, concise, and directly related to the user's interaction with the element.",
 });
 
 export const makeListDescriptionPrompt = (): Prompt => ({
   role: "HUMAN",
   content:
-    "Generate a Korean description explaining the action preformed by selecting an item in the list on a webpage. Focus on describing the function without detailing what the list represents or where it is located.",
+    "Generate a Korean description of the specific list on a webpage. Emphasize the immediate outcome or effect of selecting an item from this list, focusing on the functionality of the action. Avoid going into details about the nature or representation of the list itself or its location on the webpage. The description should be clear, concise, and directly related to what happens when a user interacts with the list by selecting an item.",
 });
 
 export const makeSectionDescriptionPrompt = (): Prompt => ({

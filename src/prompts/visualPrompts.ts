@@ -125,7 +125,9 @@ Output:
       // Details extracted from the second snippet
   },
   ..
-]`,
+]
+
+The output should be provided in a JSON array format that can be parsed.`,
   };
   console.log(getAttrFromListPrompts.content);
   const jsonString = await getGpt4Response([getAttrFromListPrompts]);
@@ -135,10 +137,21 @@ Output:
   const allAttributes = new Set<string>();
   jsonArray
     .filter((item: object) => Object.keys(item).length > 1)
-    .forEach((json: Record<string, string>) => {
-      Object.keys(json).forEach((attr) => {
-        allAttributes.add(attr);
-      });
+    .forEach((json: Record<string, any>) => {
+      const processObject = (
+        obj: Record<string, any>,
+        parentKey: string = ""
+      ) => {
+        Object.keys(obj).forEach((key) => {
+          const fullKey = parentKey ? `${parentKey}_${key}` : key;
+          if (obj[key] instanceof Object && !(obj[key] instanceof Array)) {
+            processObject(obj[key], fullKey);
+          } else {
+            allAttributes.add(fullKey);
+          }
+        });
+      };
+      processObject(json);
     });
 
   return Array.from(allAttributes);

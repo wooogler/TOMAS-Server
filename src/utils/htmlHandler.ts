@@ -553,7 +553,7 @@ export interface ComponentInfo {
   description: string;
 }
 
-const capitalizeFirstCharacter = (str: string) =>
+export const capitalizeFirstCharacter = (str: string) =>
   str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 
 export const editActionType = (actionType: string) => {
@@ -565,7 +565,7 @@ export const editActionType = (actionType: string) => {
 export function extractSurroundingHtml(
   htmlString: string,
   target: string,
-  range = 1000
+  range = 2000
 ) {
   const startIndex = htmlString.indexOf(target);
   if (startIndex === -1) {

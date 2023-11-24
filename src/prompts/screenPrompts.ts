@@ -1,44 +1,48 @@
 import { parsingItemAgent } from "../modules/agents";
 import {
   ActionType,
+  capitalizeFirstCharacter,
   editActionType,
   extractSurroundingHtml,
   removeBeforeAndIncludingKeyword,
 } from "../utils/htmlHandler";
 import { Prompt, getAiResponse } from "../utils/langchainHandler";
+import { ScreenType } from "../utils/pageHandler";
 import { makeSectionDescriptionPrompt } from "./chatPrompts";
 
-export const getPageDescription = async (html: string) => {
-  const describePageSystemPrompt: Prompt = {
-    role: "SYSTEM",
-    content: `Given the HTML code, briefly summarize the general purpose of the web page it represents in one sentence.
-    
-HTML code:
+export const getScreenDescription = async (
+  html: string,
+  screenType: ScreenType
+) => {
+  let describeScreenSystemPrompt: Prompt;
+
+  if (screenType === "page") {
+    describeScreenSystemPrompt = {
+      role: "SYSTEM",
+      content: `Analyze the provided HTML code of the webpage and describe the page's general purpose and function in one sentence. Focus on the type of information the webpage is designed to convey and its intended use, based on the structure and elements found in the HTML.
+      
+HTML code of the page:
 ${html}`,
-  };
-
-  const pageDescription = await getAiResponse([describePageSystemPrompt]);
-
-  return pageDescription;
-};
-
-export const getScreenDescription = async (html: string) => {
-  const describePageSystemPrompt: Prompt = {
-    role: "SYSTEM",
-    content: `Describe the general purpose of the screen in one sentence, focusing on its function and the type of information it provides, without detailing the specific elements or layout of the screen.
-    
-HTML code of the screen:
+    };
+  } else {
+    // screenType === 'modal'
+    describeScreenSystemPrompt = {
+      role: "SYSTEM",
+      content: `Analyze the provided HTML code of the modal and describe the modal's specific purpose and function in one sentence. Focus on the type of information or interaction the modal is designed to convey or facilitate, based on its structure and elements.
+      
+HTML code of the modal:
 ${html}`,
-  };
+    };
+  }
 
   const describePageInKoreanPrompt: Prompt = {
     role: "HUMAN",
-    content: `Summarize the main purpose of the described webpage in one Korean sentence, focusing on its function and the type of information it provides, without detailing the specific elements or layout of the screen.`,
+    content: `Summarize the main purpose of the described screen in one Korean sentence, focusing on its function and the type of information it provides, without detailing the specific elements or layout of the screen.`,
   };
 
-  const screenDescription = await getAiResponse([describePageSystemPrompt]);
+  const screenDescription = await getAiResponse([describeScreenSystemPrompt]);
   const screenDescriptionKorean = await getAiResponse([
-    describePageSystemPrompt,
+    describeScreenSystemPrompt,
     { content: screenDescription, role: "AI" },
     describePageInKoreanPrompt,
   ]);
@@ -71,12 +75,13 @@ export const getListDescription = async (
 ) => {
   const describeListSystemPrompt: Prompt = {
     role: "SYSTEM",
-    content: `Summarize the general purpose of the list.
+    content: `Analyze the provided HTML code of the list and summarize its general purpose in one sentence. Focus on the type of information the list is designed to display and its intended use, based on the elements and structure found in the HTML. Avoid detailing the specific layout or design of the list's elements, but use the HTML to deduce the overall purpose of the list and the nature of the information it contains.
 
 HTML of the list:
 ${html}
-    
-The description on the webpage where the list is located: ${screenDescription}
+
+Description of the screen where the list is Located:
+${screenDescription}
 `,
   };
 
@@ -272,28 +277,52 @@ ${screenDescription}
   }
 };
 
+// export const selectActionTemplate = ({
+//   options,
+//   firstTwoItemsWithParentHtml,
+//   screenDescription,
+// }: {
+//   options: string[];
+//   firstTwoItemsWithParentHtml: string;
+//   screenDescription: string;
+// }): Prompt => ({
+//   role: "SYSTEM",
+//   content: `A user is looking at the list on the web page screen.
+
+// HTML around the list with first two items:
+// ${firstTwoItemsWithParentHtml}
+
+// items'text in the list:
+// ${options.map((option) => `- ${option}`).join("\n")}
+
+// Description of the screen where the list is located:
+// ${screenDescription}
+
+// Infer the purpose of the list and describe the action of a user selecting one item from that list in one sentence, starting with 'Select one '.`,
+// });
+
 export const selectActionTemplate = ({
   options,
-  firstTwoItemsWithParentHtml,
+  firstThreeItemsWithParentHtml,
   screenDescription,
 }: {
   options: string[];
-  firstTwoItemsWithParentHtml: string;
+  firstThreeItemsWithParentHtml: string;
   screenDescription: string;
 }): Prompt => ({
   role: "SYSTEM",
-  content: `A user is looking at the list on the web page screen. 
+  content: `Analyze the role and current state of a list on the web page, with a focus on the types of items it displays and how a user interacts with them. 
+Begin your description with 'Select a [item type] ', where '[item type]' should be replaced with the specific kind of items in the list. In one sentence, highlight the purpose of selecting an item from the list, the action involved in making a selection, and any existing selection state of the list. Use the provided HTML context, list items' text, and screen description to determine the types of items and structure your description accordingly.
 
-HTML around the list with first two items:
-${firstTwoItemsWithParentHtml}
+HTML Context of the List:
+${firstThreeItemsWithParentHtml}
 
-items'text in the list:
+List Items' Text:
 ${options.map((option) => `- ${option}`).join("\n")}
 
-Description of the screen where the list is located:
+Screen Context Description:
 ${screenDescription}
-
-Infer the purpose of the list and describe the action of a user selecting one item from that list in one sentence, starting with 'Select one '.`,
+`,
 });
 
 export const tableActionTemplate = ({
@@ -332,14 +361,20 @@ export const singleActionTemplate = ({
   simplifiedScreenHtml: string;
 }): Prompt => ({
   role: "SYSTEM",
-  content: `Describe an action that a user can take on an element with its purpose, starting with '${actionType} ' in one sentence.
+  content: `Provide a detailed analysis of the role and current state of an HTML element in its screen context, starting your description with a direct action command in the form '${capitalizeFirstCharacter(
+    actionType
+  )} the [element]'. 
+Explain the purpose of this action in relation to the element and its surrounding interface. 
+Your description should be in the form of a directive, instructing a specific action to be performed, in one to two sentences without newlines.
+Avoid mentioning javascript functions.
 
-HTML of the element:
+HTML of the Element:
 ${simplifiedElementHtml}
 
-Description of the screen where the element is located:
-${screenDescription}
+Surrounding HTML of the Element:
+${extractSurroundingHtml(simplifiedScreenHtml, simplifiedElementHtml)}
 
-Surrounding HTML of the element:
-${extractSurroundingHtml(simplifiedScreenHtml, simplifiedElementHtml)}`,
+Screen Context Description:
+${screenDescription}
+`,
 });

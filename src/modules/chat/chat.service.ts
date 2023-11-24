@@ -29,7 +29,8 @@ import {
   getActionHistory,
 } from "../../prompts/actionPrompts";
 import {
-  getUserContext,
+  getUserGoal,
+  getUserInfo,
   makeQuestionForConfirmation,
   makeQuestionForSelectConfirmation,
 } from "../../prompts/chatPrompts";
@@ -121,7 +122,7 @@ async function planningAndAsk(): Promise<
     actionLogs = loadObjectArrayFromFile<SystemLog>("actionLogs.json");
 
     const chats = await getChats();
-    const userContext = await getUserContext(chats);
+    const userGoal = await getUserGoal(chats);
     const actions = focusSection.actions;
 
     const systemContext = await getSystemContext(actionLogs);
@@ -131,7 +132,7 @@ async function planningAndAsk(): Promise<
         ? actions[0].i.toString()
         : await planningAgent(
             focusSection,
-            userContext,
+            userGoal,
             actionLogs.length !== 0 ? systemContext : "No action history"
           );
 
@@ -151,11 +152,12 @@ async function planningAndAsk(): Promise<
         };
 
         if (component.actionType === "input") {
+          const userInfo = await getUserInfo(chats);
           let valueBasedOnHistory = await JSON.parse(
             await findInputTextValue(
               screenDescription,
               component.description,
-              userContext
+              userInfo
             )
           );
 
@@ -245,7 +247,7 @@ export async function answerForInput(
   }
   await createHumanChat({ content: input.content }, "answerForInput");
   const chats = await getChats();
-  const userContext = await getUserContext(chats);
+  const userInfo = await getUserInfo(chats);
   const screenDescription = focusSection.screenDescription;
   const screenDescriptionKorean = focusSection.screenDescriptionKorean;
   const component = input.component;
@@ -262,7 +264,7 @@ export async function answerForInput(
       await findInputTextValue(
         screenDescription,
         component?.description,
-        userContext
+        userInfo
       )
     );
 

@@ -21,7 +21,7 @@ import {
   getActionHistory,
 } from "../prompts/actionPrompts";
 import {
-  getUserContext,
+  getUserGoal,
   makeQuestionForConfirmation,
 } from "../prompts/chatPrompts";
 import {
@@ -37,24 +37,24 @@ import { Action } from "../utils/parsingAgent";
 
 export async function planningAgent(
   focusedSection: ScreenResult,
-  userContext: string,
+  userGoal: string,
   systemContext: string
 ) {
   const planningActionPromptForSystem: Prompt = {
     role: "SYSTEM",
-    content: `
-    You are an AI planning agent. Based on the user's context and action logs, first describe your plan for proceeding to the next screen.
+    content: `You are an AI planning agent. Analyze the user's current goal and the available actions on the screen to determine the most logical and practical next step. Consider what a general user would likely find most useful or relevant in achieving their goal.
 
-${userContext}
+User Goal:
+${userGoal}
 
 Action Logs:
 ${systemContext}
 
-Describe your thought process and reasoning for how to proceed to the next screen, considering the user's needs and the current screen context.
+Describe your thought process and reasoning for how to proceed, focusing on the most straightforward and beneficial action for the user, given the current screen context.
 
-Then, choose one action from the available actions on the current screen that aligns best with the user's goal and provides a smooth transition to the next screen.
+Then, from the available actions on the current screen, choose one next action with its corresponding "(i=##)" that is most likely to assist the user in a practical and effective manner.
 
-Description of the current screen: ${focusedSection.screenDescription}
+Current Screen Description: ${focusedSection.screenDescription}
 
 Available actions:
 ${focusedSection.actions
@@ -107,7 +107,7 @@ Execution Agent:
 `);
 
   let chats = await getChats();
-  let userContext = await getUserContext(chats);
+  let userContext = await getUserGoal(chats);
   let actionValue = "";
   if (action.type == "input") {
     let valueBasedOnHistory = await JSON.parse(
@@ -121,7 +121,7 @@ Execution Agent:
 
       chats = await getChats();
 
-      userContext = await getUserContext(chats);
+      userContext = await getUserGoal(chats);
 
       valueBasedOnHistory = await JSON.parse(
         await findInputTextValue(screenDescription, action.content, userContext)

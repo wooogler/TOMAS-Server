@@ -9,9 +9,10 @@ import {
   tableActionTemplate,
 } from "../prompts/screenPrompts";
 import {
+  makeClickQuestionPrompt,
   makeElementDescriptionPrompt,
+  makeInputQuestionPrompt,
   makeListDescriptionPrompt,
-  makeQuestionPrompt,
   makeSelectQuestionPrompt,
   translateQuestionTemplate,
 } from "../prompts/chatPrompts";
@@ -37,8 +38,25 @@ export async function parsingListAgent({ listHtml }: { listHtml: string }) {
   const dom = new JSDOM(listHtml);
   const listElement = dom.window.document.body.firstElementChild as Element;
   const itemElements = Array.from(listElement.children);
+
+  // 각 itemElement에 한해서만 클래스 빈도수 확인
+  const classFrequency = new Map();
+  itemElements.forEach((itemElement) => {
+    itemElement.classList.forEach((className) => {
+      classFrequency.set(className, (classFrequency.get(className) || 0) + 1);
+    });
+  });
+
+  // 각 itemElement에서 고유한 클래스를 가진 요소의 인덱스 찾기
+  const uniqueClassElementIndexes = itemElements.map((itemElement) => {
+    const isUniqueClass = Array.from(itemElement.classList).some(
+      (className) => classFrequency.get(className) === 1
+    );
+    return isUniqueClass ? itemElements.indexOf(itemElement) : -1;
+  });
+
   const itemActions: Action[] = await itemElements.reduce(
-    async (prevPromise, itemElement) => {
+    async (prevPromise, itemElement, index) => {
       const prevActions = await prevPromise;
       const clickableElements = findClickableElements(itemElement);
       const selectableElements = findSelectableElements(itemElement);
@@ -46,14 +64,18 @@ export async function parsingListAgent({ listHtml }: { listHtml: string }) {
 
       const itemText = itemElement.textContent?.replace(/\s+/g, " ").trim();
       const itemI = itemElement.getAttribute("i");
-      if (clickableElements.length > 0) {
-        prevActions.push({
-          type: "focus",
-          content: itemText || "",
-          question: `Do you want to select ${itemText}?`,
-          i: Number(itemI),
-          html: simplifyHtml(itemElement.outerHTML, true, true),
-        });
+      if (
+        clickableElements.length > 0 &&
+        uniqueClassElementIndexes[index] === -1
+      ) {
+        if (uniqueClassElementIndexes)
+          prevActions.push({
+            type: "focus",
+            content: itemText || "",
+            question: `Do you want to select ${itemText}?`,
+            i: Number(itemI),
+            html: simplifyHtml(itemElement.outerHTML, true, true),
+          });
       }
       return prevActions;
     },
@@ -72,6 +94,7 @@ export async function parsingItemAgent({
 }) {
   const dom = new JSDOM(elementHtml);
   let element = dom.window.document.body as Element;
+  const originalElement = element.cloneNode(true) as Element;
   const actionableElements: ActionableElement[] = [];
 
   const selectableElements = findSelectableElements(element);
@@ -95,7 +118,7 @@ export async function parsingItemAgent({
 
   const actions = await getActions(
     actionableElements,
-    element,
+    originalElement,
     screenDescription
   );
 
@@ -464,7 +487,7 @@ export function modifySelectAction(elem: Element, screenElement: Element) {
   const element = screenElement.querySelector(`[i="${elemI}"]`) as Element;
   const elementClone = element.cloneNode(true) as Element;
 
-  while (elementClone.children.length > 2) {
+  while (elementClone.children.length > 3) {
     const lastChild = elementClone.lastChild;
     if (lastChild) {
       elementClone.removeChild(lastChild);
@@ -487,16 +510,17 @@ async function getAiResponseForSelectAction(
 ) {
   const options = await extractOptions(elem.element, screenDescription);
   const parentElement = modifySelectAction(elem.element, screenElement);
-  const firstTwoItemsWithParentHtml = simplifyHtml(
+  const firstThreeItemsWithParentHtml = simplifyHtml(
     parentElement?.outerHTML || "",
     true,
     true
   );
   const selectActionPrompt = selectActionTemplate({
     options,
-    firstTwoItemsWithParentHtml,
+    firstThreeItemsWithParentHtml,
     screenDescription,
   });
+  console.log(selectActionPrompt.content);
   const content = await getAiResponse([selectActionPrompt]);
   const question = await getAiResponse([
     selectActionPrompt,
@@ -536,6 +560,8 @@ async function getAiResponseForSingleAction(
       ? tableActionPrompt
       : singleActionPrompt;
   const content = await getAiResponse([actionPrompt]);
+  const makeQuestionPrompt =
+    elem.type === "input" ? makeInputQuestionPrompt : makeClickQuestionPrompt;
   const question = await getAiResponse([
     actionPrompt,
     { role: "AI", content: content },

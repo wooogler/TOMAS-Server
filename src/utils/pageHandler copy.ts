@@ -4,8 +4,6 @@ import puppeteer, { Browser, Page } from "puppeteer";
 import { simplifyHtml, simplifyItemHtml } from "./htmlHandler";
 import {
   getListDescription,
-  getModalDescription,
-  getPageDescription,
   getScreenDescription,
 } from "../prompts/screenPrompts";
 import {
@@ -185,7 +183,7 @@ export class PageHandler {
     action: () => Promise<void>
   ): Promise<ScreenResult> {
     const page = await this.getPage();
-    const { screen, scrolls, screenChangeType } = await getScreen(
+    const { screen, scrolls, screenChangeType, screenType } = await getScreen(
       page,
       action,
       true
@@ -203,7 +201,7 @@ export class PageHandler {
     }
     const screenSimpleHtml = simplifyHtml(screen, true);
     const { screenDescription, screenDescriptionKorean } =
-      await getScreenDescription(screenSimpleHtml);
+      await getScreenDescription(screenSimpleHtml, screenType);
     const actions = await parsingAgent({
       screenHtml: screen,
       screenDescription,
@@ -233,12 +231,17 @@ export class PageHandler {
   ): Promise<ScreenResult> {
     const page = await this.getPage();
     const element = await this.getElement(selector);
+
+    // 이전에 설정된 대화 상자 핸들러 제거
+    page.removeAllListeners("dialog");
+
+    // 대화 상자가 나타날 때 단 한 번만 자동으로 수락
+    page.once("dialog", async (dialog) => {
+      await dialog.accept();
+    });
+
     return this.handleAction(parsing, async () => {
       await element.click();
-      // alert 창이 나타날 때 자동으로 수락
-      page.on("dialog", async (dialog) => {
-        await dialog.accept();
-      });
     });
   }
 
@@ -262,7 +265,7 @@ export class PageHandler {
     parsing: boolean = true
   ): Promise<ScreenResult> {
     const page = await this.getPage();
-    const { screen } = await getScreen(page, async () => {}, false);
+    const { screen, screenType } = await getScreen(page, async () => {}, false);
     const dom = new JSDOM(screen);
     const screenElement = dom.window.document.body as Element;
     const listElement = dom.window.document.querySelector(selector) as Element;
@@ -278,7 +281,7 @@ export class PageHandler {
     }
     const screenSimpleHtml = simplifyHtml(screen, true);
     const { screenDescription, screenDescriptionKorean } =
-      await getScreenDescription(screenSimpleHtml);
+      await getScreenDescription(screenSimpleHtml, screenType);
 
     const listHtml = modifySelectAction(listElement, screenElement);
     const listSimpleHtml = simplifyHtml(listHtml?.outerHTML || "", true);
@@ -308,12 +311,12 @@ export class PageHandler {
     parsing: boolean = true
   ): Promise<ScreenResult> {
     const page = await this.getPage();
-    const { screen } = await getScreen(page, async () => {}, false);
+    const { screen, screenType } = await getScreen(page, async () => {}, false);
     const dom = new JSDOM(screen);
     const element = dom.window.document.querySelector(selector);
     const screenSimpleHtml = simplifyHtml(screen, true);
     const { screenDescription, screenDescriptionKorean } =
-      await getScreenDescription(screenSimpleHtml);
+      await getScreenDescription(screenSimpleHtml, screenType);
 
     if (parsing === false) {
       return {
@@ -343,7 +346,7 @@ export class PageHandler {
 
   async unfocus(parsing: boolean = true): Promise<ScreenResult> {
     const page = await this.getPage();
-    const { screen, screenChangeType } = await getScreen(
+    const { screen, screenChangeType, screenType } = await getScreen(
       page,
       async () => {},
       true
@@ -361,7 +364,7 @@ export class PageHandler {
       };
     }
     const { screenDescription, screenDescriptionKorean } =
-      await getScreenDescription(pageSimpleHtml);
+      await getScreenDescription(pageSimpleHtml, screenType);
     const actions = await parsingAgent({
       screenHtml: screen,
       screenDescription,
@@ -507,9 +510,35 @@ export async function addIAttribute(page: Page) {
 async function findScreenAndScrolls(
   page: Page,
   hiddenElementIs: string[]
-): Promise<{ screen: string; scrolls: { x: string[]; y: string[] } }> {
+): Promise<{
+  screen: string;
+  scrolls: { x: string[]; y: string[] };
+  screenType: ScreenType;
+}> {
   return await page.evaluate((hiddenElementIs) => {
     const clonedBody = document.body.cloneNode(true) as HTMLElement;
+
+    // hiddenElementIs에 해당하는 요소를 제외하고 z-index 계산
+    let highestZIndex = 0;
+    let screenType: ScreenType = "page";
+
+    document.querySelectorAll("body *").forEach((el) => {
+      if (el instanceof HTMLElement) {
+        const elIAttr = el.getAttribute("i");
+        if (elIAttr !== null && !hiddenElementIs.includes(elIAttr)) {
+          console.log(elIAttr, window.getComputedStyle(el).zIndex);
+          const zIndex = parseInt(window.getComputedStyle(el).zIndex, 10);
+          if (!isNaN(zIndex)) {
+            highestZIndex = Math.max(highestZIndex, zIndex);
+          }
+        }
+      }
+    });
+
+    if (highestZIndex > 999) {
+      // 임계값 설정 (예: 1000)
+      screenType = "modal";
+    }
 
     const removeHiddenElements = (
       hiddenElementIs: string[],
@@ -546,6 +575,7 @@ async function findScreenAndScrolls(
     return {
       screen: clonedBody.innerHTML,
       scrolls,
+      screenType,
     };
   }, hiddenElementIs);
 }
@@ -567,6 +597,8 @@ export type ScreenChangeType =
   | "STATE_CHANGE"
   | "URL_CHANGE";
 
+export type ScreenType = "page" | "modal";
+
 export async function getScreen(
   page: Page,
   action: () => Promise<void>,
@@ -575,6 +607,7 @@ export async function getScreen(
   screen: string;
   scrolls: { x: string[]; y: string[] };
   screenChangeType: ScreenChangeType;
+  screenType: ScreenType;
 }> {
   const oldUrl = page.url();
   const oldHiddenElementIs = await getHiddenElementIs(page, isAction);
@@ -611,7 +644,10 @@ export async function getScreen(
     }
   }
 
-  const { screen, scrolls } = await findScreenAndScrolls(page, hiddenElementIs);
+  const { screen, scrolls, screenType } = await findScreenAndScrolls(
+    page,
+    hiddenElementIs
+  );
 
-  return { screen, scrolls, screenChangeType };
+  return { screen, scrolls, screenChangeType, screenType };
 }

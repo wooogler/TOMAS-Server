@@ -1,24 +1,429 @@
 [
   [
+    "button,닫기,class=btn-close-main-notice,type=button",
+    {
+      "type": "click",
+      "i": 932,
+      "content": "Click the \"닫기\" button to close the modal notice. This button allows the user to dismiss the notice and continue using the interface without any interruptions.",
+      "question": "'닫기' 버튼을 클릭하시겠습니까?",
+      "description": "'닫기' 버튼을 클릭하면 모달 공지사항이 닫힙니다.",
+      "html": "<button type=\"button\" class=\"btn-close-main-notice\">닫기</button>"
+    }
+  ],
+  [
     "a,href=https://www.megabox.co.kr/event/detail?eventNo=13476",
     {
       "type": "click",
-      "i": 933,
-      "content": "Click on the element with the purpose of accessing a movie event with the event number 13476.",
-      "question": "클릭하여 이벤트 번호 13476에 대한 영화 이벤트에 참여하시겠습니까?",
-      "description": "해당 요소를 클릭하면 영화 이벤트에 참여할 수 있습니다.",
+      "i": 937,
+      "content": "Click the link element to navigate to the URL specified in the href attribute, which in this case is \"https://www.megabox.co.kr/event/detail?eventNo=13476\". This action allows the user to access the event details or information related to the link.",
+      "question": "링크를 클릭하여 \"https://www.megabox.co.kr/event/detail?eventNo=13476\"로 이동하시겠습니까?",
+      "description": "해당 요소를 클릭하면 \"https://www.megabox.co.kr/event/detail?eventNo=13476\"로 이동합니다.",
       "html": "<a href=\"https://www.megabox.co.kr/event/detail?eventNo=13476\"></a>"
     }
   ],
   [
-    "button,닫기,class=btn-close-main-notice,type=button",
+    "button,이벤트,id=navi_event_btn,class=button-bot,type=button",
     {
       "type": "click",
-      "i": 928,
-      "content": "Click the \"닫기\" button to close the main notice or popup on the screen.",
-      "question": "\"메인 공지사항을 닫으시겠습니까?\"",
-      "description": "해당 요소와 상호작용하여 수행되는 동작은 메인 공지사항을 닫는 것입니다. 사용자는 해당 요소를 클릭하여 메인 공지사항을 닫을 수 있습니다.",
-      "html": "<button type=\"button\" class=\"btn-close-main-notice\">닫기</button>"
+      "i": 194,
+      "content": "Click the \"이벤트\" button. This button is located in the navigation bar at the top of the webpage and is used to access the events section of the website.",
+      "question": "\"이벤트\" 버튼을 클릭하시겠습니까?",
+      "description": "\"이벤트\" 버튼을 클릭하면 이벤트 섹션으로 이동합니다.",
+      "html": "<button id=\"navi_event_btn\" type=\"button\" class=\"button-bot\"><span>이벤트</span></button>"
+    }
+  ],
+  [
+    "button,예매,class=button-bot,type=button",
+    {
+      "type": "click",
+      "i": 988,
+      "content": "Click the \"예매\" button. This button is located in the bottom navigation bar of the webpage and is used to navigate to the ticket booking section of the website.",
+      "question": "\"예매\" 버튼을 클릭하시겠습니까?",
+      "description": "\"예매\" 버튼을 클릭하면 영화 티켓 예매 페이지로 이동합니다.",
+      "html": "<button type=\"button\" class=\"button-bot\"><span>예매</span></button>"
+    }
+  ],
+  [
+    "button,class=h-alarm,type=button",
+    {
+      "type": "click",
+      "i": 122,
+      "content": "Click the \"h-alarm\" button. This button is likely used to access the user's alarm settings or notifications, allowing them to manage and view any alerts or reminders related to their movie theater experience.",
+      "question": "\"클릭 동작을 진행하시겠습니까?\"",
+      "description": "\"이 버튼을 클릭하면 알림 설정이나 알림을 확인할 수 있습니다.\"",
+      "html": "<button type=\"button\" class=\"h-alarm\"></button>"
+    }
+  ],
+  [
+    "a,href=javascript:AppHandler.Common.goMain()",
+    {
+      "type": "click",
+      "i": 114,
+      "content": "Click the <a> element. This element appears to be a link that triggers a JavaScript function called \"AppHandler.Common.goMain()\". It is located within the <header> section of the webpage, suggesting that it may be a link to the main page or home page of the website.",
+      "question": "<a> 요소를 클릭하시겠습니까?",
+      "description": "<a> 요소를 클릭하면 메인 페이지로 이동합니다.",
+      "html": "<a href=\"javascript:AppHandler.Common.goMain()\"></a>"
+    }
+  ],
+  [
+    "button,MY,class=button-bot,type=button",
+    {
+      "type": "click",
+      "i": 197,
+      "content": "Click the \"MY\" button. This button is located in the navigation bar of the webpage and is used to access the user's personal account or profile.",
+      "question": "\"클릭 작업을 진행하시겠습니까?\"",
+      "description": "\"이 버튼을 클릭하면 사용자의 개인 계정 또는 프로필에 액세스할 수 있습니다.\"",
+      "html": "<button type=\"button\" class=\"button-bot\"><span>MY</span></button>"
+    }
+  ],
+  [
+    "button,#클소,class=btn swiper-slide,type=button",
+    {
+      "type": "click",
+      "i": 198,
+      "content": "Click the #클소 button. This button is part of a navigation menu that allows users to filter movies by different categories. Clicking this button will filter the movies to show only those related to the \"#클소\" category.",
+      "question": "'#클소' 버튼을 클릭하시겠습니까?",
+      "description": "'#클소' 버튼을 클릭하면, 관련된 영화만 보여주는 필터링된 목록이 표시됩니다.",
+      "html": "<button type=\"button\" class=\"btn swiper-slide\"><span>#클소</span></button>"
+    }
+  ],
+  [
+    "a,더보기,class=btn-more-link,href=javascript:void(0);",
+    {
+      "type": "click",
+      "i": 493,
+      "content": "Click the \"더보기\" button. This button is used to expand or show more content related to the \"무비피드\" section on the webpage.",
+      "question": "\"더보기\" 버튼을 클릭하시겠습니까?",
+      "description": "\"더보기\" 버튼을 클릭하면 해당 섹션의 추가 콘텐츠가 펼쳐지거나 표시됩니다.",
+      "html": "<a href=\"javascript:void(0);\" class=\"btn-more-link\">더보기</a>"
+    }
+  ],
+  [
+    "a,더 많은 영화보기,class=btn-more-movie,href=javascript:fn_goMovieList()",
+    {
+      "type": "click",
+      "i": 487,
+      "content": "Click the \"더 많은 영화보기\" button. This button is located at the top of the webpage and is used to navigate to a page that displays more movies.",
+      "question": "\"더 많은 영화보기\" 버튼을 클릭하시겠습니까?",
+      "description": "\"더 많은 영화보기\" 버튼을 클릭하면 더 많은 영화 목록을 볼 수 있습니다.",
+      "html": "<a href=\"javascript:fn_goMovieList()\" class=\"btn-more-movie\">더 많은 영화보기 </a>"
+    }
+  ],
+  [
+    "button,#돌비시네마,class=btn swiper-slide act,type=button",
+    {
+      "type": "click",
+      "i": 196,
+      "content": "Click the #돌비시네마 button. This button is part of a navigation menu that allows users to switch between different categories or sections of the website. Clicking this button would likely take the user to a page or section dedicated to Dolby Cinema movies or related content.",
+      "question": "#돌비시네마 버튼을 클릭하시겠습니까?",
+      "description": "#돌비시네마 버튼을 클릭하면, 돌비 시네마와 관련된 페이지로 이동합니다.",
+      "html": "<button type=\"button\" class=\"btn swiper-slide act\"><span>#돌비시네마</span></button>"
+    }
+  ],
+  [
+    "button,#단독,class=btn swiper-slide act,type=button",
+    {
+      "type": "click",
+      "i": 194,
+      "content": "Click the #단독 button. This button is part of a group of buttons that allow users to filter the displayed movies based on different categories. Clicking this button will filter the movies to show only those that are exclusive to the theater.",
+      "question": "'#단독' 버튼을 클릭하시겠습니까?",
+      "description": "'#단독' 버튼을 클릭하면, 극장에서만 상영되는 영화만 보여주는 필터링이 적용됩니다.",
+      "html": "<button type=\"button\" class=\"btn swiper-slide act\"><span>#단독</span></button>"
+    }
+  ],
+  [
+    "button,#필소,class=btn swiper-slide,type=button",
+    {
+      "type": "click",
+      "i": 200,
+      "content": "Click the #필소 button. This button is part of a navigation menu that allows users to filter movies by different categories or tags. Clicking this button would filter the movies displayed on the screen to show only those tagged with \"#필소\".",
+      "question": "#필소 버튼을 클릭하시겠습니까?",
+      "description": "#필소 버튼을 클릭하면, 화면에 표시된 영화들이 \"#필소\" 태그가 있는 영화들로 필터링됩니다.",
+      "html": "<button type=\"button\" class=\"btn swiper-slide\"><span>#필소</span></button>"
+    }
+  ],
+  [
+    "button,#상영예정,class=btn swiper-slide swiper-slide-next,type=button",
+    {
+      "type": "click",
+      "i": 192,
+      "content": "Click the #상영예정 button. This button is located in the header section of the webpage and is used to navigate to a section that displays upcoming movies that will be shown in the theater.",
+      "question": "#상영예정 버튼을 클릭하시겠습니까?",
+      "description": "#상영예정 버튼을 클릭하면 상영 예정인 영화 목록으로 이동합니다.",
+      "html": "<button type=\"button\" class=\"btn swiper-slide swiper-slide-next\"><span>#상영예정</span></button>"
+    }
+  ],
+  [
+    "ul,O.T O.T 다이어리 1PICK N,class=swiper-wrapper",
+    {
+      "type": "select",
+      "i": 136,
+      "content": "Select a movie/event from the list: The purpose of selecting an item from the list is to navigate to a specific movie or event page on the website, and the action involved in making a selection is clicking on the item. The current state of the list is that it displays multiple items, including \"O.T\", \"다이어리\", \"1PICK\", and \"N차 관람\".",
+      "question": "리스트에서 어떤 항목을 선택하시겠습니까?",
+      "description": "리스트에서 항목을 선택하면 해당 영화 또는 이벤트 페이지로 이동합니다....",
+      "html": "<ul class=\"swiper-wrapper\"><li class=\"swiper-slide swiper-slide-active\"><a href=\"https://www.megabox.co.kr/event/detail?eventNo=14543\"><img class=\"quickborder\"><span>O.T</span></a></li><li class=\"swiper-slide swiper-slide-next\"><a href=\"https://www.megabox.co.kr/event/detail?eventNo=14492\"><span>O.T</span></a></li><li class=\"swiper-slide\"><a href=\"https://www.megabox.co.kr/event/detail?eventNo=14438\"><span>다이어리</span></a></li><li class=\"swiper-slide\"><a href=\"https://www.megabox.co.kr/event/detail?eventNo=14520\"><span>1PICK</span></a></li><li class=\"swiper-slide\"><a href=\"https://www.megabox.co.kr/event/detail?eventNo=14425\"><span>N차 관람</span></a></li></ul>",
+      "options": [
+        "O.T",
+        "O.T",
+        "다이어리",
+        "1PICK",
+        "N차 관람"
+      ]
+    }
+  ],
+  [
+    "button,스토어,class=button-bot,type=button",
+    {
+      "type": "click",
+      "i": 188,
+      "content": "Click the \"스토어\" button. This button is located in the bottom navigation bar of the webpage and is used to navigate to the store section of the website. The store section likely contains merchandise related to movies or the movie theater, such as DVDs, posters, or clothing.",
+      "question": "\"스토어\" 버튼을 클릭하시겠습니까?",
+      "description": "\"스토어\" 버튼을 클릭하면 스토어 섹션으로 이동합니다. 스토어 섹션에서는 영화나 영화관과 관련된 상품들을 구매할 수 있습니다....",
+      "html": "<button type=\"button\" class=\"button-bot\"><span>스토어</span></button>"
+    }
+  ],
+  [
+    "button,class=h-burger,type=button",
+    {
+      "type": "click",
+      "i": 124,
+      "content": "Click the \"h-burger\" button. This button is typically used as a hamburger menu icon, indicating that it opens a menu or navigation drawer when clicked. In the surrounding interface, it is located within a header section, suggesting that it may be used to access additional options or menus related to the website or user account.",
+      "question": "\"클릭 동작을 진행하시겠습니까?\"",
+      "description": "\"h-burger\" 버튼을 클릭하면 메뉴 또는 네비게이션 드로어가 열립니다.",
+      "html": "<button type=\"button\" class=\"h-burger\"></button>"
+    }
+  ],
+  [
+    "div,1 12세이상관람가 서울의 봄 예매율,id=boxo_movie,class=swiper-wrapper2",
+    {
+      "type": "select",
+      "i": 206,
+      "content": "Select a movie from the list: The purpose of selecting a movie from the list is to view more details about the movie and potentially book tickets for it, and the action involved in making a selection is clicking on the movie's name or image. The current state of the list is that it displays two movies, each with its rank, age rating, movie name, reservation rate, and a \"Book Now\" button.",
+      "question": "리스트에서 어떤 항목을 선택하시겠습니까?",
+      "description": "리스트에서 항목을 선택하면 해당 영화에 대한 자세한 정보를 확인하고 예매할 수 있습니다.",
+      "html": "<div class=\"swiper-wrapper2\"><div class=\"item swiper-slide\"><a href=\"javascript:fn_goMoveDetail('23081200', '1', 'main')\"><div class=\"img\" clickable=\"true\"><img class=\"lozad\"></div><div class=\"rank\" clickable=\"true\">1</div><!-- 12세 이상 관람가 --><div class=\"movie-name\" clickable=\"true\"> <i class=\"iconset ico-pg-12-sprite\">12세이상관람가</i> 서울의 봄</div></a><div class=\"movie-info-util \"><div class=\"movie-count\"><div class=\"s_tit\"><span>예매율 56%</span><em class=\"st\">9.4</em></div></div><div class=\"btn-area\"><a href=\"javascript:fn_goQuickBooking('23081200')\" class=\"vote-now\">바로예매</a></div></div></div><div class=\"item swiper-slide\"><a href=\"javascript:fn_goMoveDetail('23085200', '1', 'main')\"><div class=\"img\" clickable=\"true\"><img class=\"lozad\"></div><div class=\"rank\" clickable=\"true\">2</div><!-- 12세 이상 관람가 --><div class=\"movie-name\" clickable=\"true\"> <i class=\"iconset ico-pg-12-sprite\">12세이상관람가</i> 싱글 인 서울</div></a><div class=\"movie-info-util \"><div class=\"movie-count\"><div class=\"s_tit\"><span>예매율 7%</span><em>D-5</em></div></div><div class=\"btn-area\"><a href=\"javascript:fn_goQuickBooking('23085200')\" class=\"vote-now\">바로예매</a></div></div></div></div>",
+      "options": [
+        "1 12세이상관람가 서울의 봄 예매율 56% 9.4 바로예매",
+        "2 12세이상관람가 싱글 인 서울 예매율 7% D-5 바로예매"
+      ]
+    }
+  ],
+  [
+    "a,class=h-ticket,href=javascript:AppDomain.Member.loginConfirm();",
+    {
+      "type": "click",
+      "i": 119,
+      "content": "Click the \"h-ticket\" element to check the ticket the user have. This element is a link that triggers a JavaScript function called \"AppDomain.Member.loginConfirm()\" when clicked. It is located within a header section of the webpage, suggesting that it is part of the navigation or user account area.",
+      "question": "\"클릭 동작을 진행하시겠습니까?\"",
+      "description": "이 요소를 클릭하면 로그인 확인 및 회원 가입이 진행됩니다.",
+      "html": "<a href=\"javascript:AppDomain.Member.loginConfirm();\" class=\"h-ticket\"></a>"
+    }
+  ],
+  [
+    "button,홈,class=button-bot,type=button",
+    {
+      "type": "click",
+      "i": 185,
+      "content": "Click the \"홈\" button to go back to the homepage of the movie ticket reservation website. This button is located at the bottom of the screen and allows users to easily navigate back to the main page from any other section of the website.",
+      "question": "\"홈\" 버튼을 클릭하시겠습니까?",
+      "description": "\"홈\" 버튼을 클릭하면 영화 예매 웹페이지의 홈페이지로 돌아갑니다.",
+      "html": "<button type=\"button\" class=\"button-bot\"><span>홈</span></button>"
+    }
+  ],
+  [
+    "a,이용약관,href=javaScript:fn_mvMenu('AGREE')",
+    {
+      "type": "click",
+      "i": 168,
+      "content": "Click the \"이용약관\" element to view the terms and conditions of using the movie ticket reservation service. This element is located in the footer section of the webpage, along with other links related to privacy policy, customer support, and the PC version of the website.",
+      "question": "'이용약관'을 클릭하여 예매 서비스 이용약관을 확인하시겠습니까?",
+      "description": "'이용약관'을 클릭하면 예매 서비스의 이용약관을 확인할 수 있습니다.",
+      "html": "<a href=\"javaScript:fn_mvMenu('AGREE')\">이용약관</a>"
+    }
+  ],
+  [
+    "a,위치기반서비스 이용약관,href=javaScript:fn_mvMenu('LCINFO')",
+    {
+      "type": "click",
+      "i": 170,
+      "content": "Click the \"위치기반서비스 이용약관\" link in the footer of the webpage to view the terms and conditions for using location-based services. This link provides information about how the website uses location data and the user's consent for accessing their location.",
+      "question": "위치기반서비스 이용약관을 클릭하시겠습니까?",
+      "description": "위치기반서비스 이용약관을 클릭하면 위치 기반 서비스를 이용하기 위한 약관을 확인할 수 있습니다.",
+      "html": "<a href=\"javaScript:fn_mvMenu('LCINFO')\">위치기반서비스 이용약관</a>"
+    }
+  ],
+  [
+    "div,서울의 봄 싱글 인 서울 괴물,class=rec-block-wrap",
+    {
+      "type": "select",
+      "i": 133,
+      "content": "Select a movie: The purpose of selecting a movie is to choose a specific movie to watch and proceed with the reservation process, and the action involved in making a selection is clicking on the movie title in the list. The current state of the list is that it displays three movie options: \"서울의 봄\", \"싱글 인 서울\", and \"괴물\".",
+      "question": "리스트에서 어떤 항목을 선택하시겠습니까?",
+      "description": "리스트에서 항목을 선택하면 해당 영화의 예매 목록으로 이동합니다....",
+      "html": "<div class=\"rec-block-wrap\"><!-- 인기영화: 최대3개 , 선택시해당 영화별 예매 목록으로 이동 --><div class=\"block movie\"><a href=\"javascript:fn_moveReserve(moveType.boxOffice, { movieNo: '23081200', movieNm: '서울의 봄', admisClassCd: 'AD02' });\">서울의 봄</a></div><div class=\"block movie\"><a href=\"javascript:fn_moveReserve(moveType.boxOffice, { movieNo: '23085200', movieNm: '싱글 인 서울', admisClassCd: 'AD02' });\">싱글 인 서울</a></div><div class=\"block movie\"><a href=\"javascript:fn_moveReserve(moveType.boxOffice, { movieNo: '23068900', movieNm: '괴물', admisClassCd: 'AD02' });\">괴물</a></div></div>",
+      "options": [
+        "서울의 봄",
+        "싱글 인 서울",
+        "괴물"
+      ]
+    }
+  ],
+  [
+    "div,어느곳에서보고 싶으세요? 극장별 예매,class=reserve-link-area2",
+    {
+      "type": "select",
+      "i": 145,
+      "content": "Select a item type from the list: theater, movie, or private. \n\nThe purpose of selecting an item from the list is to choose a specific category for movie ticket reservation, such as selecting a theater to watch a movie, choosing a movie to watch, or booking a private screening at the COEX theater. \n\nTo make a selection, the user can click on one of the items in the list, which are represented by clickable links with descriptive text. \n\nThe current state of the list is that none of the items are selected by default, and the user can only select one item at a time.",
+      "question": "리스트에서 어떤 항목을 선택하시겠습니까?",
+      "description": "리스트에서 항목을 선택하면 즉시 해당 기능이 실행됩니다.",
+      "html": "<div class=\"reserve-link-area2\"><div class=\"item theater\"><a href=\"javascript:fn_reserveChoice(moveType.theater, '')\"><p class=\"question\">어느곳에서보고 싶으세요?</p><p class=\"text-reserve\">극장별 예매</p><i class=\"iconset ico-link-theater\"></i></a></div><div class=\"item movie\"><a href=\"javascript:fn_reserveChoice(moveType.movie, '')\"><p class=\"question\">어떤영화를보고 싶으세요?</p><p class=\"text-reserve\">영화별 예매</p><i class=\"iconset ico-link-movie\"></i></a></div><div class=\"item private\"><a href=\"javascript:AppDomain.Booking.privateBooking(AppDomain.Flag.isCloseAll)\"><p class=\"question\">특별한 날, 프라이빗관 어떠세요?</p><p class=\"text-reserve\">코엑스 프라이빗 대관예매</p><i class=\"iconset ico-link-private\"></i></a></div></div>",
+      "options": [
+        "어느곳에서보고 싶으세요? 극장별 예매",
+        "어떤영화를보고 싶으세요? 영화별 예매",
+        "특별한 날, 프라이빗관 어떠세요? 코엑스 프라이빗 대관예매"
+      ]
+    }
+  ],
+  [
+    "ul,개인정보처리방침 고객센터 PC버전,class=link",
+    {
+      "type": "select",
+      "i": 171,
+      "content": "Select a link: The purpose of selecting a link from the list is to navigate to a specific page or section of the website, such as the terms and conditions, privacy policy, customer support, or the PC version of the website. The action involved in making a selection is clicking on the desired link. There is no existing selection state of the list, as only one link can be selected at a time.",
+      "question": "해당 목록에서 어떤 항목을 선택하시겠습니까?",
+      "description": "해당 웹 페이지의 목록에서 항목을 선택하면 즉시 해당 페이지로 이동하게 됩니다. 선택한 항목에 따라 이용약관, 위치기반서비스 이용약관, 개인정보처리방침, 고객센터, PC버전 등 다양한 페이지로 이동할 수 있습니다.",
+      "html": "<ul class=\"link\"><li><a href=\"javaScript:fn_mvMenu('INDVDLINFO')\">개인정보처리방침</a></li><li><a href=\"javaScript:fn_mvMenu('CSTMRINFO')\">고객센터</a></li><li><a href=\"javaScript:fn_mvMenu('PCVER')\" class=\"PCVER\">PC버전</a></li></ul>",
+      "options": [
+        "개인정보처리방침",
+        "고객센터",
+        "PC버전"
+      ]
+    }
+  ],
+  [
+    "button,class=h-close,type=button",
+    {
+      "type": "click",
+      "i": 211,
+      "content": "Click the \"h-close\" button. This button is located in the header section of the login page and is used to close the login form.",
+      "question": "\"클릭 동작을 진행하시겠습니까?\"",
+      "description": "\"로그인 폼을 닫는 버튼입니다.\"",
+      "html": "<button type=\"button\" class=\"h-close\"></button>"
+    }
+  ],
+  [
+    "a,페이코로 로그인,class=login-payco,href=javascript:void(0);",
+    {
+      "type": "click",
+      "i": 162,
+      "content": "Click the \"페이코로 로그인\" element to log in using the Payco service. This element is a link that allows users to authenticate their account using their Payco credentials.",
+      "question": "\"페이코로 로그인\"을 클릭하시겠습니까?",
+      "description": "\"페이코로 로그인\"을 클릭하면 페이코 서비스를 사용하여 로그인할 수 있습니다.",
+      "html": "<a href=\"javascript:void(0);\" class=\"login-payco\">페이코로 로그인</a>"
+    }
+  ],
+  [
+    "a,네이버로 로그인,class=login-naver,href=javascript:void(0);",
+    {
+      "type": "click",
+      "i": 158,
+      "content": "Click the \"네이버로 로그인\" link. This link allows users to log in using their Naver account, providing an alternative login option for users who prefer to use their Naver credentials instead of creating a new account.",
+      "question": "\"네이버로 로그인\" 링크를 클릭하시겠습니까?",
+      "description": "\"네이버로 로그인\" 링크를 클릭하면 네이버 계정으로 로그인할 수 있습니다.",
+      "html": "<a href=\"javascript:void(0);\" class=\"login-naver\">네이버로 로그인</a>"
+    }
+  ],
+  [
+    "input,id=loginId,class=input-text enterTgt,name=loginId,type=text",
+    {
+      "type": "input",
+      "i": 135,
+      "content": "Input the loginId element.\n\nThis action allows the user to input their username or ID into the text field provided on the login page. The loginId element is a text input field where users can enter their login credentials.",
+      "question": "로그인 아이디를 입력하세요.",
+      "description": "로그인 아이디를 입력하는 텍스트 필드입니다. 이 공간에 사용자는 자신의 아이디를 입력하여 로그인할 수 있습니다.",
+      "html": "<input type=\"text\" class=\"input-text enterTgt\" id=\"loginId\">"
+    }
+  ],
+  [
+    "input,id=loginPwd,class=input-text enterTgt,name=loginPwd,type=password",
+    {
+      "type": "input",
+      "i": 138,
+      "content": "Input the password element.\n\nThe password element is used to input a user's password for authentication purposes. It is located within a form element on a login page, allowing users to securely enter their password. The surrounding interface includes a text input element for the username, options for logging in with a mobile phone, links for finding ID or password, joining as a new member, and checking reservations as a non-member.",
+      "question": "비밀번호를 입력하세요.",
+      "description": "비밀번호를 입력하면 로그인할 수 있습니다.",
+      "html": "<input type=\"password\" class=\"input-text enterTgt\" id=\"loginPwd\">"
+    }
+  ],
+  [
+    "a,휴대폰 간편로그인,id=hpLogin1,href=https://sepay.org/spm/join?regSiteCode=TG&ctgCode=1&subCode=1",
+    {
+      "type": "click",
+      "i": 145,
+      "content": "Click the \"휴대폰 간편로그인\" link. This link allows users to log in using their mobile phone, providing a convenient and quick login option for users who prefer to use their mobile devices.",
+      "question": "\"휴대폰 간편로그인\" 링크를 클릭하시겠습니까?",
+      "description": "\"휴대폰 간편로그인\" 링크를 클릭하면 휴대폰을 사용하여 간편하게 로그인할 수 있습니다.",
+      "html": "<a id=\"hpLogin1\" href=\"https://sepay.org/spm/join?regSiteCode=TG&amp;ctgCode=1&amp;subCode=1\">휴대폰 간편로그인</a>"
+    }
+  ],
+  [
+    "a,광고,id=hpLogin2,class=button advertis,href=https://sepay.org/spm/join?regSiteCode=TG&ctgCode=1&subCode=1",
+    {
+      "type": "click",
+      "i": 146,
+      "content": "Click the \"광고\" button. This button serves as an advertisement link, redirecting users to a separate webpage or website. It is positioned within a section of the login page that includes options for logging in using different methods, such as mobile phone login or social media login.",
+      "question": "\"광고\" 버튼을 클릭하시겠습니까?",
+      "description": "\"광고\" 버튼을 클릭하면 다른 웹페이지로 이동합니다. 이 버튼은 광고 링크로 작동하여 사용자를 다른 웹페이지로 리디렉션합니다.",
+      "html": "<a id=\"hpLogin2\" href=\"https://sepay.org/spm/join?regSiteCode=TG&amp;ctgCode=1&amp;subCode=1\" class=\"button advertis\">광고</a>"
+    }
+  ],
+  [
+    "a,카카오톡으로 로그인,class=login-kakao,href=javascript:void(0);",
+    {
+      "type": "click",
+      "i": 160,
+      "content": "Click the \"카카오톡으로 로그인\" element to log in using KakaoTalk. This element is a link that allows users to authenticate their login using their KakaoTalk account.",
+      "question": "\"카카오톡으로 로그인\"을 클릭하여 로그인 작업을 진행하시겠습니까?",
+      "description": "\"카카오톡으로 로그인\"은 사용자가 카카오톡 계정을 사용하여 로그인할 수 있는 링크입니다. 이를 클릭하면 로그인 작업이 진행됩니다....",
+      "html": "<a href=\"javascript:void(0);\" class=\"login-kakao\">카카오톡으로 로그인</a>"
+    }
+  ],
+  [
+    "ul,ID/PW 찾기 회원가입 비회원 예매",
+    {
+      "type": "select",
+      "i": 150,
+      "content": "Select a link from the login-link-list. The purpose of selecting an item from this list is to navigate to a specific page or perform a specific action related to the selected item, such as finding ID/PW, joining as a new member, or checking reservations as a non-member. The action involved in making a selection is clicking on the link. There is no existing selection state for the list, as only one item can be selected at a time.",
+      "question": "로그인 링크 목록에서 어떤 항목을 선택하시겠습니까?",
+      "description": "로그인 링크 목록에서 항목을 선택하면 해당 항목과 관련된 특정 페이지로 이동하거나 특정 작업을 수행할 수 있습니다.",
+      "html": "<ul><li><a href=\"javascript:AppDomain.Member.findIdPwd(AppDomain.Flag.isRefreshClose)\">ID/PW 찾기</a></li><li><a href=\"javascript:AppDomain.Member.join()\">회원가입</a></li><li><a href=\"javascript:loginNon()\">비회원 예매확인</a></li></ul>",
+      "options": [
+        "ID/PW 찾기",
+        "회원가입",
+        "비회원 예매확인"
+      ]
+    }
+  ],
+  [
+    "button,로그인,id=loginBtn,class=button-bot purple,type=button",
+    {
+      "type": "click",
+      "i": 148,
+      "content": "Click the \"로그인\" button. This button is used to submit the entered username and password and initiate the login process. It is located within a form element and is surrounded by other login-related elements such as input fields for username and password, options for mobile phone login, links for finding ID or password, joining as a new member, and checking reservations as a non-member.",
+      "question": "\"로그인\" 버튼을 클릭하시겠습니까?",
+      "description": "\"로그인\" 버튼을 클릭하면 로그인 프로세스가 시작됩니다.",
+      "html": "<button type=\"button\" class=\"button-bot purple\" id=\"loginBtn\">로그인</button>"
+    }
+  ],
+  [
+    "a,서울의 봄,href=javascript:fn_moveReserve(moveType.boxOffice, { movieNo: '23081200', movieNm: '서울의 봄', admisClassCd: 'AD02' });",
+    {
+      "type": "click",
+      "i": 135,
+      "content": "Click the \"서울의 봄\" link to move to the reservation page for the movie \"서울의 봄\" in the modal. This link allows the user to select and reserve a specific movie from the list of available movies in the modal.",
+      "question": "'서울의 봄' 링크를 클릭하여 예매 페이지로 이동하시겠습니까?",
+      "description": "'서울의 봄' 링크를 클릭하면 예매 페이지로 이동합니다.",
+      "html": "<a href=\"javascript:fn_moveReserve(moveType.boxOffice, { movieNo: '23081200', movieNm: '서울의 봄', admisClassCd: 'AD02' });\">서울의 봄</a>"
     }
   ]
 ]

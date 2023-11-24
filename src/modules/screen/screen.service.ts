@@ -8,7 +8,7 @@ import { executionAgent, planningAgent } from "../agents";
 import { createHumanChat, getChats, createAIChat } from "../chat/chat.service";
 import { NavigateInput } from "./screen.schema";
 import { SystemLog, getSystemContext } from "../../prompts/actionPrompts";
-import { getUserObjective, getUserContext } from "../../prompts/chatPrompts";
+import { getUserGoal, getUserObjective } from "../../prompts/chatPrompts";
 
 let globalBrowser: Browser | null = null;
 let globalPage: Page | null = null;
@@ -95,7 +95,7 @@ export async function navigate(input: NavigateInput) {
       const chats = await getChats();
       const [userObjective, userContext] = await Promise.all([
         getUserObjective(chats),
-        getUserContext(chats),
+        getUserGoal(chats),
       ]);
 
       //   const systemContext = await getSystemContext(); // TODO: get system context
