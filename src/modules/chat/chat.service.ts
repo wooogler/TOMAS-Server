@@ -10,6 +10,8 @@ import {
   AnswerResponse,
   ConfirmInput,
   CreateHumanChatInput,
+  FilterInput,
+  FilterResponse,
   NavigateInput,
   SelectInput,
   SelectResponse,
@@ -309,6 +311,30 @@ export async function answerForInput(
   }
 }
 
+export async function answerForFilter(
+  input: FilterInput
+): Promise<FilterResponse> {
+  console.log("answerForFilter");
+  const components = input.components;
+  if (components) {
+    const tableData = components.map((component, index) => {
+      if (typeof component.data === "string") {
+        return { index, content: component.data };
+      } else {
+        return { index, ...component.data };
+      }
+    });
+    console.log(JSON.stringify(tableData));
+  } else {
+    throw new Error("No Components!");
+  }
+
+  return {
+    components,
+    type: "questionForSelect",
+  };
+}
+
 export async function answerForSelect(input: SelectInput) {
   console.log("answerForSelect");
   if (page) {
@@ -332,7 +358,7 @@ export async function answerForSelect(input: SelectInput) {
   };
 
   actionLogs = loadObjectArrayFromFile<SystemLog>("actionLogs.json");
-  const actionDescription = getActionHistory(
+  const actionDescription = await getActionHistory(
     action,
     option !== null ? option.content : "no option"
   );
@@ -420,7 +446,10 @@ export async function confirm(
         if (!input.actionValue) {
           throw new Error("No action value for input");
         }
-        const actionDescription = getActionHistory(action, input.actionValue);
+        const actionDescription = await getActionHistory(
+          action,
+          input.actionValue
+        );
         actionLogs.push({
           type: focusSection.type,
           id: focusSection.id,
@@ -435,7 +464,7 @@ export async function confirm(
         );
       } else if (component.actionType === "click") {
         console.log("confirm for click");
-        const actionDescription = getActionHistory(action, "yes");
+        const actionDescription = await getActionHistory(action, "yes");
         actionLogs.push({
           type: focusSection.type,
           id: focusSection.id,

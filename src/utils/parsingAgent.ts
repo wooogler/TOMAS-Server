@@ -279,10 +279,6 @@ export function findClickableElements(screen: Element): Element[] {
   const clickableElements = Array.from(
     screen.querySelectorAll(clickableTagNames.join(","))
   ).filter((element) => {
-    // 클래스에 'on'이 포함되어 있는 경우 제외
-    if (element.classList.contains("on")) {
-      return false;
-    }
     if (
       element.tagName.toLowerCase() === "button" &&
       element.hasAttribute("disabled")

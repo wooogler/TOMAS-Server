@@ -1,5 +1,6 @@
 import { FastifyInstance } from "fastify";
 import {
+  answerForFilterHandler,
   answerForInputHandler,
   answerForSelectHandler,
   confirmHandler,
@@ -65,6 +66,19 @@ async function chatRoutes(server: FastifyInstance) {
       },
     },
     answerForSelectHandler
+  );
+
+  server.post(
+    "/answer/filter",
+    {
+      schema: {
+        body: $ref("filterInputSchema"),
+        response: {
+          201: $ref("filterResponseSchema"),
+        },
+      },
+    },
+    answerForFilterHandler
   );
 
   server.post(

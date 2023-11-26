@@ -129,10 +129,10 @@ Output:
 
 The output should be provided in a JSON array format that can be parsed.`,
   };
-  console.log(getAttrFromListPrompts.content);
   const jsonString = await getGpt4Response([getAttrFromListPrompts]);
-  console.log(jsonString);
-  const jsonArray = JSON.parse(jsonString);
+  const regex = /\[\s*\{.*?\}\s*\]/gs;
+  const match = jsonString.match(regex);
+  const jsonArray = JSON.parse(match ? match[0] : "[]");
 
   const allAttributes = new Set<string>();
   jsonArray
@@ -180,8 +180,6 @@ function hasOnlyOneTextContent(htmlString: string): boolean {
 
   const textContentCount = countTextNodes(dom.window.document.body);
 
-  console.log(textContentCount);
-
   return textContentCount === 1;
 }
 
@@ -210,8 +208,7 @@ export async function getDataFromHTML(screen: ScreenResult) {
       const simpleActionHtml = removeAllElementsWithoutText(action.html);
       const extractInfoPrompt: Prompt = {
         role: "SYSTEM",
-        content: `
-      Given a HTML snippet, extract key information in a structured JSON format.
+        content: `Given a HTML snippet, extract key information in a structured JSON format.
 
 HTML Snippet:
 ${simpleActionHtml}
@@ -241,5 +238,7 @@ Output:
       content: actions[index].content,
     };
   });
+
+  console.log(data);
   return data;
 }

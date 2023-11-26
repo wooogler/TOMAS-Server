@@ -72,7 +72,7 @@ OR
   return response;
 }
 
-export function getActionHistory(action: Action, actionValue: string) {
+export function getActionHistoryOld(action: Action, actionValue: string) {
   const actionType = action.type;
   const actionContent = action.content;
   if (actionType === "click") {
@@ -88,10 +88,7 @@ export function getActionHistory(action: Action, actionValue: string) {
   }
 }
 
-export async function getActionHistoryOriginal(
-  action: Action,
-  actionValue: string
-) {
+export async function getActionHistory(action: Action, actionValue: string) {
   let actionDone = "";
   const actionType = action.type;
   if (actionType === "click") {

@@ -85,13 +85,25 @@ const selectInputSchema = z.object({
   content: z.string(),
 });
 
+const filterInputSchema = z.object({
+  components: z.array(selectSchema),
+  content: z.string(),
+});
+
+const filterResponseSchema = z.object({
+  components: z.array(selectSchema),
+  type: z.string(),
+});
+
 export type CreateHumanChatInput = z.infer<typeof createHumanChatSchema>;
 export type NavigateInput = z.infer<typeof navigateSchema>;
 export type AnswerInput = z.infer<typeof answerInputSchema>;
 export type SelectInput = z.infer<typeof selectInputSchema>;
+export type FilterInput = z.infer<typeof filterInputSchema>;
 export type ConfirmInput = z.infer<typeof confirmSchema>;
 export type AnswerResponse = z.infer<typeof answerResponseSchema>;
 export type SelectResponse = z.infer<typeof selectResponseSchema>;
+export type FilterResponse = z.infer<typeof filterResponseSchema>;
 export type navigateResponse = z.infer<typeof navigateResponseSchema>;
 
 export const { schemas: chatSchemas, $ref } = buildJsonSchemas(
@@ -106,6 +118,8 @@ export const { schemas: chatSchemas, $ref } = buildJsonSchemas(
     confirmSchema,
     selectResponseSchema,
     selectInputSchema,
+    filterResponseSchema,
+    filterInputSchema,
   },
   {
     $id: "ChatSchema",

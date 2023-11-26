@@ -65,6 +65,13 @@ export async function answerForSelectHandler(
   return answerResponse;
 }
 
+export async function answerForFilterHandler(
+  request: FastifyRequest<{ Body: SelectInput }>
+) {
+  const answerResponse = await answerForSelect(request.body);
+  return answerResponse;
+}
+
 export async function confirmHandler(
   request: FastifyRequest<{ Body: ConfirmInput }>
 ) {

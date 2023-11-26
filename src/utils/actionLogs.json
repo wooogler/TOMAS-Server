@@ -3,21 +3,21 @@
     "type": "screen",
     "id": "https://m.megabox.co.kr/",
     "screenDescription": "The purpose of the modal is to display a notice or announcement to the user. It includes a close button, a link, and an option to not show the notice for a day.",
-    "actionDescription": "Click the \"닫기\" button to close the modal notice. This button allows the user to dismiss the notice and continue using the interface without any interruptions.",
+    "actionDescription": "The system clicked the \"닫기\" button to close the modal notice.",
     "screenChangeType": "URL_CHANGE"
   },
   {
     "type": "screen",
     "id": "https://m.megabox.co.kr/",
-    "screenDescription": "The webpage appears to be a movie theater website, designed to provide information about current movies, events, and promotions, as well as allow users to book tickets and access their account.",
-    "actionDescription": "Click the \"예매\" button. This button is located in the bottom navigation bar of the webpage and is used to navigate to the ticket booking section of the website.",
+    "screenDescription": "The webpage appears to be a movie theater website, designed to provide information about current movies, events, and promotions, as well as allow users to book tickets and access other features of the website.",
+    "actionDescription": "The system clicked the \"예매\" button to navigate to the ticket booking section of the website.",
     "screenChangeType": "CLOSE_LAYER"
   },
   {
     "type": "screen",
     "id": "https://m.megabox.co.kr/booking",
-    "screenDescription": "The webpage is designed for movie ticket reservation, allowing users to browse and select popular movies, choose a theater or movie to watch, and even book private screenings at the COEX theater.",
-    "actionDescription": "Select 서울의 봄 for select a movie: the purpose of selecting a movie is to choose a specific movie to watch and proceed with the reservation process, and the action involved in making a selection is clicking on the movie title in the list. the current state of the list is that it displays three movie options: \"서울의 봄\", \"싱글 인 서울\", and \"괴물\".",
+    "screenDescription": "The webpage is designed for movie ticket reservation, allowing users to browse and select popular movies, choose a theater or movie to watch, and book private screenings at the COEX theater.",
+    "actionDescription": "The system did not select any movie option from the list.",
     "screenChangeType": "URL_CHANGE"
   }
 ]

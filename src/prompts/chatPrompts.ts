@@ -58,6 +58,7 @@ export async function getUserInfo(chats: Chat[]): Promise<string> {
     findUserInfoPrompt,
     conversationPrompt,
   ]);
+  console.log("userInfo: ", userInfoResponse);
   return userInfoResponse;
 }
 
