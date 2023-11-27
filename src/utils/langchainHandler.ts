@@ -19,22 +19,22 @@ export type Prompt = {
 const chat = new ChatOpenAI({
   openAIApiKey: process.env.OPENAI_API_KEY,
   modelName: "gpt-3.5-turbo",
-  maxTokens: -1,
+  maxTokens: 512,
   temperature: 0,
 });
 
 const chat16k = new ChatOpenAI({
   openAIApiKey: process.env.OPENAI_API_KEY,
   modelName: "gpt-3.5-turbo-16k",
-  maxTokens: -1,
+  maxTokens: 512,
   temperature: 0,
 });
 
 const chat4 = new ChatOpenAI({
   openAIApiKey: process.env.OPENAI_API_KEY,
   modelName: "gpt-4",
-  temperature: 0.2,
-  maxTokens: 4096,
+  temperature: 0.5,
+  maxTokens: 1024,
 });
 
 const MAX_CHARACTERS = 30000;

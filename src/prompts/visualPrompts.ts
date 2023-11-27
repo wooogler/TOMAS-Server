@@ -242,3 +242,25 @@ Output:
   console.log(data);
   return data;
 }
+
+export async function getFilteredData(tableString: string, query: string) {
+  const getFilteredDataPrompt: Prompt = {
+    role: "SYSTEM",
+    content: `Given a JSON array of data, sort the array based on the user input.
+
+JSON Array:
+${tableString}
+
+User Input:
+${query}
+
+Output the sorted array in a JSON array.`,
+  };
+
+  const jsonString = await getGpt4Response([getFilteredDataPrompt]);
+  console.log(jsonString);
+  const regex = /\[\s*\{.*?\}\s*\]/gs;
+  const match = jsonString.match(regex);
+  const jsonArray = JSON.parse(match ? match[0] : "[]");
+  return jsonArray;
+}

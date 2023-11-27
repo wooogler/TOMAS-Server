@@ -13,17 +13,18 @@ import {
   PageHandler,
   ScreenResult,
 } from "../utils/pageHandler";
-import { Prompt, getGpt4Response } from "../utils/langchainHandler";
+import {
+  Prompt,
+  getAiResponse,
+  getGpt4Response,
+} from "../utils/langchainHandler";
 import { getChats, createAIChat } from "./chat/chat.service";
 import {
   SystemLog,
   findInputTextValue,
   getActionHistory,
 } from "../prompts/actionPrompts";
-import {
-  getUserGoal,
-  makeQuestionForConfirmation,
-} from "../prompts/chatPrompts";
+
 import {
   getListDescription,
   getItemDescription,
@@ -33,24 +34,26 @@ import {
 } from "../prompts/screenPrompts";
 import { extractTextLabelFromHTML } from "../prompts/visualPrompts";
 import { loadCacheFromFile, saveCacheToFile } from "../utils/fileUtil";
-import { Action } from "../utils/parsingAgent";
 
 export async function planningAgent(
   focusedSection: ScreenResult,
   userGoal: string,
   systemContext: string
 ) {
-  const planningActionPromptForSystem: Prompt = {
+  const planningActionPrompt: Prompt = {
     role: "SYSTEM",
-    content: `You are an AI planning agent. Analyze the user's current goal and the available actions on the screen to determine the most logical and practical next step. Consider what a general user would likely find most useful or relevant in achieving their goal.
+    content: `You are an AI planning agent. 
+Your task is to analyze the user's context in conjunction with the action logs to determine the most logical and practical next step. 
+Use the action logs to understand the user's previous interactions and progress towards their goal. 
+Consider what actions have been taken and how they influence the best course of action moving forward.
 
-User Goal:
+User's context:
 ${userGoal}
 
 Action Logs:
 ${systemContext}
 
-Describe your thought process and reasoning for how to proceed, focusing on the most straightforward and beneficial action for the user, given the current screen context.
+Describe your thought process and reasoning for how to proceed.
 
 Then, from the available actions on the current screen, choose one next action with its corresponding "(i=##)" that is most likely to assist the user in a practical and effective manner.
 
@@ -62,130 +65,46 @@ ${focusedSection.actions
   .join("\n")}
 `,
   };
+  console.log(planningActionPrompt.content);
   console.log(`
 ---------------
 Planning Agent:
 ---------------
 `);
-  console.log(planningActionPromptForSystem.content);
-  //   const response = await getAiResponse([
-  //     planningActionPromptForSystem,
-  //     planningActionPromptForUser,
-  //   ]);
-  const response = await getGpt4Response([
-    planningActionPromptForSystem,
-    // planningActionPromptForUser,
-  ]);
-  console.log(response);
 
-  const regex = /\(i=(\d+)\)/;
-  const match = response.match(regex);
-  if (match && match[1]) {
-    return match[1];
+  const organizePlanPrompt: Prompt = {
+    role: "HUMAN",
+    content: `Output the reason why you choose the action in one user-friendly sentence and the next action itself with its corresponding "(i=##)" in the following format:
+Reason: <reason>
+Next action: <action> (i=<i>)`,
+  };
+
+  const response = await getGpt4Response([planningActionPrompt]);
+  console.log(response);
+  const answer = await getAiResponse([
+    planningActionPrompt,
+    { role: "AI", content: response },
+    organizePlanPrompt,
+  ]);
+  console.log(answer);
+
+  // <reason> 추출을 위한 정규 표현식
+  const reasonRegex = /Reason: (.+?)\n/;
+  // <i> 추출을 위한 정규 표현식
+  const iRegex = /\(i=(\d+)\)/;
+
+  const reasonMatch = answer.match(reasonRegex);
+  const iMatch = answer.match(iRegex);
+  if (reasonMatch && iMatch) {
+    const reason = reasonMatch[1];
+    const i = iMatch[1];
+    return {
+      reason: reasonMatch[1],
+      i: iMatch[1],
+    };
   }
 
   return null;
-}
-
-export async function executionAgent({
-  page,
-  action,
-  screenDescription,
-  currentFocusedSection,
-  systemLogs,
-}: {
-  page: PageHandler;
-  action: Action;
-  screenDescription: string;
-  currentFocusedSection: ScreenResult;
-  systemLogs: SystemLog[];
-}) {
-  console.log(`
----------------
-Execution Agent:
----------------
-`);
-
-  let chats = await getChats();
-  let userContext = await getUserGoal(chats);
-  let actionValue = "";
-  if (action.type == "input") {
-    let valueBasedOnHistory = await JSON.parse(
-      await findInputTextValue(screenDescription, action.content, userContext)
-    );
-    if (valueBasedOnHistory.value == null) {
-      const question = action.question;
-
-      // TODO: Ask the user the question, and get the answer. Then update chat history in the database.
-      // await createAIChat({ content: question || "No Question" });
-
-      chats = await getChats();
-
-      userContext = await getUserGoal(chats);
-
-      valueBasedOnHistory = await JSON.parse(
-        await findInputTextValue(screenDescription, action.content, userContext)
-      );
-    }
-
-    actionValue = valueBasedOnHistory.value;
-  } else if (action.type == "select") {
-    const options = await page.select(`[i="${action.i}"]`);
-    // createAIChat({
-    //   content: `Which one do you want?
-    // Possible options could be:
-    // ${options.actions.map(
-    //   (action) => `- ${action.content}\n (i=${action.i}))\n\n`
-    // )}`,
-    // });
-
-    // TODO: Wait for the user's answer. Then update chat history in the database.
-    // suppose the answer is "<integer i>".
-    actionValue = "352";
-  }
-  if (action.type != "select") {
-    const confirmationQuestion = await makeQuestionForConfirmation(
-      action,
-      actionValue,
-      screenDescription
-    );
-    // Add confirmation question to database. TODO: Get the answer.
-    // createAIChat({ content: confirmationQuestion });
-  }
-
-  // Suppose the answer is "yes"/"no".
-  const answer = "yes";
-
-  if (answer == "yes") {
-    if (action.type == "input") {
-      let rt = await page.inputText(`[i="${action.i}"]`, actionValue);
-      return rt;
-    } else if (action.type == "click") {
-      const actionHistoryDescription = await getActionHistory(
-        {
-          i: action.i,
-          type: "click",
-          content: action.content,
-          html: action.html,
-          question: action.question,
-        },
-        "yes"
-      );
-      systemLogs.push({
-        id: currentFocusedSection.id,
-        type: "action",
-        screenDescription: screenDescription,
-        actionDescription: actionHistoryDescription,
-        screenChangeType: "STATE_CHANGE",
-      });
-
-      return await page.click(`[i="${action.i}"]`);
-    } else if (action.type == "select") {
-      return await page.select(`[i="${actionValue}"]`);
-    }
-  }
-  return currentFocusedSection;
-  // TODO: Update task history or system context in the database.
 }
 
 type ProcessComponentParams = {

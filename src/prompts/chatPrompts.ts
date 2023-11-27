@@ -1,65 +1,72 @@
 import { Chat } from "@prisma/client";
 import { Prompt, getAiResponse } from "../utils/langchainHandler";
 import { ActionComponent } from "../utils/pageHandler";
-import { loadCacheFromFile, saveCacheToFile } from "../utils/fileUtil";
+import {
+  loadCacheFromFile,
+  loadJsonFromFile,
+  saveCacheToFile,
+} from "../utils/fileUtil";
 import { generateIdentifier } from "../utils/htmlHandler";
 import { AnswerResponse } from "../modules/chat/chat.schema";
 import { Action } from "../utils/parsingAgent";
 
-export const makeConversationPrompt = (chats: Chat[]): Prompt => ({
-  role: "HUMAN",
-  content: `Conversation:
-  ${chats
+export const makeConversation = (chats: Chat[]): string => {
+  const actionChats = chats.filter((chat) => !chat.type.startsWith("confirm"));
+  return actionChats
     .map(
       (chat) => `${chat.role === "HUMAN" ? "User" : "System"}: ${chat.content}`
     )
-    .join("\n")}`,
-});
-
-export const getUserObjective = async (chats: Chat[]) => {
-  const findTaskObjectiveSystemPrompt: Prompt = {
-    role: "SYSTEM",
-    content: `You need to examine the conversation between user and system and determine the user's objective. Output the objective using "To ~" without providing additional context.`,
-  };
-
-  const conversationPrompt: Prompt = makeConversationPrompt(chats);
-
-  return getAiResponse([findTaskObjectiveSystemPrompt, conversationPrompt]);
+    .join("\n");
 };
 
 // 사용자의 목표를 추출하는 함수
-export async function getUserGoal(chats: Chat[]): Promise<string> {
-  const actionChats = chats;
-  const conversationPrompt: Prompt = makeConversationPrompt(actionChats);
+export async function getUserContext(chats: Chat[]): Promise<string> {
+  const conversation: string = makeConversation(chats);
 
   const findUserGoalPrompt: Prompt = {
     role: "SYSTEM",
-    content: `Based on the conversation between the system and the user, describe the user's goal.`,
+    content: `Based on the conversation between the system and the user, describe the user's context.
+    
+Conversation:
+${conversation}
+    `,
   };
 
-  const userGoalResponse = await getAiResponse([
-    findUserGoalPrompt,
-    conversationPrompt,
-  ]);
+  const userGoalResponse = await getAiResponse([findUserGoalPrompt]);
+  console.log(findUserGoalPrompt.content);
+  console.log(userGoalResponse);
   return userGoalResponse;
 }
 
 // 사용자 정보를 추출하는 함수
-export async function getUserInfo(chats: Chat[]): Promise<string> {
-  const actionChats = chats;
-  const conversationPrompt: Prompt = makeConversationPrompt(actionChats);
+export async function getUserInfo(
+  chats: Chat[],
+  userContext: string
+): Promise<object> {
+  const conversation: string = makeConversation(chats);
+
+  const defaultUserInfo = loadJsonFromFile("userInfo.json");
 
   const findUserInfoPrompt: Prompt = {
     role: "SYSTEM",
-    content: `Based on the conversation, extract any relevant user information and present it in a list format. Each item should be in the format "{key} : {value}"."`,
+    content: `Based on the conversation and user's context, output any relevant information in a JSON format.
+
+Conversation: 
+${conversation}
+
+User's context: ${userContext}
+`,
   };
 
-  const userInfoResponse = await getAiResponse([
-    findUserInfoPrompt,
-    conversationPrompt,
-  ]);
-  console.log("userInfo: ", userInfoResponse);
-  return userInfoResponse;
+  const userInfoResponse = await getAiResponse([findUserInfoPrompt]);
+  const jsonRegex = /{.*}/;
+  const userInfoJson = userInfoResponse.match(jsonRegex);
+  if (userInfoJson) {
+    const userInfo = JSON.parse(userInfoJson[0]);
+    return { ...defaultUserInfo, ...userInfo };
+  }
+
+  return { ...defaultUserInfo };
 }
 
 export async function makeQuestionForActionValue(
@@ -107,39 +114,22 @@ The description of the screen: ${screenDescription}
   return newQuestion;
 }
 
-export async function makeQuestionForConfirmation(
+export async function makeQuestionForInputConfirmation(
   action: Action,
   screenDescription: string,
   actionValue?: string
 ) {
   const makeConfirmationPrompt: Prompt = {
     role: "SYSTEM",
-    content: `Create a natural language question to ask whether the user wants to do the given action${
-      action.type === "input" ? " with value" : ""
-    }.
+    content: `Given the input action on the screen, Create a natural language question to ask whether the user wants to input the value or not.
 
-Action: ${action.content}
-${action.type === "input" ? `Value: ${actionValue}` : ""}
+Input action: ${action.content}
+Value: ${actionValue}
 
 The description of the screen: ${screenDescription}`,
   };
 
-  const firstConfirmationPrompt: Prompt = {
-    role: "AI",
-    content: await getAiResponse([makeConfirmationPrompt]),
-  };
-
-  const modifyConfirmationPrompt: Prompt = {
-    role: "HUMAN",
-    content:
-      "The user does not see the screen and is unfamiliar with technology, so please do not mention the element and the action on the screen, and avoid the jargon, mechanical terms, and terms that are too specific to the webpage.",
-  };
-
-  return await getAiResponse([
-    makeConfirmationPrompt,
-    firstConfirmationPrompt,
-    modifyConfirmationPrompt,
-  ]);
+  return await getAiResponse([makeConfirmationPrompt]);
 }
 
 export async function makeQuestionForSelectConfirmation(
@@ -184,7 +174,7 @@ export const makeSelectQuestionPrompt = (): Prompt => ({
 export const makeInputQuestionPrompt = (): Prompt => ({
   role: "HUMAN",
   content:
-    "Given the 'input' action described, generate a Korean directive asking the user to input the specified information. The directive should clearly prompt the user to enter the information related to the input action. Avoid providing any English translation in the output.",
+    "Given the 'input' action described, generate a Korean question that asks the user to input the specified information. The directive should clearly prompt the user to enter the information related to the input action. Avoid providing any English translation in the output.",
 });
 
 export const makeClickQuestionPrompt = (): Prompt => ({

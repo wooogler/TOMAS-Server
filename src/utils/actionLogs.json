@@ -3,21 +3,56 @@
     "type": "screen",
     "id": "https://m.megabox.co.kr/",
     "screenDescription": "The purpose of the modal is to display a notice or announcement to the user. It includes a close button, a link, and an option to not show the notice for a day.",
-    "actionDescription": "The system clicked the \"닫기\" button to close the modal notice.",
+    "actionDescription": "The user clicked the \"닫기\" button to close the modal notice.",
     "screenChangeType": "URL_CHANGE"
   },
   {
     "type": "screen",
     "id": "https://m.megabox.co.kr/",
-    "screenDescription": "The webpage appears to be a movie theater website, designed to provide information about current movies, events, and promotions, as well as allow users to book tickets and access other features of the website.",
-    "actionDescription": "The system clicked the \"예매\" button to navigate to the ticket booking section of the website.",
+    "screenDescription": "The webpage appears to be a movie theater website, designed to provide information about current movies, events, and promotions, as well as allow users to book tickets and access their account.",
+    "actionDescription": "The user clicked the \"예매\" button to start the ticket booking process for a specific movie.",
     "screenChangeType": "CLOSE_LAYER"
   },
   {
     "type": "screen",
     "id": "https://m.megabox.co.kr/booking",
-    "screenDescription": "The webpage is designed for movie ticket reservation, allowing users to browse and select popular movies, choose a theater or movie to watch, and book private screenings at the COEX theater.",
-    "actionDescription": "The system did not select any movie option from the list.",
+    "screenDescription": "The webpage is designed to provide information and facilitate the process of movie ticket reservation.",
+    "actionDescription": "The user clicked on the \"어떤영화를보고 싶으세요?\" element to select a movie and proceed with the movie ticket reservation process.",
     "screenChangeType": "URL_CHANGE"
+  },
+  {
+    "type": "screen",
+    "id": "https://m.megabox.co.kr/booking/movie",
+    "screenDescription": "The webpage is designed to display a list of movies and allow users to search for movies based on certain criteria.",
+    "actionDescription": "The user selected the movie '12세이상관람가 서울의 봄' from the list.",
+    "screenChangeType": "URL_CHANGE"
+  },
+  {
+    "type": "screen",
+    "id": "https://m.megabox.co.kr/booking/movie",
+    "screenDescription": "The webpage is designed to allow users to select a theater from a list of options organized by region, and then proceed to view movie schedules and seating arrangements for the selected theater.",
+    "actionDescription": "The user selected '지역별' from the list to choose a theater by region and view its movie schedules and seating arrangements.",
+    "screenChangeType": "OPEN_LAYER"
+  },
+  {
+    "type": "screen",
+    "id": "https://m.megabox.co.kr/booking/movie",
+    "screenDescription": "The webpage is designed to allow users to select a theater from a list of options organized by region, and then proceed to view movie schedules and seating arrangements for the selected theater.",
+    "actionDescription": "The user selected the theater '경기 30' from the list to view its movie schedules and seating arrangements.",
+    "screenChangeType": "STATE_CHANGE"
+  },
+  {
+    "type": "screen",
+    "id": "https://m.megabox.co.kr/booking/movie",
+    "screenDescription": "The webpage is designed to allow users to select a theater from a list of options based on location, and then proceed to the next step.",
+    "actionDescription": "The user selected the theater location '고양스타필드' from the list.",
+    "screenChangeType": "STATE_CHANGE"
+  },
+  {
+    "type": "screen",
+    "id": "https://m.megabox.co.kr/booking/movie",
+    "screenDescription": "The webpage is designed to allow users to select a theater from a list of options categorized by region, and then proceed to view movie schedules and seating arrangements for the selected theater.",
+    "actionDescription": "The user clicked the \"선택 완료\" button to confirm their selection of a theater and proceed to view movie schedules and seating arrangements.",
+    "screenChangeType": "STATE_CHANGE"
   }
 ]

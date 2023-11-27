@@ -3,6 +3,7 @@ import {
   AnswerInput,
   ConfirmInput,
   CreateHumanChatInput,
+  FilterInput,
   NavigateInput,
   SelectInput,
 } from "./chat.schema";
@@ -18,6 +19,7 @@ import {
   closePage,
   deleteLogs,
   getNewestChat,
+  answerForFilter,
 } from "./chat.service";
 
 export async function createHumanChatHandler(
@@ -66,9 +68,9 @@ export async function answerForSelectHandler(
 }
 
 export async function answerForFilterHandler(
-  request: FastifyRequest<{ Body: SelectInput }>
+  request: FastifyRequest<{ Body: FilterInput }>
 ) {
-  const answerResponse = await answerForSelect(request.body);
+  const answerResponse = await answerForFilter(request.body);
   return answerResponse;
 }
 

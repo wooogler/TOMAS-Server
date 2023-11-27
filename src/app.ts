@@ -2,9 +2,7 @@ import Fastify from "fastify";
 import dotenv from "dotenv";
 import openaiRoutes from "./modules/openai/openai.route";
 import chatRoutes from "./modules/chat/chat.route";
-import screenRoutes from "./modules/screen/screen.route";
 import { chatSchemas } from "./modules/chat/chat.schema";
-import { screenSchemas } from "./modules/screen/screen.schema";
 import cors from "@fastify/cors";
 import multer from "fastify-multer";
 
@@ -17,12 +15,11 @@ async function main() {
   server.register(cors, {
     origin: "*",
   });
-  for (const schema of [...chatSchemas, ...screenSchemas]) {
+  for (const schema of [...chatSchemas]) {
     server.addSchema(schema);
   }
 
   server.register(chatRoutes, { prefix: "/api/chats" });
-  server.register(screenRoutes, { prefix: "/api/screen" });
   server.register(openaiRoutes, { prefix: "/api/openai" });
 
   try {

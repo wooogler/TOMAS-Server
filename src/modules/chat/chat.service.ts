@@ -31,12 +31,12 @@ import {
   getActionHistory,
 } from "../../prompts/actionPrompts";
 import {
-  getUserGoal,
+  getUserContext,
   getUserInfo,
-  makeQuestionForConfirmation,
+  makeQuestionForInputConfirmation,
   makeQuestionForSelectConfirmation,
 } from "../../prompts/chatPrompts";
-import { getDataFromHTML } from "../../prompts/visualPrompts";
+import { getDataFromHTML, getFilteredData } from "../../prompts/visualPrompts";
 import {
   loadObjectArrayFromFile,
   saveObjectArrayToFile,
@@ -124,7 +124,7 @@ async function planningAndAsk(): Promise<
     actionLogs = loadObjectArrayFromFile<SystemLog>("actionLogs.json");
 
     const chats = await getChats();
-    const userGoal = await getUserGoal(chats);
+    const userContext = await getUserContext(chats);
     const actions = focusSection.actions;
 
     const systemContext = await getSystemContext(actionLogs);
@@ -132,11 +132,13 @@ async function planningAndAsk(): Promise<
     const taskI =
       actions.length === 1
         ? actions[0].i.toString()
-        : await planningAgent(
-            focusSection,
-            userGoal,
-            actionLogs.length !== 0 ? systemContext : "No action history"
-          );
+        : (
+            await planningAgent(
+              focusSection,
+              userContext,
+              actionLogs.length !== 0 ? systemContext : "No action history"
+            )
+          )?.i;
 
     if (taskI) {
       page.highlight(`[i="${taskI}"]`);
@@ -154,16 +156,13 @@ async function planningAndAsk(): Promise<
         };
 
         if (component.actionType === "input") {
-          const userInfo = await getUserInfo(chats);
-          let valueBasedOnHistory = await JSON.parse(
-            await findInputTextValue(
-              screenDescription,
-              component.description,
-              userInfo
-            )
+          const userInfo = await getUserInfo(chats, userContext);
+          console.log(userInfo);
+          let actionValue = await findInputTextValue(
+            component.description || "",
+            userInfo
           );
 
-          const actionValue = valueBasedOnHistory.value;
           // If user context is not enough to answer the question
           if (actionValue === null || actionValue === "") {
             const question = action.question;
@@ -179,7 +178,7 @@ async function planningAndAsk(): Promise<
               screenDescription: screenDescriptionKorean,
             };
           } else {
-            const confirmationQuestion = await makeQuestionForConfirmation(
+            const confirmationQuestion = await makeQuestionForInputConfirmation(
               action,
               screenDescription,
               actionValue
@@ -249,7 +248,9 @@ export async function answerForInput(
   }
   await createHumanChat({ content: input.content }, "answerForInput");
   const chats = await getChats();
-  const userInfo = await getUserInfo(chats);
+  const userGoal = await getUserContext(chats);
+  const userInfo = await getUserInfo(chats, userGoal);
+  console.log(userInfo);
   const screenDescription = focusSection.screenDescription;
   const screenDescriptionKorean = focusSection.screenDescriptionKorean;
   const component = input.component;
@@ -262,15 +263,11 @@ export async function answerForInput(
   };
 
   if (component) {
-    let valueBasedOnHistory = await JSON.parse(
-      await findInputTextValue(
-        screenDescription,
-        component?.description,
-        userInfo
-      )
+    let actionValue = await findInputTextValue(
+      component?.description || "",
+      userInfo
     );
 
-    const actionValue = valueBasedOnHistory.value;
     // If user context is not enough to answer the question
     if (actionValue === null) {
       console.log("actionValue is null");
@@ -288,7 +285,7 @@ export async function answerForInput(
       };
     } else {
       console.log("actionValue is " + actionValue);
-      const confirmationQuestion = await makeQuestionForConfirmation(
+      const confirmationQuestion = await makeQuestionForInputConfirmation(
         action,
         screenDescription,
         actionValue
@@ -315,16 +312,25 @@ export async function answerForFilter(
   input: FilterInput
 ): Promise<FilterResponse> {
   console.log("answerForFilter");
-  const components = input.components;
+  let components = input.components;
+  const content = input.content;
   if (components) {
     const tableData = components.map((component, index) => {
       if (typeof component.data === "string") {
-        return { index, content: component.data };
+        return { index, data: component.data };
       } else {
         return { index, ...component.data };
       }
     });
-    console.log(JSON.stringify(tableData));
+    const tableString = JSON.stringify(tableData, null, 2);
+    const filteredData = await getFilteredData(tableString, content);
+    console.log(filteredData);
+    components = filteredData.map((item: any) => {
+      return {
+        ...components[item.index],
+      };
+    });
+    console.log(components);
   } else {
     throw new Error("No Components!");
   }

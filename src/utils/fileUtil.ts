@@ -29,6 +29,15 @@ export function saveCacheToFile(
   fs.writeFileSync(filePath, jsonData, "utf-8");
 }
 
+export function loadJsonFromFile(fileName: string): object {
+  const filePath = getCacheFilePath(fileName);
+  if (fs.existsSync(filePath)) {
+    const fileData = fs.readFileSync(filePath, "utf-8");
+    return JSON.parse(fileData);
+  }
+  return {};
+}
+
 export function loadObjectArrayFromFile<T>(fileName: string): T[] {
   const filePath = getCacheFilePath(fileName);
   if (fs.existsSync(filePath)) {

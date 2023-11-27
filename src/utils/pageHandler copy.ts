@@ -183,11 +183,8 @@ export class PageHandler {
     action: () => Promise<void>
   ): Promise<ScreenResult> {
     const page = await this.getPage();
-    const { screen, scrolls, screenChangeType, screenType } = await getScreen(
-      page,
-      action,
-      true
-    );
+    const { screen, scrolls, screenChangeType, screenType, pageHtml } =
+      await getScreen(page, action, true);
 
     if (parsing === false) {
       return {
@@ -205,6 +202,7 @@ export class PageHandler {
     const actions = await parsingAgent({
       screenHtml: screen,
       screenDescription,
+      pageHtml,
     });
     return {
       type: "screen",
@@ -346,7 +344,7 @@ export class PageHandler {
 
   async unfocus(parsing: boolean = true): Promise<ScreenResult> {
     const page = await this.getPage();
-    const { screen, screenChangeType, screenType } = await getScreen(
+    const { screen, screenChangeType, screenType, pageHtml } = await getScreen(
       page,
       async () => {},
       true
@@ -368,6 +366,7 @@ export class PageHandler {
     const actions = await parsingAgent({
       screenHtml: screen,
       screenDescription,
+      pageHtml,
     });
     return {
       type: "page",
@@ -514,6 +513,7 @@ async function findScreenAndScrolls(
   screen: string;
   scrolls: { x: string[]; y: string[] };
   screenType: ScreenType;
+  pageHtml: string;
 }> {
   return await page.evaluate((hiddenElementIs) => {
     const clonedBody = document.body.cloneNode(true) as HTMLElement;
@@ -576,6 +576,7 @@ async function findScreenAndScrolls(
       screen: clonedBody.innerHTML,
       scrolls,
       screenType,
+      pageHtml: document.body.innerHTML,
     };
   }, hiddenElementIs);
 }
@@ -608,6 +609,7 @@ export async function getScreen(
   scrolls: { x: string[]; y: string[] };
   screenChangeType: ScreenChangeType;
   screenType: ScreenType;
+  pageHtml: string;
 }> {
   const oldUrl = page.url();
   const oldHiddenElementIs = await getHiddenElementIs(page, isAction);
@@ -644,10 +646,10 @@ export async function getScreen(
     }
   }
 
-  const { screen, scrolls, screenType } = await findScreenAndScrolls(
+  const { screen, scrolls, screenType, pageHtml } = await findScreenAndScrolls(
     page,
     hiddenElementIs
   );
 
-  return { screen, scrolls, screenChangeType, screenType };
+  return { screen, scrolls, screenChangeType, screenType, pageHtml };
 }

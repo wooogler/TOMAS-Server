@@ -311,14 +311,16 @@ export const selectActionTemplate = ({
   screenDescription: string;
 }): Prompt => ({
   role: "SYSTEM",
-  content: `Analyze the role and current state of a list on the web page, with a focus on the types of items it displays and how a user interacts with them. 
-Begin your description with 'Select a [item type] ', where '[item type]' should be replaced with the specific kind of items in the list. In one sentence, highlight the purpose of selecting an item from the list, the action involved in making a selection, and any existing selection state of the list. Use the provided HTML context, list items' text, and screen description to determine the types of items and structure your description accordingly.
+  content: `Analyze the role of a list on the web page, focusing on the types of items it displays and user interaction. 
+Output a concise, one-sentence description starting with 'Select one '.
+Your sentence should succinctly encapsulate the purpose of selecting an item and the action involved. 
+Rely on the provided list items, HTML context of the list, and screen description to accurately identify the types of items and ensure your description is brief yet comprehensive.
 
-HTML Context of the List:
-${firstThreeItemsWithParentHtml}
-
-List Items' Text:
+List items:
 ${options.map((option) => `- ${option}`).join("\n")}
+
+HTML context of the list:
+${firstThreeItemsWithParentHtml}
 
 Screen Context Description:
 ${screenDescription}
@@ -361,11 +363,11 @@ export const singleActionTemplate = ({
   simplifiedScreenHtml: string;
 }): Prompt => ({
   role: "SYSTEM",
-  content: `Provide a detailed analysis of the role and current state of an HTML element in its screen context, starting your description with a direct action command in the form '${capitalizeFirstCharacter(
+  content: `Provide a detailed analysis of the role of an HTML element in its screen context, starting your description with a direct action command in the form '${capitalizeFirstCharacter(
     actionType
   )} the [element]'. 
 Explain the purpose of this action in relation to the element and its surrounding interface. 
-Your description should be in the form of a directive, instructing a specific action to be performed, in one to two sentences without newlines.
+Your description should be in the form of a directive, instructing a specific action to be performed, in one sentence without newlines.
 Avoid mentioning javascript functions.
 
 HTML of the Element:

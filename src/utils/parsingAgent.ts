@@ -1,5 +1,5 @@
 import { JSDOM } from "jsdom";
-import { Prompt, getAiResponse } from "./langchainHandler";
+import { Prompt, getAiResponse, getGpt4Response } from "./langchainHandler";
 import { extractSurroundingHtml, simplifyHtml } from "./htmlHandler";
 import { extractTextLabelFromHTML } from "../prompts/visualPrompts";
 import { loadCacheFromFile, saveCacheToFile } from "./fileUtil";
@@ -37,13 +37,52 @@ export interface Action {
 export async function parsingListAgent({ listHtml }: { listHtml: string }) {
   const dom = new JSDOM(listHtml);
   const listElement = dom.window.document.body.firstElementChild as Element;
+  const itemElements = Array.from(listElement.children).filter((item) => {
+    return !item.classList.contains("theater-tit");
+  });
+
+  const itemActions: Action[] = await itemElements.reduce(
+    async (prevPromise, itemElement, index) => {
+      const prevActions = await prevPromise;
+      const clickableElements = findClickableElements(itemElement);
+      const selectableElements = findSelectableElements(itemElement);
+      itemElement = removeElementsFromScreen(itemElement, selectableElements);
+
+      const itemText = itemElement.textContent?.replace(/\s+/g, " ").trim();
+      const itemI = itemElement.getAttribute("i");
+      if (clickableElements.length > 0) {
+        prevActions.push({
+          type: "focus",
+          content: itemText || "",
+          question: `Do you want to select ${itemText}?`,
+          i: Number(itemI),
+          html: simplifyHtml(itemElement.outerHTML, true, true),
+        });
+      }
+      return prevActions;
+    },
+    Promise.resolve([] as Action[])
+  );
+
+  return itemActions;
+}
+
+export async function parsingListAgentOriginal({
+  listHtml,
+}: {
+  listHtml: string;
+}) {
+  const dom = new JSDOM(listHtml);
+  const listElement = dom.window.document.body.firstElementChild as Element;
   const itemElements = Array.from(listElement.children);
 
   // 각 itemElement에 한해서만 클래스 빈도수 확인
   const classFrequency = new Map();
   itemElements.forEach((itemElement) => {
     itemElement.classList.forEach((className) => {
-      classFrequency.set(className, (classFrequency.get(className) || 0) + 1);
+      if (className !== "on") {
+        classFrequency.set(className, (classFrequency.get(className) || 0) + 1);
+      }
     });
   });
 
@@ -128,12 +167,16 @@ export async function parsingItemAgent({
 export async function parsingAgent({
   screenHtml,
   screenDescription,
+  pageHtml,
 }: {
   screenHtml: string;
   screenDescription: string;
+  pageHtml: string;
 }): Promise<Action[]> {
   const dom = new JSDOM(screenHtml);
   let screen = dom.window.document.body as Element;
+  const pageDom = new JSDOM(pageHtml);
+  const page = pageDom.window.document.body as Element;
   let originalScreen = screen.cloneNode(true) as Element;
   const actionableElements: ActionableElement[] = [];
 
@@ -142,7 +185,9 @@ export async function parsingAgent({
     actionableElements.push({
       i: element.getAttribute("i") || "",
       type: "select",
-      element,
+      element: page.querySelector(
+        `[i="${element.getAttribute("i")}"]`
+      ) as Element,
     });
   });
   screen = removeElementsFromScreen(screen, selectableElements);
@@ -178,11 +223,20 @@ export async function parsingAgent({
 function findSelectableElements(screen: Element): Element[] {
   const elements: Element[] = [];
   const selectableTagNames = ["ul", "ol", "select", "fieldset", "table"];
-  const excludeClassKeywords = ["mask", "section", "swiper", "bot"];
+  const excludeClassKeywords = [
+    "mask",
+    "section",
+    "swiper",
+    "bot",
+    "v2",
+    "swipe",
+    "display",
+  ];
 
   // Traverse the DOM and find all selectable elements
   function traverseAndFind(element: Element) {
     const tagName = element.tagName.toLowerCase();
+    const id = element.getAttribute("id");
 
     if (tagName === "div") {
       const frequencyMap = createFrequencyMap(element, excludeClassKeywords);
@@ -192,6 +246,10 @@ function findSelectableElements(screen: Element): Element[] {
           elements.push(element);
           break;
         }
+      }
+
+      if (id === "scheduleListWrap") {
+        elements.push(element);
       }
       // 가장 높은 빈도수를 가진 클래스/데이터 속성 찾기
       // let maxFrequency = 0;
@@ -280,8 +338,8 @@ export function findClickableElements(screen: Element): Element[] {
     screen.querySelectorAll(clickableTagNames.join(","))
   ).filter((element) => {
     if (
-      element.tagName.toLowerCase() === "button" &&
-      element.hasAttribute("disabled")
+      element.hasAttribute("disabled") ||
+      element.classList.contains("disabled")
     ) {
       return false;
     }
@@ -431,8 +489,11 @@ async function createSelectAction(
   screenElement: Element,
   screenDescription: string
 ): Promise<Action> {
-  const { content, question, description, options } =
-    await getAiResponseForSelectAction(elem, screenElement, screenDescription);
+  const { content, question, description, options } = await getSelectAction(
+    elem,
+    screenElement,
+    screenDescription
+  );
 
   return {
     type: "select",
@@ -450,7 +511,7 @@ async function createSingleAction(
   screenElement: Element,
   screenDescription: string
 ): Promise<Action> {
-  const { content, question, description } = await getAiResponseForSingleAction(
+  const { content, question, description } = await getSingleAction(
     elem,
     screenElement,
     screenDescription
@@ -499,7 +560,7 @@ export function modifySelectAction(elem: Element, screenElement: Element) {
   return parentElement;
 }
 
-async function getAiResponseForSelectAction(
+async function getSelectAction(
   elem: ActionableElement,
   screenElement: Element,
   screenDescription: string
@@ -517,7 +578,7 @@ async function getAiResponseForSelectAction(
     screenDescription,
   });
   console.log(selectActionPrompt.content);
-  const content = await getAiResponse([selectActionPrompt]);
+  const content = await getGpt4Response([selectActionPrompt]);
   const question = await getAiResponse([
     selectActionPrompt,
     { role: "AI", content: content },
@@ -534,7 +595,7 @@ async function getAiResponseForSelectAction(
   return { content, question, description, options };
 }
 
-async function getAiResponseForSingleAction(
+async function getSingleAction(
   elem: ActionableElement,
   screenElement: Element,
   screenDescription: string

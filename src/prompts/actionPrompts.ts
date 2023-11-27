@@ -4,10 +4,10 @@ import { Prompt, getAiResponse } from "../utils/langchainHandler";
 import { ActionComponent, ScreenChangeType } from "../utils/pageHandler";
 import { Action } from "../utils/parsingAgent";
 
-export async function findInputTextValue(
+export async function findInputTextValueOriginal(
   pageDescription: string,
   componentDescription: string | undefined,
-  userContext: string
+  userInfo: object
 ) {
   const inputComponentPrompt: Prompt = {
     role: "SYSTEM",
@@ -20,7 +20,7 @@ ${pageDescription}
 Component description:
 ${componentDescription}
 
-${userContext}
+${userInfo}
 
 Output needs to follow one of the JSON formats in plain text. Never provide additional context.
 {
@@ -35,6 +35,33 @@ OR
         `,
   };
   return await getAiResponse([inputComponentPrompt]);
+}
+
+export async function findInputTextValue(
+  inputActionDescription: string,
+  userInfo: object
+) {
+  const findInputValuePrompt: Prompt = {
+    role: "SYSTEM",
+    content: `Given the User Info and a description of an input action, determine the value required for the input action from the User Info. 
+If the required value is present in the User Info, output that value. 
+If the value cannot be found, output 'null'.
+
+User Info: 
+${Object.entries(userInfo)
+  .map(([key, value]) => `- ${key}: ${value}`)
+  .join("\n")}
+
+Input Action Description:
+${inputActionDescription}
+`,
+  };
+
+  const value = await getAiResponse([findInputValuePrompt]);
+  if (value === "null") {
+    return null;
+  }
+  return value;
 }
 
 export async function findSelectValue(
@@ -102,7 +129,7 @@ export async function getActionHistory(action: Action, actionValue: string) {
   }
   const actionHistoryPrompt: Prompt = {
     role: "SYSTEM",
-    content: `Here are the actions that the system tried and have done on the web page. 
+    content: `Here are the actions that the user tried and have done on the web page. 
 
 Tried: ${action.content}
 Done: ${
