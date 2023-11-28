@@ -363,11 +363,11 @@ export const singleActionTemplate = ({
   simplifiedScreenHtml: string;
 }): Prompt => ({
   role: "SYSTEM",
-  content: `Provide a detailed analysis of the role of an HTML element in its screen context, starting your description with a direct action command in the form '${capitalizeFirstCharacter(
+  content: `Provide a detailed analysis of the action with an HTML element in its screen context, starting your description with '${capitalizeFirstCharacter(
     actionType
   )} the [element]'. 
 Explain the purpose of this action in relation to the element and its surrounding interface. 
-Your description should be in the form of a directive, instructing a specific action to be performed, in one sentence without newlines.
+Your description should be in the form of a directive, instructing a specific action to be performed, in one concise sentence.
 Avoid mentioning javascript functions.
 
 HTML of the Element:

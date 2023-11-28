@@ -17,6 +17,13 @@
       "name": "test",
       "runtimeArgs": ["-r", "ts-node/register"],
       "args": ["${workspaceFolder}/src/test.ts"]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "test2",
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "args": ["${workspaceFolder}/src/test2.ts"]
     }
   ]
 }

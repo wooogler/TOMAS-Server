@@ -1,5 +1,9 @@
 import { Chat } from "@prisma/client";
-import { Prompt, getAiResponse } from "../utils/langchainHandler";
+import {
+  Prompt,
+  getAiResponse,
+  getGpt4Response,
+} from "../utils/langchainHandler";
 import { ActionComponent } from "../utils/pageHandler";
 import {
   loadCacheFromFile,
@@ -49,7 +53,7 @@ export async function getUserInfo(
 
   const findUserInfoPrompt: Prompt = {
     role: "SYSTEM",
-    content: `Based on the conversation and user's context, output any relevant information in a JSON format.
+    content: `Based on the conversation and user's context, output any relevant information in a one-level JSON format.
 
 Conversation: 
 ${conversation}
@@ -58,7 +62,8 @@ User's context: ${userContext}
 `,
   };
 
-  const userInfoResponse = await getAiResponse([findUserInfoPrompt]);
+  const userInfoResponse = await getGpt4Response([findUserInfoPrompt]);
+  console.log("userInfoResponse:", userInfoResponse);
   const jsonRegex = /{.*}/;
   const userInfoJson = userInfoResponse.match(jsonRegex);
   if (userInfoJson) {
@@ -168,7 +173,7 @@ The description of the screen: ${screenDescription}`,
 export const makeSelectQuestionPrompt = (): Prompt => ({
   role: "HUMAN",
   content:
-    "Based on the 'select' action described in the input, create a Korean question that asks the user which item they wish to choose from a specific list. The question should directly inquire about the user's choice regarding the item to be selected from the list. Avoid including any English translation in the output.",
+    "Given the select action, create a concise and clear Korean question that captures the essence of the required action or information sought in the statement.",
 });
 
 export const makeInputQuestionPrompt = (): Prompt => ({
@@ -192,7 +197,7 @@ export const makeElementDescriptionPrompt = (): Prompt => ({
 export const makeListDescriptionPrompt = (): Prompt => ({
   role: "HUMAN",
   content:
-    "Generate a Korean description of the specific list on a webpage. Emphasize the immediate outcome or effect of selecting an item from this list, focusing on the functionality of the action. Avoid going into details about the nature or representation of the list itself or its location on the webpage. The description should be clear, concise, and directly related to what happens when a user interacts with the list by selecting an item.",
+    "Generate a Korean description of the list. Emphasize the immediate outcome or effect of selecting an item from this list, focusing on the functionality of the action. Avoid going into details about the nature or representation of the list itself or its location on the webpage. The description should be clear, concise, and directly related to what happens when a user interacts with the list by selecting an item.",
 });
 
 export const makeSectionDescriptionPrompt = (): Prompt => ({

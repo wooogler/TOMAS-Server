@@ -1,6 +1,10 @@
 import { AnswerResponse } from "../modules/chat/chat.schema";
 import { editActionType } from "../utils/htmlHandler";
-import { Prompt, getAiResponse } from "../utils/langchainHandler";
+import {
+  Prompt,
+  getAiResponse,
+  getGpt4Response,
+} from "../utils/langchainHandler";
 import { ActionComponent, ScreenChangeType } from "../utils/pageHandler";
 import { Action } from "../utils/parsingAgent";
 
@@ -44,7 +48,7 @@ export async function findInputTextValue(
   const findInputValuePrompt: Prompt = {
     role: "SYSTEM",
     content: `Given the User Info and a description of an input action, determine the value required for the input action from the User Info. 
-If the required value is present in the User Info, output that value. 
+If the required value is present in the User Info, output that value only. 
 If the value cannot be found, output 'null'.
 
 User Info: 
@@ -57,7 +61,11 @@ ${inputActionDescription}
 `,
   };
 
-  const value = await getAiResponse([findInputValuePrompt]);
+  console.log(findInputValuePrompt.content);
+
+  const value = await getGpt4Response([findInputValuePrompt]);
+
+  console.log("actionValue: ", value);
   if (value === "null") {
     return null;
   }

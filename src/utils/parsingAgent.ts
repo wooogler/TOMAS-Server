@@ -247,10 +247,6 @@ function findSelectableElements(screen: Element): Element[] {
           break;
         }
       }
-
-      if (id === "scheduleListWrap") {
-        elements.push(element);
-      }
       // 가장 높은 빈도수를 가진 클래스/데이터 속성 찾기
       // let maxFrequency = 0;
       // let maxFrequencyClassOrAttr = "";
