@@ -86,6 +86,7 @@ const selectInputSchema = z.object({
 });
 
 const filterInputSchema = z.object({
+  component: ActionComponentSchema,
   components: z.array(selectSchema),
   content: z.string(),
 });

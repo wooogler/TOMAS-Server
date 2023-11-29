@@ -16,6 +16,17 @@ import { Action } from "../utils/parsingAgent";
 
 export const makeConversation = (chats: Chat[]): string => {
   const actionChats = chats.filter((chat) => !chat.type.startsWith("confirm"));
+
+  // "선택 안함" 응답의 인덱스 찾기
+  const selectedIndex = actionChats.findIndex(
+    (chat) => chat.content === "선택 안함"
+  );
+
+  // "선택 안함"이 있다면 해당 응답과 그 이전 질문 제거
+  if (selectedIndex !== -1) {
+    actionChats.splice(selectedIndex - 1, 2);
+  }
+
   return actionChats
     .map(
       (chat) => `${chat.role === "HUMAN" ? "User" : "System"}: ${chat.content}`
@@ -29,7 +40,7 @@ export async function getUserContext(chats: Chat[]): Promise<string> {
 
   const findUserGoalPrompt: Prompt = {
     role: "SYSTEM",
-    content: `Based on the conversation between the system and the user, describe the user's context.
+    content: `Based on the conversation between the system and the user, describe the user's goal.
     
 Conversation:
 ${conversation}
@@ -185,6 +196,12 @@ export const makeClickQuestionPrompt = (): Prompt => ({
   role: "HUMAN",
   content:
     "Given the 'click' action described, create a Korean question that asks the user whether they wish to proceed with the click action. The question should directly inquire about the user's intention to perform the specific click action mentioned. Refrain from including any English translation in the output.",
+});
+
+export const makeModifyQuestionPrompt = (): Prompt => ({
+  role: "HUMAN",
+  content:
+    "Given a description of a user action, convert this action into a clear and concise Korean question that could be presented to the user",
 });
 
 export const makeElementDescriptionPrompt = (): Prompt => ({

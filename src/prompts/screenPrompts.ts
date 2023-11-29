@@ -92,7 +92,7 @@ export const getSectionDescription = async (
   screenDescription: string
 ) => {
   const html = simplifyHtml(sectionHtml, true, true);
-  const describeModalSystemPrompt: Prompt = {
+  const describeSectionSystemPrompt: Prompt = {
     role: "SYSTEM",
     content: `Analyze the provided HTML code of the section and describe the section's specific purpose and function in one sentence. Focus on the type of information or interaction the modal is designed to convey or facilitate, based on its structure and elements.
     
@@ -102,9 +102,17 @@ HTML code:
 ${html}`,
   };
 
-  const sectionDescription = await getAiResponse([describeModalSystemPrompt]);
+  const sectionDescription = await getAiResponse([describeSectionSystemPrompt]);
+  const sectionDescriptionKorean = await getAiResponse([
+    describeSectionSystemPrompt,
+    {
+      content: sectionDescription,
+      role: "AI",
+    },
+    makeSectionDescriptionPrompt(),
+  ]);
 
-  return sectionDescription;
+  return { sectionDescription, sectionDescriptionKorean };
 };
 
 export const getListDescription = async (
@@ -353,6 +361,7 @@ export const selectActionTemplate = ({
 Output a concise, one-sentence description starting with 'Select one '.
 Your sentence should succinctly encapsulate the purpose of selecting an item and the action involved. 
 Rely on the provided list items, HTML context of the list, and screen description to accurately identify the types of items and ensure your description is brief yet comprehensive.
+Avoid mentioning javascript functions.
 
 List items:
 ${options.map((option) => `- ${option}`).join("\n")}
@@ -399,11 +408,25 @@ export const singleActionTemplate = ({
   screenDescription: string;
   simplifiedElementHtml: string;
   simplifiedScreenHtml: string;
-}): Prompt => ({
-  role: "SYSTEM",
-  content: `Provide a detailed analysis of the action with an HTML element in its screen context, starting your description with '${capitalizeFirstCharacter(
-    actionType
-  )} the [element]'. 
+}): Prompt => {
+  if (actionType === "modify") {
+    return {
+      role: "SYSTEM",
+      content: `Given the HTML element on the screen, analyze the structure and identify the main function. Describe the action on the element in one sentence, starting with 'Select '. 
+    
+    HTML of the Element:
+    ${simplifiedElementHtml}
+    
+    Screen Context Description:
+    ${screenDescription}
+    `,
+    };
+  } else {
+    return {
+      role: "SYSTEM",
+      content: `Provide a detailed analysis of the action with an HTML element in its screen context, starting your description with '${capitalizeFirstCharacter(
+        actionType
+      )} the [element]'. 
 Explain the purpose of this action in relation to the element and its surrounding interface. 
 Your description should be in the form of a directive, instructing a specific action to be performed, in one concise sentence.
 Avoid mentioning javascript functions.
@@ -417,4 +440,6 @@ ${extractSurroundingHtml(simplifiedScreenHtml, simplifiedElementHtml)}
 Screen Context Description:
 ${screenDescription}
 `,
-});
+    };
+  }
+};

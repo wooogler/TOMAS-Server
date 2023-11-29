@@ -67,6 +67,7 @@ ${inputActionDescription}
   if (value === "null") {
     return null;
   }
+  console.log("actionValue: ", value);
   return value;
 }
 

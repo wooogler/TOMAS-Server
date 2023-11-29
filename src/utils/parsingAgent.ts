@@ -13,6 +13,7 @@ import {
   makeElementDescriptionPrompt,
   makeInputQuestionPrompt,
   makeListDescriptionPrompt,
+  makeModifyQuestionPrompt,
   makeSelectQuestionPrompt,
   translateQuestionTemplate,
 } from "../prompts/chatPrompts";
@@ -182,6 +183,18 @@ export async function parsingAgent({
   let originalScreen = screen.cloneNode(true) as Element;
   const actionableElements: ActionableElement[] = [];
 
+  const modifiableElements = findModifiableElements(screen);
+  modifiableElements.forEach((element) => {
+    actionableElements.push({
+      i: element.getAttribute("i") || "",
+      type: "modify",
+      element: page.querySelector(
+        `[i="${element.getAttribute("i")}"]`
+      ) as Element,
+    });
+  });
+  screen = removeElementsFromScreen(screen, modifiableElements);
+
   if (!excludeSelectable) {
     const selectableElements = findSelectableElements(screen);
     selectableElements.forEach((element) => {
@@ -223,6 +236,20 @@ export async function parsingAgent({
   return actions.sort((a, b) => a.i - b.i);
 }
 
+function findModifiableElements(screen: Element): Element[] {
+  const modifiableElements: Element[] = [];
+  const people = screen.querySelector("#ticketKindList");
+  const seat = screen.querySelector("#seatLayout > div");
+  if (seat) {
+    modifiableElements.push(seat);
+  }
+
+  if (people) {
+    modifiableElements.push(people);
+  }
+  return modifiableElements;
+}
+
 function findSelectableElements(screen: Element): Element[] {
   const elements: Element[] = [];
   const selectableTagNames = ["ul", "ol", "select", "fieldset", "table"];
@@ -240,6 +267,7 @@ function findSelectableElements(screen: Element): Element[] {
   function traverseAndFind(element: Element) {
     const tagName = element.tagName.toLowerCase();
     const id = element.getAttribute("id");
+    const classList = Array.from(element.classList);
 
     if (tagName === "div") {
       const frequencyMap = createFrequencyMap(element, excludeClassKeywords);
@@ -250,30 +278,10 @@ function findSelectableElements(screen: Element): Element[] {
           break;
         }
       }
-      // 가장 높은 빈도수를 가진 클래스/데이터 속성 찾기
-      // let maxFrequency = 0;
-      // let maxFrequencyClassOrAttr = "";
-      // for (const [key, frequency] of frequencyMap.entries()) {
-      //   if (frequency > maxFrequency) {
-      //     maxFrequency = frequency;
-      //     maxFrequencyClassOrAttr = key;
-      //   }
-      // }
-
-      // // 해당 클래스/데이터 속성을 가진 자식 요소만 포함하는 새로운 요소 생성
-      // if (maxFrequency >= 2) {
-      //   const newElement = document.createElement("div");
-      //   for (const childElement of element.children) {
-      //     if (
-      //       childElement.classList.contains(maxFrequencyClassOrAttr) ||
-      //       childElement.getAttribute(maxFrequencyClassOrAttr) !== null
-      //     ) {
-      //       newElement.appendChild(childElement.cloneNode(true));
-      //     }
-      //   }
-      //   elements.push(newElement);
-      // }
-    } else if (selectableTagNames.includes(tagName)) {
+    } else if (
+      selectableTagNames.includes(tagName) ||
+      classList.includes("time-wrap")
+    ) {
       // If the element is a selectable tag, add it to the list of selectable elements
       elements.push(element);
     }
@@ -300,11 +308,6 @@ function findSelectableElements(screen: Element): Element[] {
     }
     return countClickable > arr.length / 2;
   });
-
-  const seat = screen.querySelector("#seatLayout > div");
-  if (seat) {
-    selectableElements.push(seat);
-  }
 
   return selectableElements;
 }
@@ -644,9 +647,14 @@ async function getSingleAction(
     element.tagName.toLowerCase() === "table"
       ? tableActionPrompt
       : singleActionPrompt;
-  const content = await getAiResponse([actionPrompt]);
-  const makeQuestionPrompt =
-    elem.type === "input" ? makeInputQuestionPrompt : makeClickQuestionPrompt;
+  console.log(actionPrompt.content);
+  const content =
+    elem.type === "modify"
+      ? await getGpt4Response([actionPrompt])
+      : await getAiResponse([actionPrompt]);
+  console.log(content);
+  const makeQuestionPrompt = makeModifyQuestionPrompt;
+  // elem.type === "input" ? makeInputQuestionPrompt : makeClickQuestionPrompt;
   const question = await getAiResponse([
     {
       role: "SYSTEM",

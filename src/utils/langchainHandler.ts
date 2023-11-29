@@ -36,6 +36,12 @@ const chat4 = new ChatOpenAI({
   temperature: 0.5,
   maxTokens: 1024,
 });
+const chat432k = new ChatOpenAI({
+  openAIApiKey: process.env.OPENAI_API_KEY,
+  modelName: "gpt-4-32k",
+  temperature: 0.5,
+  maxTokens: 1024,
+});
 
 const MAX_CHARACTERS = 30000;
 
@@ -60,18 +66,23 @@ export const getAiResponse = async (
   return response.text;
 };
 
-export const getGpt4Response = async (prompts: Prompt[]) => {
+export const getGpt4Response = async (
+  prompts: Prompt[],
+  long: boolean = false
+) => {
   const promptMessages = prompts.map((prompt) => {
+    const promptContent = prompt.content.slice(0, MAX_CHARACTERS) + "...";
     if (prompt.role === "HUMAN") {
-      return new HumanChatMessage(prompt.content);
+      return new HumanChatMessage(promptContent);
     } else if (prompt.role === "AI") {
-      return new AIChatMessage(prompt.content);
+      return new AIChatMessage(promptContent);
     } else {
-      return new SystemChatMessage(prompt.content);
+      return new SystemChatMessage(promptContent);
     }
   });
 
-  const response = await chat4.call(promptMessages);
+  let chatModel = long ? chat432k : chat4;
+  const response = await chatModel.call(promptMessages);
 
   return response.text;
 };

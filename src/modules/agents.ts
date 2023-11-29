@@ -114,12 +114,13 @@ export async function planningAgent(
 ) {
   const planningActionPrompt: Prompt = {
     role: "SYSTEM",
-    content: `As an agent, your task is to select the most suitable action for the current situation, considering both the user's context and the history of previous actions taken.
+    content: `As an agent, your task is to select the most common action for the current situation, considering both the user's context and the history of previous actions taken.
+Ensure that the action you choose has not been performed previously. 
 Reflect on the sequence of actions already performed and their outcomes to make an informed decision about the next step. 
 Evaluate the available options based on this historical context and choose one action that seems most appropriate. 
 If you determine that no further actions are needed or beneficial, please output 'done'.
 
-User's context:
+User's goal:
 ${userGoal}
 
 Action History:

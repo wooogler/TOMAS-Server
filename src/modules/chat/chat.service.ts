@@ -311,11 +311,12 @@ export async function answerForInput(
 
 export async function answerForFilter(
   input: FilterInput
-): Promise<FilterResponse> {
+): Promise<FilterResponse | AnswerResponse | undefined> {
   console.log("answerForFilter");
   let components = input.components;
+  let component = input.component;
   const content = input.content;
-  if (components) {
+  if (components.length > 0) {
     const tableData = components.map((component, index) => {
       if (typeof component.data === "string") {
         return { index, data: component.data };
@@ -333,7 +334,9 @@ export async function answerForFilter(
     });
     console.log(components);
   } else {
-    throw new Error("No Components!");
+    console.log("modify");
+    await page.modifyState(`[i=${component.i}`, content, false);
+    return await planningAndAsk();
   }
 
   return {

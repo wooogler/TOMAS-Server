@@ -13,14 +13,15 @@ async function main() {
     await pageHandler.highlightScreenResults(screenResults);
   };
 
-  const number = await loginSite(pageHandler);
-  const numberScreen = await pageHandler.modifyState(
-    "#ticketKindList",
-    "I want to book tickets for 3 adults and 1 child.",
-    false
-  );
-  // const upAdult = await pageHandler.click("#TKA_plus", false);
-  // const clickAgree = await pageHandler.click("#seatSelectionBtn", false);
+  const number = await loginSite(pageHandler, false);
+  // const numberScreen = await pageHandler.modifyState(
+  //   "#ticketKindList",
+  //   "I want to book tickets for 3 adults and 1 child.",
+  //   false
+  // );
+  const upAdult = await pageHandler.click("#TKA_plus", false);
+  const clickAgree = await pageHandler.click("#seatSelectionBtn", true);
+  showScreenResults(clickAgree);
   // const screenResults = await pageHandler.modifyState(
   //   "#seatLayout > div",
   //   "뒷 자리를 예매해줘.",
@@ -28,7 +29,7 @@ async function main() {
   // );
 }
 
-async function loginSite(pageHandler: PageHandler) {
+async function loginSite(pageHandler: PageHandler, parsing = false) {
   const notice = await pageHandler.navigate(
     "https://m.megabox.co.kr/main",
     false
@@ -50,8 +51,11 @@ async function loginSite(pageHandler: PageHandler) {
   const schedule = await pageHandler.click("#theaterChoiceBtn", false);
   console.log("schedule: ", schedule.type);
 
-  const selectDate = await pageHandler.click("#playDate_20231129 > a", false);
-  const login = await pageHandler.click("#time_1003_01_11551426", false);
+  const selectDate = await pageHandler.click("#playDate_20231130 > a", false);
+  const login = await pageHandler.click(
+    "#scheduleListWrap > div > div:nth-child(2) > div > div:nth-child(1) > a",
+    false
+  );
   console.log("login: ", login.type);
 
   const defaultUserInfo = loadJsonFromFile("userInfo.json") as {
@@ -73,7 +77,7 @@ async function loginSite(pageHandler: PageHandler) {
 
   const number = await pageHandler.click(
     "#seatPreviewWrap > div.btn-group.pd0 > button",
-    false
+    parsing
   );
   console.log("number: ", number.type);
   return number;

@@ -261,6 +261,8 @@ export class PageHandler {
     });
 
     return this.handleAction(parsing, async () => {
+      await this.scrollToElement(selector);
+      await new Promise((r) => setTimeout(r, 200));
       await element.click();
     });
   }
@@ -272,6 +274,8 @@ export class PageHandler {
   ): Promise<ScreenResult> {
     const page = await this.getPage();
     return this.handleAction(parsing, async () => {
+      await this.scrollToElement(selector);
+      await new Promise((r) => setTimeout(r, 200));
       await page.$eval(
         selector,
         (input) => ((input as HTMLInputElement).value = "")
@@ -282,10 +286,10 @@ export class PageHandler {
 
   async modifyState(
     selector: string,
-    userContext: string,
+    userRequest: string,
     isLongState: boolean,
     oldActions: Action[] = []
-  ) {
+  ): Promise<ScreenResult> {
     const page = await this.getPage();
     let { screen, screenType, pageHtml } = await getScreen(
       page,
@@ -306,10 +310,8 @@ export class PageHandler {
     }, selector);
     const { screenDescription, screenDescriptionKorean } =
       await getScreenDescription(screen, screenType);
-    const sectionDescription = await getSectionDescription(
-      sectionHtml,
-      screenDescription
-    );
+    const { sectionDescription, sectionDescriptionKorean } =
+      await getSectionDescription(sectionHtml, screenDescription);
 
     const { sectionState } = isLongState
       ? { sectionState: "No State" }
@@ -323,13 +325,13 @@ export class PageHandler {
 
     const selectNextActionPrompt: Prompt = {
       role: "SYSTEM",
-      content: `You are an agent tasked with modifying the state of the section according to the user's context. 
+      content: `You are an agent tasked with modifying the state of the section according to the user's request. 
 Your goal is to select one next action with "(i=##)" that is most appropriate for the current situation. 
 After each action, the state of the screen will change, and new actions may become available. 
 Think step by step, and select only one action at a time. 
 If you determine that no further actions are necessary to achieve the user's goal or to maintain the desired state of the screen, please output 'done'.
 
-user's context: ${userContext}
+user's request: ${userRequest}
 
 Description of the section: ${sectionDescription}
 
@@ -342,12 +344,12 @@ ${actions.map((comp) => `- ${comp.content} (i=${comp.i})`).join("\n")}
 
     const selectNextActionWithHistoryPrompt: Prompt = {
       role: "SYSTEM",
-      content: `As an agent, your task is to select the most suitable next action for the current situation, considering both the user's context and the history of previous actions taken. 
+      content: `As an agent, your task is to select the most suitable next action for the current situation, considering both the user's request and the history of previous actions taken. 
 Reflect on the sequence of actions already performed and their outcomes to make an informed decision about the next step. 
 Evaluate the available options based on this historical context and choose one action that seems most appropriate. 
 If you determine that no further actions are needed or beneficial, please output 'done'.
 
-User's context: ${userContext}
+User's request: ${userRequest}
 
 Description of the section: ${sectionDescription}
 
@@ -377,14 +379,22 @@ ${actions.map((comp) => `- ${comp.content} (i=${comp.i})`).join("\n")}`,
       } else if (action.type === "input") {
         // input은 필요할 때 구현
       }
+      return await this.modifyState(selector, userRequest, isLongState, [
+        ...oldActions,
+        action,
+      ]);
     } else {
       console.log("done");
-      return;
+      return {
+        type: screenType,
+        screenDescription: sectionDescription,
+        screenDescriptionKorean: sectionDescriptionKorean,
+        screenChangeType: "STATE_CHANGE",
+        actions: [],
+        id: `${this.extractBaseURL(page.url())}`,
+        screenHtml: sectionHtml,
+      };
     }
-    await this.modifyState(selector, userContext, isLongState, [
-      ...oldActions,
-      action,
-    ]);
   }
 
   async select(
@@ -439,6 +449,8 @@ ${actions.map((comp) => `- ${comp.content} (i=${comp.i})`).join("\n")}`,
     parsing: boolean = true
   ): Promise<ScreenResult> {
     const page = await this.getPage();
+    await this.scrollToElement(selector);
+    await new Promise((r) => setTimeout(r, 200));
     const { screen, screenType } = await getScreen(page, async () => {}, false);
     const dom = new JSDOM(screen);
     const element = dom.window.document.querySelector(selector);

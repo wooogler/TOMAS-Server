@@ -217,7 +217,7 @@ Extract and format the information in one-level JSON as follows:
 
 Output: 
 {
-  ${attrList.map((attr) => `"${attr}": {${attr}} or null`).join(",\n")}
+  ${attrList.map((attr) => `"${attr}": <${attr}> or null`).join(",\n")}
 }
 `,
       };
@@ -256,11 +256,13 @@ ${query}
 
 Output the sorted array in a JSON array.`,
   };
+  console.log(getFilteredDataPrompt.content);
 
   const jsonString = await getGpt4Response([getFilteredDataPrompt]);
   console.log(jsonString);
   const regex = /\[\s*\{.*?\}\s*\]/gs;
   const match = jsonString.match(regex);
   const jsonArray = JSON.parse(match ? match[0] : "[]");
+
   return jsonArray;
 }
