@@ -5,15 +5,21 @@ import {
   editActionType,
   extractSurroundingHtml,
   removeBeforeAndIncludingKeyword,
+  simplifyHtml,
 } from "../utils/htmlHandler";
-import { Prompt, getAiResponse } from "../utils/langchainHandler";
+import {
+  Prompt,
+  getAiResponse,
+  getGpt4Response,
+} from "../utils/langchainHandler";
 import { ScreenType } from "../utils/pageHandler";
 import { makeSectionDescriptionPrompt } from "./chatPrompts";
 
 export const getScreenDescription = async (
-  html: string,
+  screenHtml: string,
   screenType: ScreenType
 ) => {
+  const html = simplifyHtml(screenHtml, true, true);
   let describeScreenSystemPrompt: Prompt;
 
   if (screenType === "page") {
@@ -50,23 +56,55 @@ ${html}`,
   return { screenDescription, screenDescriptionKorean };
 };
 
-export const getModalDescription = async (
-  html: string,
-  pageDescription: string
+export const getSectionState = async (screen: string) => {
+  const html = simplifyHtml(screen, true, true);
+  const describeSectionStatePrompt: Prompt = {
+    role: "SYSTEM",
+    content: `Analyze the provided HTML code and return the current state of the section in a JSON format. 
+Focus on extracting values from key elements like input fields and buttons to construct a structured representation of the section's state.
+
+HTML code of the section:
+${html}`,
+  };
+
+  const sectionState = await getAiResponse([describeSectionStatePrompt]);
+
+  return { sectionState };
+};
+
+export const getSectionLongState = async (screen: string) => {
+  const html = simplifyHtml(screen, true, true);
+  const describeSectionStatePrompt: Prompt = {
+    role: "SYSTEM",
+    content: `Analyze the provided HTML code and describe the current state of the section in natural language. Focus specifically on elements with distinctive classes that indicate their state, such as 'active', 'selected', 'disabled', etc. Describe how these classes reflect the current configuration and status of the section's key elements like buttons, input fields, and other interactive components.
+
+HTML code of the section:
+${html}`,
+  };
+
+  const sectionState = await getGpt4Response([describeSectionStatePrompt]);
+
+  return { sectionState };
+};
+
+export const getSectionDescription = async (
+  sectionHtml: string,
+  screenDescription: string
 ) => {
+  const html = simplifyHtml(sectionHtml, true, true);
   const describeModalSystemPrompt: Prompt = {
     role: "SYSTEM",
-    content: `Given the HTML code, summarize the general purpose of the modal in the web page it represents.
+    content: `Analyze the provided HTML code of the section and describe the section's specific purpose and function in one sentence. Focus on the type of information or interaction the modal is designed to convey or facilitate, based on its structure and elements.
     
-Consider the description on the web page where the modal is located: ${pageDescription}
+Consider the description on the screen where the section is located: ${screenDescription}
 
 HTML code:
 ${html}`,
   };
 
-  const screenDescription = await getAiResponse([describeModalSystemPrompt]);
+  const sectionDescription = await getAiResponse([describeModalSystemPrompt]);
 
-  return screenDescription;
+  return sectionDescription;
 };
 
 export const getListDescription = async (
@@ -311,7 +349,7 @@ export const selectActionTemplate = ({
   screenDescription: string;
 }): Prompt => ({
   role: "SYSTEM",
-  content: `Analyze the role of a list on the web page, focusing on the types of items it displays and user interaction. 
+  content: `Analyze the role of a list on the web page, considering both the types of items it displays and user interaction, as well as any comments within the list's HTML context. 
 Output a concise, one-sentence description starting with 'Select one '.
 Your sentence should succinctly encapsulate the purpose of selecting an item and the action involved. 
 Rely on the provided list items, HTML context of the list, and screen description to accurately identify the types of items and ensure your description is brief yet comprehensive.
@@ -320,7 +358,7 @@ List items:
 ${options.map((option) => `- ${option}`).join("\n")}
 
 HTML context of the list:
-${firstThreeItemsWithParentHtml}
+${simplifyHtml(firstThreeItemsWithParentHtml, true, true)}
 
 Screen Context Description:
 ${screenDescription}

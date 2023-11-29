@@ -176,7 +176,7 @@ export const simplifyHtml = (
       "meta",
     ]);
 
-    const attributesToKeepForAllComps = ["href", "clickable"];
+    const attributesToKeepForAllComps = ["href"];
     if (isClass === true) {
       attributesToKeepForAllComps.push("class");
     }
@@ -203,6 +203,8 @@ export const simplifyHtml = (
       "class",
       "id",
       "disabled",
+      "value",
+      "title",
     ];
     if (isClass === true) {
       attributesToKeepForActionComps.push("class");

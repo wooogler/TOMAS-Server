@@ -168,10 +168,12 @@ export async function parsingAgent({
   screenHtml,
   screenDescription,
   pageHtml,
+  excludeSelectable,
 }: {
   screenHtml: string;
   screenDescription: string;
   pageHtml: string;
+  excludeSelectable?: boolean;
 }): Promise<Action[]> {
   const dom = new JSDOM(screenHtml);
   let screen = dom.window.document.body as Element;
@@ -180,17 +182,19 @@ export async function parsingAgent({
   let originalScreen = screen.cloneNode(true) as Element;
   const actionableElements: ActionableElement[] = [];
 
-  const selectableElements = findSelectableElements(screen);
-  selectableElements.forEach((element) => {
-    actionableElements.push({
-      i: element.getAttribute("i") || "",
-      type: "select",
-      element: page.querySelector(
-        `[i="${element.getAttribute("i")}"]`
-      ) as Element,
+  if (!excludeSelectable) {
+    const selectableElements = findSelectableElements(screen);
+    selectableElements.forEach((element) => {
+      actionableElements.push({
+        i: element.getAttribute("i") || "",
+        type: "select",
+        element: page.querySelector(
+          `[i="${element.getAttribute("i")}"]`
+        ) as Element,
+      });
     });
-  });
-  screen = removeElementsFromScreen(screen, selectableElements);
+    screen = removeElementsFromScreen(screen, selectableElements);
+  }
 
   const clickableElements = findClickableElements(screen);
   clickableElements.forEach((element) => {
@@ -211,11 +215,10 @@ export async function parsingAgent({
     });
   });
 
-  const actions = await getActions(
-    actionableElements,
-    originalScreen,
-    screenDescription
-  );
+  const actions =
+    actionableElements.length < 50
+      ? await getActions(actionableElements, originalScreen, screenDescription)
+      : await getSimpleActions(actionableElements);
 
   return actions.sort((a, b) => a.i - b.i);
 }
@@ -298,6 +301,11 @@ function findSelectableElements(screen: Element): Element[] {
     return countClickable > arr.length / 2;
   });
 
+  const seat = screen.querySelector("#seatLayout > div");
+  if (seat) {
+    selectableElements.push(seat);
+  }
+
   return selectableElements;
 }
 
@@ -335,7 +343,8 @@ export function findClickableElements(screen: Element): Element[] {
   ).filter((element) => {
     if (
       element.hasAttribute("disabled") ||
-      element.classList.contains("disabled")
+      element.classList.contains("disabled") ||
+      element.classList.contains("impossible")
     ) {
       return false;
     }
@@ -444,6 +453,24 @@ async function getActions(
   return actions;
 }
 
+async function getSimpleActions(
+  actionableElements: ActionableElement[]
+): Promise<Action[]> {
+  const actions = await actionableElements.map((elem) => {
+    return {
+      type: elem.type,
+      content:
+        elem.type === "click"
+          ? `Click ${elem.element.textContent}`
+          : `Input ${(elem.element as HTMLInputElement).placeholder}`,
+      i: Number(elem.i),
+      html: simplifyHtml(elem.element.outerHTML, true),
+    };
+  });
+
+  return actions;
+}
+
 async function processElement(
   elem: ActionableElement,
   screenElement: Element,
@@ -524,13 +551,14 @@ async function createSingleAction(
   };
 }
 
-async function extractOptions(
-  element: Element,
-  screenDescription: string
-): Promise<string[]> {
+function extractOptions(element: Element): string[] {
   const optionElements = Array.from(element.children);
   return optionElements.map((option) => {
-    // 텍스트에서 개행, 탭 제거 및 연속된 공백을 단일 공백으로 변환
+    const scriptTags = option.getElementsByTagName("script");
+    while (scriptTags.length > 0) {
+      const scriptTag = scriptTags[0];
+      scriptTag.parentNode?.removeChild(scriptTag);
+    }
     return option.textContent?.replace(/\s+/g, " ").trim() || "";
   });
 }
@@ -561,31 +589,35 @@ async function getSelectAction(
   screenElement: Element,
   screenDescription: string
 ) {
-  const options = await extractOptions(elem.element, screenDescription);
+  const options = extractOptions(elem.element);
   const parentElement = modifySelectAction(elem.element, screenElement);
-  const firstThreeItemsWithParentHtml = simplifyHtml(
-    parentElement?.outerHTML || "",
-    true,
-    true
-  );
+  const firstThreeItemsWithParentHtml = parentElement?.outerHTML || "";
   const selectActionPrompt = selectActionTemplate({
     options,
-    firstThreeItemsWithParentHtml,
+    firstThreeItemsWithParentHtml: simplifyHtml(
+      firstThreeItemsWithParentHtml,
+      true,
+      true
+    ),
     screenDescription,
   });
   console.log(selectActionPrompt.content);
   const content = await getGpt4Response([selectActionPrompt]);
+  console.log(content);
+
   const question = await getAiResponse([
-    selectActionPrompt,
-    { role: "AI", content: content },
-    makeSelectQuestionPrompt(),
+    {
+      role: "SYSTEM",
+      content: `${makeSelectQuestionPrompt().content}
+Action: ${content}`,
+    },
   ]);
   const description = await getAiResponse([
-    selectActionPrompt,
-    { role: "AI", content: content },
-    makeSelectQuestionPrompt(),
-    { role: "AI", content: question },
-    makeListDescriptionPrompt(),
+    {
+      role: "SYSTEM",
+      content: `${makeListDescriptionPrompt().content}
+Action: ${content}`,
+    },
   ]);
 
   return { content, question, description, options };
@@ -616,16 +648,18 @@ async function getSingleAction(
   const makeQuestionPrompt =
     elem.type === "input" ? makeInputQuestionPrompt : makeClickQuestionPrompt;
   const question = await getAiResponse([
-    actionPrompt,
-    { role: "AI", content: content },
-    makeQuestionPrompt(),
+    {
+      role: "SYSTEM",
+      content: `${makeQuestionPrompt().content}
+Action: ${content}`,
+    },
   ]);
   const description = await getAiResponse([
-    actionPrompt,
-    { role: "AI", content: content },
-    makeQuestionPrompt(),
-    { role: "AI", content: question },
-    makeElementDescriptionPrompt(),
+    {
+      role: "SYSTEM",
+      content: `${makeElementDescriptionPrompt().content}
+Action: ${content}`,
+    },
   ]);
 
   return { content, question, description };

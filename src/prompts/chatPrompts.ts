@@ -63,8 +63,7 @@ User's context: ${userContext}
   };
 
   const userInfoResponse = await getGpt4Response([findUserInfoPrompt]);
-  console.log("userInfoResponse:", userInfoResponse);
-  const jsonRegex = /{.*}/;
+  const jsonRegex = /{.*?}/s;
   const userInfoJson = userInfoResponse.match(jsonRegex);
   if (userInfoJson) {
     const userInfo = JSON.parse(userInfoJson[0]);
@@ -126,7 +125,7 @@ export async function makeQuestionForInputConfirmation(
 ) {
   const makeConfirmationPrompt: Prompt = {
     role: "SYSTEM",
-    content: `Given the input action on the screen, Create a natural language question to ask whether the user wants to input the value or not.
+    content: `Given the input action on the screen, Create a Korean natural language question to ask whether the user wants to input the value or not.
 
 Input action: ${action.content}
 Value: ${actionValue}
@@ -173,7 +172,7 @@ The description of the screen: ${screenDescription}`,
 export const makeSelectQuestionPrompt = (): Prompt => ({
   role: "HUMAN",
   content:
-    "Given the select action, create a concise and clear Korean question that captures the essence of the required action or information sought in the statement.",
+    "Given the 'select' action, generate a Korean question that asks the user which item they wish to select. The question should directly inquire about the user's intention to perform the specific select action mentioned. Refrain from including any English translation in the output.",
 });
 
 export const makeInputQuestionPrompt = (): Prompt => ({
@@ -185,7 +184,7 @@ export const makeInputQuestionPrompt = (): Prompt => ({
 export const makeClickQuestionPrompt = (): Prompt => ({
   role: "HUMAN",
   content:
-    "Given the 'click' action described in the input, create a Korean question that asks the user whether they wish to proceed with the click action. The question should directly inquire about the user's intention to perform the specific click action mentioned. Refrain from including any English translation in the output.",
+    "Given the 'click' action described, create a Korean question that asks the user whether they wish to proceed with the click action. The question should directly inquire about the user's intention to perform the specific click action mentioned. Refrain from including any English translation in the output.",
 });
 
 export const makeElementDescriptionPrompt = (): Prompt => ({

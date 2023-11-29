@@ -64,8 +64,6 @@ ${inputActionDescription}
   console.log(findInputValuePrompt.content);
 
   const value = await getGpt4Response([findInputValuePrompt]);
-
-  console.log("actionValue: ", value);
   if (value === "null") {
     return null;
   }

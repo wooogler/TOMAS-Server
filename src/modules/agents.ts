@@ -35,7 +35,7 @@ import {
 import { extractTextLabelFromHTML } from "../prompts/visualPrompts";
 import { loadCacheFromFile, saveCacheToFile } from "../utils/fileUtil";
 
-export async function planningAgent(
+export async function planningAgentOriginal(
   focusedSection: ScreenResult,
   userGoal: string,
   systemContext: string
@@ -56,6 +56,76 @@ ${systemContext}
 Describe your thought process and reasoning for how to proceed.
 
 Then, from the available actions on the current screen, choose one next action with its corresponding "(i=##)" that is most likely to assist the user in a practical and effective manner.
+
+Current Screen Description: ${focusedSection.screenDescription}
+
+Available actions:
+${focusedSection.actions
+  .map((comp) => `- ${comp.content} (i=${comp.i})`)
+  .join("\n")}
+`,
+  };
+  console.log(planningActionPrompt.content);
+  console.log(`
+---------------
+Planning Agent:
+---------------
+`);
+
+  const organizePlanPrompt: Prompt = {
+    role: "HUMAN",
+    content: `Output the reason why you choose the action in one user-friendly sentence and the next action itself with its corresponding "(i=##)" in the following format:
+Reason: <reason>
+Next action: <action> (i=<i>)`,
+  };
+
+  const response = await getGpt4Response([planningActionPrompt]);
+  console.log(response);
+  const answer = await getAiResponse([
+    planningActionPrompt,
+    { role: "AI", content: response },
+    organizePlanPrompt,
+  ]);
+  console.log(answer);
+
+  // <reason> 추출을 위한 정규 표현식
+  const reasonRegex = /Reason: (.+?)\n/;
+  // <i> 추출을 위한 정규 표현식
+  const iRegex = /\(i=(\d+)\)/;
+
+  const reasonMatch = answer.match(reasonRegex);
+  const iMatch = answer.match(iRegex);
+  if (reasonMatch && iMatch) {
+    const reason = reasonMatch[1];
+    const i = iMatch[1];
+    return {
+      reason: reasonMatch[1],
+      i: iMatch[1],
+    };
+  }
+
+  return null;
+}
+
+export async function planningAgent(
+  focusedSection: ScreenResult,
+  userGoal: string,
+  systemContext: string
+) {
+  const planningActionPrompt: Prompt = {
+    role: "SYSTEM",
+    content: `As an agent, your task is to select the most suitable action for the current situation, considering both the user's context and the history of previous actions taken.
+Reflect on the sequence of actions already performed and their outcomes to make an informed decision about the next step. 
+Evaluate the available options based on this historical context and choose one action that seems most appropriate. 
+If you determine that no further actions are needed or beneficial, please output 'done'.
+
+User's context:
+${userGoal}
+
+Action History:
+${systemContext}
+
+Describe your thought process and choose one action from the available actions on the current screen with its corresponding "(i=##)".
 
 Current Screen Description: ${focusedSection.screenDescription}
 

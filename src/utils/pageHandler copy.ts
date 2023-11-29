@@ -5,6 +5,9 @@ import { simplifyHtml, simplifyItemHtml } from "./htmlHandler";
 import {
   getListDescription,
   getScreenDescription,
+  getSectionDescription,
+  getSectionLongState,
+  getSectionState,
 } from "../prompts/screenPrompts";
 import {
   Action,
@@ -14,6 +17,7 @@ import {
   parsingListAgent,
 } from "./parsingAgent";
 import { Prompt, getAiResponse, getGpt4Response } from "./langchainHandler";
+import { getChats } from "../modules/chat/chat.service";
 
 const NO_PAGE_ERROR = new Error("Cannot find a page.");
 
@@ -30,7 +34,9 @@ export interface ScreenResult {
   screenDescription: string;
   screenDescriptionKorean: string;
   screenChangeType: ScreenChangeType;
+  screenState?: string;
   actions: Action[];
+  screenHtml: string;
 }
 
 export class PageHandler {
@@ -64,6 +70,20 @@ export class PageHandler {
       throw new Error(`Element with selector ${selector} not found.`);
     }
     return element;
+  }
+
+  async scrollToElement(selector: string) {
+    const page = await this.getPage();
+    await page.evaluate((selector) => {
+      const el = document.querySelector(selector);
+      if (el) {
+        el.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+          inline: "center",
+        });
+      }
+    }, selector);
   }
 
   private extractBaseURL(url: string) {
@@ -188,29 +208,31 @@ export class PageHandler {
 
     if (parsing === false) {
       return {
-        type: "page",
+        type: screenType,
         screenDescription: "",
         screenDescriptionKorean: "",
         actions: [],
         screenChangeType: "STATE_CHANGE",
         id: `${this.extractBaseURL(page.url())}`,
+        screenHtml: screen,
       };
     }
-    const screenSimpleHtml = simplifyHtml(screen, true);
     const { screenDescription, screenDescriptionKorean } =
-      await getScreenDescription(screenSimpleHtml, screenType);
+      await getScreenDescription(screen, screenType);
+
     const actions = await parsingAgent({
       screenHtml: screen,
       screenDescription,
       pageHtml,
     });
     return {
-      type: "screen",
+      type: screenType,
       screenDescription,
       screenDescriptionKorean,
       screenChangeType,
       actions,
       id: `${this.extractBaseURL(page.url())}`,
+      screenHtml: screen,
     };
   }
 
@@ -258,6 +280,113 @@ export class PageHandler {
     });
   }
 
+  async modifyState(
+    selector: string,
+    userContext: string,
+    isLongState: boolean,
+    oldActions: Action[] = []
+  ) {
+    const page = await this.getPage();
+    let { screen, screenType, pageHtml } = await getScreen(
+      page,
+      async () => {},
+      false
+    );
+    const dom = new JSDOM(screen);
+    const section = dom.window.document.querySelector(selector);
+    const sectionHtml = await page.evaluate((selector) => {
+      const section = document.querySelector(selector);
+      if (!section) return "";
+      const inputs = section.querySelectorAll("input");
+      inputs.forEach((input) => {
+        input.setAttribute("value", input.value);
+      });
+
+      return section.outerHTML;
+    }, selector);
+    const { screenDescription, screenDescriptionKorean } =
+      await getScreenDescription(screen, screenType);
+    const sectionDescription = await getSectionDescription(
+      sectionHtml,
+      screenDescription
+    );
+
+    const { sectionState } = isLongState
+      ? { sectionState: "No State" }
+      : await getSectionState(sectionHtml);
+    const actions = await parsingAgent({
+      screenHtml: sectionHtml,
+      screenDescription,
+      pageHtml,
+      excludeSelectable: true,
+    });
+
+    const selectNextActionPrompt: Prompt = {
+      role: "SYSTEM",
+      content: `You are an agent tasked with modifying the state of the section according to the user's context. 
+Your goal is to select one next action with "(i=##)" that is most appropriate for the current situation. 
+After each action, the state of the screen will change, and new actions may become available. 
+Think step by step, and select only one action at a time. 
+If you determine that no further actions are necessary to achieve the user's goal or to maintain the desired state of the screen, please output 'done'.
+
+user's context: ${userContext}
+
+Description of the section: ${sectionDescription}
+
+Current section state: ${sectionState}
+
+Available actions:
+${actions.map((comp) => `- ${comp.content} (i=${comp.i})`).join("\n")}
+`,
+    };
+
+    const selectNextActionWithHistoryPrompt: Prompt = {
+      role: "SYSTEM",
+      content: `As an agent, your task is to select the most suitable next action for the current situation, considering both the user's context and the history of previous actions taken. 
+Reflect on the sequence of actions already performed and their outcomes to make an informed decision about the next step. 
+Evaluate the available options based on this historical context and choose one action that seems most appropriate. 
+If you determine that no further actions are needed or beneficial, please output 'done'.
+
+User's context: ${userContext}
+
+Description of the section: ${sectionDescription}
+
+History of previous actions: 
+${oldActions.map((comp) => `- ${comp.content}`).join("\n")}
+
+Available actions:
+${actions.map((comp) => `- ${comp.content} (i=${comp.i})`).join("\n")}`,
+    };
+    console.log(selectNextActionWithHistoryPrompt.content);
+
+    const response = isLongState
+      ? await getGpt4Response([selectNextActionWithHistoryPrompt])
+      : await getAiResponse([selectNextActionPrompt]);
+    console.log(response);
+
+    const iRegex = /\(i=(\d+)\)/;
+    const iMatch = response.match(iRegex);
+    const action = actions.find((comp) => comp.i === Number(iMatch?.[1]));
+
+    if (action) {
+      if (action.type === "click") {
+        await this.scrollToElement(`[i="${action.i}"]`);
+        new Promise((r) => setTimeout(r, 200));
+        await page.click(`[i="${action.i}"]`);
+        new Promise((r) => setTimeout(r, 200));
+      } else if (action.type === "input") {
+        // input은 필요할 때 구현
+      }
+    } else {
+      console.log("done");
+      return;
+    }
+    await this.modifyState(selector, userContext, isLongState, [
+      ...oldActions,
+      action,
+    ]);
+  }
+
   async select(
     selector: string,
     parsing: boolean = true
@@ -269,17 +398,17 @@ export class PageHandler {
     const listElement = dom.window.document.querySelector(selector) as Element;
     if (parsing === false) {
       return {
-        type: "section",
+        type: screenType,
         screenDescription: "",
         screenDescriptionKorean: "",
         actions: [],
         id: `${this.extractBaseURL(page.url())}`,
         screenChangeType: "STATE_CHANGE",
+        screenHtml: screen,
       };
     }
-    const screenSimpleHtml = simplifyHtml(screen, true);
     const { screenDescription, screenDescriptionKorean } =
-      await getScreenDescription(screenSimpleHtml, screenType);
+      await getScreenDescription(screen, screenType);
 
     const listHtml = modifySelectAction(listElement, screenElement);
     const listSimpleHtml = simplifyHtml(listHtml?.outerHTML || "", true);
@@ -293,7 +422,7 @@ export class PageHandler {
     });
 
     return {
-      type: "section",
+      type: screenType,
       screenDescription: listDescription,
       screenDescriptionKorean: listDescriptionKorean,
       actions,
@@ -301,6 +430,7 @@ export class PageHandler {
         page.url()
       )}section/${listElement?.getAttribute("i")}`,
       screenChangeType: "STATE_CHANGE",
+      screenHtml: screen,
     };
   }
 
@@ -312,9 +442,8 @@ export class PageHandler {
     const { screen, screenType } = await getScreen(page, async () => {}, false);
     const dom = new JSDOM(screen);
     const element = dom.window.document.querySelector(selector);
-    const screenSimpleHtml = simplifyHtml(screen, true);
     const { screenDescription, screenDescriptionKorean } =
-      await getScreenDescription(screenSimpleHtml, screenType);
+      await getScreenDescription(screen, screenType);
 
     if (parsing === false) {
       return {
@@ -324,6 +453,7 @@ export class PageHandler {
         actions: [],
         id: `${this.extractBaseURL(page.url())}`,
         screenChangeType: "STATE_CHANGE",
+        screenHtml: screen,
       };
     }
 
@@ -339,6 +469,7 @@ export class PageHandler {
       actions,
       id: `${this.extractBaseURL(page.url())}`,
       screenChangeType: "STATE_CHANGE",
+      screenHtml: screen,
     };
   }
 
@@ -349,8 +480,7 @@ export class PageHandler {
       async () => {},
       true
     );
-    const screenSimpleHtml = simplifyHtml(screen, true);
-    const pageSimpleHtml = simplifyHtml(await page.content(), true);
+
     if (parsing === false) {
       return {
         type: "page",
@@ -359,10 +489,11 @@ export class PageHandler {
         screenChangeType,
         actions: [],
         id: `${this.extractBaseURL(page.url())}`,
+        screenHtml: screen,
       };
     }
     const { screenDescription, screenDescriptionKorean } =
-      await getScreenDescription(pageSimpleHtml, screenType);
+      await getScreenDescription(screen, screenType);
     const actions = await parsingAgent({
       screenHtml: screen,
       screenDescription,
@@ -375,6 +506,7 @@ export class PageHandler {
       screenChangeType,
       actions,
       id: `${this.extractBaseURL(page.url())}`,
+      screenHtml: screen,
     };
   }
   async close() {
@@ -417,8 +549,8 @@ export async function getHiddenElementIs(
         })();
         if (isOutHidden) {
           return (
-            rect.width === 0 ||
-            rect.height === 0 ||
+            rect.width < 3 ||
+            rect.height < 3 ||
             style.visibility === "hidden" ||
             style.display === "none" ||
             isHiddenByClip ||
@@ -427,8 +559,8 @@ export async function getHiddenElementIs(
           );
         } else {
           return (
-            rect.width === 0 ||
-            rect.height === 0 ||
+            rect.width < 3 ||
+            rect.height < 3 ||
             style.visibility === "hidden" ||
             style.display === "none" ||
             isHiddenByClip ||
@@ -526,7 +658,6 @@ async function findScreenAndScrolls(
       if (el instanceof HTMLElement) {
         const elIAttr = el.getAttribute("i");
         if (elIAttr !== null && !hiddenElementIs.includes(elIAttr)) {
-          console.log(elIAttr, window.getComputedStyle(el).zIndex);
           const zIndex = parseInt(window.getComputedStyle(el).zIndex, 10);
           if (!isNaN(zIndex)) {
             highestZIndex = Math.max(highestZIndex, zIndex);

@@ -1,100 +1,30 @@
 [
   {
-    "type": "screen",
+    "type": "modal",
     "id": "https://m.megabox.co.kr/",
-    "screenDescription": "The purpose of the modal is to display a notice or announcement to the user. It includes a close button, a link, and an option to not show the notice for a day.",
-    "actionDescription": "The user clicked the \"닫기\" button to close the modal notice.",
+    "screenDescription": "The purpose of the modal is to display an advertisement popup with a close button and a link to an event page, and it also includes a checkbox option to hide the popup for one day.",
+    "actionDescription": "The user clicked the \"닫기\" button to close the advertisement popup.",
     "screenChangeType": "URL_CHANGE"
   },
   {
-    "type": "screen",
+    "type": "page",
     "id": "https://m.megabox.co.kr/",
-    "screenDescription": "The webpage appears to be a movie theater website, designed to provide information about current movies, events, and promotions, as well as allow users to book tickets and access their account.",
-    "actionDescription": "The user clicked the \"예매\" button to start the ticket booking process for a specific movie.",
+    "screenDescription": "The webpage appears to be a movie ticket booking website, designed to provide information about movies currently playing and upcoming movies, as well as allow users to book tickets for these movies.",
+    "actionDescription": "The user clicked the \"예매\" button to proceed with booking tickets for a movie.",
     "screenChangeType": "CLOSE_LAYER"
   },
   {
-    "type": "screen",
+    "type": "page",
     "id": "https://m.megabox.co.kr/booking",
-    "screenDescription": "The webpage is designed for movie ticket reservation, allowing users to browse and select popular movies, choose a theater or movie to watch, and book private screenings at the COEX theater.",
-    "actionDescription": "The user selected the movie '서울의 봄' from the list to navigate to its specific ticket reservation page.",
+    "screenDescription": "The webpage is designed for movie ticket reservations, allowing users to select movies and theaters for booking.",
+    "actionDescription": "The user did not select any of the popular movies listed and did not proceed to any ticket reservation page.",
     "screenChangeType": "URL_CHANGE"
   },
   {
-    "type": "screen",
-    "id": "https://m.megabox.co.kr/booking/movie",
-    "screenDescription": "The webpage is designed to allow users to select a theater from a list of options organized by region, and then choose a specific theater within that region.",
-    "actionDescription": "The user selected the option '지역별' from the list to navigate to a specific theater by region.",
+    "type": "page",
+    "id": "https://m.megabox.co.kr/booking",
+    "screenDescription": "The webpage is designed for movie ticket reservations, allowing users to select movies and theaters for booking.",
+    "actionDescription": "The user selected the movie '서울의 봄' to proceed to its ticket reservation page.",
     "screenChangeType": "URL_CHANGE"
-  },
-  {
-    "type": "screen",
-    "id": "https://m.megabox.co.kr/booking/movie",
-    "screenDescription": "The webpage is designed to allow users to select a theater from a list of options organized by region, and then choose a specific theater within that region.",
-    "actionDescription": "The user selected the region '경기 30' from the list of available regions.",
-    "screenChangeType": "STATE_CHANGE"
-  },
-  {
-    "type": "screen",
-    "id": "https://m.megabox.co.kr/booking/movie",
-    "screenDescription": "The webpage is designed to allow users to select a theater from a list of options based on location, and then proceed to the next step.",
-    "actionDescription": "The user selected the theater location '남양주' from the list.",
-    "screenChangeType": "STATE_CHANGE"
-  },
-  {
-    "type": "screen",
-    "id": "https://m.megabox.co.kr/booking/movie",
-    "screenDescription": "The webpage is designed to allow users to select a theater location, with options organized by region, and then choose a specific theater within that region.",
-    "actionDescription": "The user clicked the \"선택 완료\" button to confirm their selection of a theater from the list of options.",
-    "screenChangeType": "STATE_CHANGE"
-  },
-  {
-    "type": "screen",
-    "id": "https://m.megabox.co.kr/booking/movie",
-    "screenDescription": "The webpage is designed to allow users to book movie tickets, with options to change the movie, theater, and date, and view available seats in each theater.",
-    "actionDescription": "The user selected the date '28내일' from the list to view and book available movie showtimes for that specific day in a theater in Seoul.",
-    "screenChangeType": "OPEN_LAYER"
-  },
-  {
-    "type": "screen",
-    "id": "https://m.megabox.co.kr/booking/movie",
-    "screenDescription": "The webpage is designed to provide information and allow users to book movie tickets.",
-    "actionDescription": "The user selected the movie showtime '2D9관 165석' to book a seat in a specific theater in 남양주 for a 2D movie.",
-    "screenChangeType": "OPEN_LAYER"
-  },
-  {
-    "type": "item",
-    "id": "https://m.megabox.co.kr/booking/movie",
-    "screenDescription": "The webpage is designed to display movie showtimes and allow users to select a theater and date to view available showtimes for a specific movie.",
-    "actionDescription": "The user selected the movie showtime '14:20 ~16:51 163석' from the list.",
-    "screenChangeType": "STATE_CHANGE"
-  },
-  {
-    "type": "screen",
-    "id": "https://m.megabox.co.kr/booking/movie",
-    "screenDescription": "The webpage is a login page with options for both members and non-members to log in, as well as options to log in with social media accounts.",
-    "actionDescription": "The user clicked the \"회원 로그인\" button to switch to the member login tab and display the input fields for the member's ID and password, as well as other options.",
-    "screenChangeType": "OPEN_LAYER"
-  },
-  {
-    "type": "screen",
-    "id": "https://m.megabox.co.kr/booking/movie",
-    "screenDescription": "The webpage is a login page with options for both members and non-members to log in, as well as options to log in with social media accounts.",
-    "actionDescription": "The user tried to input their login ID by typing in the username or email address 'leesang627'.",
-    "screenChangeType": "STATE_CHANGE"
-  },
-  {
-    "type": "screen",
-    "id": "https://m.megabox.co.kr/booking/movie",
-    "screenDescription": "The webpage is a login page with options for both members and non-members to log in, as well as options to log in with social media accounts.",
-    "actionDescription": "The user entered the password 'EWenavd9pA8^' in the login form.",
-    "screenChangeType": "STATE_CHANGE"
-  },
-  {
-    "type": "screen",
-    "id": "https://m.megabox.co.kr/booking/movie",
-    "screenDescription": "The webpage is a login page with options for both members and non-members to log in, as well as options to log in with social media accounts.",
-    "actionDescription": "The user clicked the \"로그인\" button to submit the login form and authenticate their credentials.",
-    "screenChangeType": "STATE_CHANGE"
   }
 ]

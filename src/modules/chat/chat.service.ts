@@ -159,7 +159,7 @@ async function planningAndAsk(): Promise<
           const userInfo = await getUserInfo(chats, userContext);
           console.log(userInfo);
           let actionValue = await findInputTextValue(
-            component.description || "",
+            component.content || "",
             userInfo
           );
 
@@ -183,6 +183,7 @@ async function planningAndAsk(): Promise<
               screenDescription,
               actionValue
             );
+            component.question = confirmationQuestion;
             await createAIChat(
               {
                 content: confirmationQuestion,
@@ -248,8 +249,8 @@ export async function answerForInput(
   }
   await createHumanChat({ content: input.content }, "answerForInput");
   const chats = await getChats();
-  const userGoal = await getUserContext(chats);
-  const userInfo = await getUserInfo(chats, userGoal);
+  const userContext = await getUserContext(chats);
+  const userInfo = await getUserInfo(chats, userContext);
   console.log(userInfo);
   const screenDescription = focusSection.screenDescription;
   const screenDescriptionKorean = focusSection.screenDescriptionKorean;

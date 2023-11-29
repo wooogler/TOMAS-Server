@@ -31,15 +31,17 @@ async function main() {
 
   const resultBook = await pageHandler.click(
     "body > div.btn-bottom.bnb-main.col-5.whtm > button:nth-child(3)",
-    false
-  );
-  const resultMovie = await pageHandler.click(
-    "body > div.container.reserve-main-con.pb55 > div.reserve-wrap > div > div:nth-child(2) > div:nth-child(1) > a",
     true
   );
 
-  showScreenResults(resultMovie);
+  showScreenResults(resultBook);
+  // const resultMovie = await pageHandler.click(
+  //   "body > div.container.reserve-main-con.pb55 > div.reserve-wrap > div > div:nth-child(2) > div:nth-child(1) > a",
+  //   true
+  // );
 
-  console.log("Done");
+  // showScreenResults(resultMovie);
+
+  // console.log("Done");
 }
 main();
