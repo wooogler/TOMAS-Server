@@ -12,7 +12,7 @@ import {
 } from "../utils/fileUtil";
 import { generateIdentifier } from "../utils/htmlHandler";
 import { AnswerResponse } from "../modules/chat/chat.schema";
-import { Action } from "../utils/parsingAgent";
+import { Action } from "../agents/parsingAgent";
 
 export const makeConversation = (chats: Chat[]): string => {
   const actionChats = chats.filter((chat) => !chat.type.startsWith("confirm"));

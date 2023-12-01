@@ -5,16 +5,18 @@ import {
   HumanChatMessage,
   SystemChatMessage,
 } from "langchain/schema";
-import { ActionType, editActionType, simplifyItemHtml } from "./htmlHandler";
-import { ActionComponent, ScreenResult } from "./pageHandler";
-
-import { JSDOM } from "jsdom";
-import { parsingItemAgent } from "../modules/agents";
 
 export type Prompt = {
   role: "SYSTEM" | "HUMAN" | "AI";
   content: string;
 };
+
+const chatNew = new ChatOpenAI({
+  openAIApiKey: process.env.OPENAI_API_KEY,
+  modelName: "gpt-3.5-turbo-1106",
+  maxTokens: 512,
+  temperature: 0,
+});
 
 const chat = new ChatOpenAI({
   openAIApiKey: process.env.OPENAI_API_KEY,
@@ -47,7 +49,7 @@ const MAX_CHARACTERS = 30000;
 
 export const getAiResponse = async (
   prompts: Prompt[],
-  long: boolean = true
+  isLong: boolean = false
 ) => {
   const promptMessages = prompts.map((prompt) => {
     const promptContent = prompt.content.slice(0, MAX_CHARACTERS) + "...";
@@ -60,7 +62,7 @@ export const getAiResponse = async (
     }
   });
 
-  let chatModel = long ? chat16k : chat;
+  let chatModel = isLong ? chat16k : chat;
   const response = await chatModel.call(promptMessages);
 
   return response.text;

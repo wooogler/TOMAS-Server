@@ -1,9 +1,10 @@
-import { parsingItemAgent } from "../modules/agents";
+import { ScreenCache } from "../utils/fileUtil";
 import {
   ActionType,
   capitalizeFirstCharacter,
   editActionType,
   extractSurroundingHtml,
+  generateIdentifier,
   removeBeforeAndIncludingKeyword,
   simplifyHtml,
 } from "../utils/htmlHandler";
@@ -19,7 +20,15 @@ export const getScreenDescription = async (
   screenHtml: string,
   screenType: ScreenType
 ) => {
-  const html = simplifyHtml(screenHtml, true, true);
+  const screenCache = new ScreenCache("screenCache.json");
+  const screenIdentifier = generateIdentifier(screenHtml) + "-" + screenType;
+  const screen = screenCache.get(screenIdentifier);
+  if (screen) {
+    return screen;
+  }
+
+  const html = simplifyHtml(screenHtml, true, false);
+
   let describeScreenSystemPrompt: Prompt;
 
   if (screenType === "page") {
@@ -46,12 +55,22 @@ ${html}`,
     content: `Summarize the main purpose of the described screen in one Korean sentence, focusing on its function and the type of information it provides, without detailing the specific elements or layout of the screen.`,
   };
 
-  const screenDescription = await getAiResponse([describeScreenSystemPrompt]);
+  const screenDescription = await getAiResponse(
+    [describeScreenSystemPrompt],
+    true
+  );
   const screenDescriptionKorean = await getAiResponse([
     describeScreenSystemPrompt,
     { content: screenDescription, role: "AI" },
     describePageInKoreanPrompt,
   ]);
+
+  screenCache.set(screenIdentifier, {
+    type: screenType,
+    screenDescription,
+    screenDescriptionKorean,
+  });
+  screenCache.save();
 
   return { screenDescription, screenDescriptionKorean };
 };
@@ -67,7 +86,7 @@ HTML code of the section:
 ${html}`,
   };
 
-  const sectionState = await getAiResponse([describeSectionStatePrompt]);
+  const sectionState = await getAiResponse([describeSectionStatePrompt], true);
 
   return { sectionState };
 };
@@ -91,10 +110,21 @@ export const getSectionDescription = async (
   sectionHtml: string,
   screenDescription: string
 ) => {
+  const screenCache = new ScreenCache("screenCache.json");
+  const screenIdentifier = generateIdentifier(sectionHtml) + "-section";
+  const screen = screenCache.get(screenIdentifier);
+  if (screen) {
+    return {
+      sectionDescription: screen.screenDescription,
+      sectionDescriptionKorean: screen.screenDescriptionKorean,
+    };
+  }
+
   const html = simplifyHtml(sectionHtml, true, true);
+
   const describeSectionSystemPrompt: Prompt = {
     role: "SYSTEM",
-    content: `Analyze the provided HTML code of the section and describe the section's specific purpose and function in one sentence. Focus on the type of information or interaction the modal is designed to convey or facilitate, based on its structure and elements.
+    content: `Analyze the provided HTML code of the section and describe the section's specific purpose and function in one sentence. 
     
 Consider the description on the screen where the section is located: ${screenDescription}
 
@@ -102,7 +132,10 @@ HTML code:
 ${html}`,
   };
 
-  const sectionDescription = await getAiResponse([describeSectionSystemPrompt]);
+  const sectionDescription = await getAiResponse(
+    [describeSectionSystemPrompt],
+    true
+  );
   const sectionDescriptionKorean = await getAiResponse([
     describeSectionSystemPrompt,
     {
@@ -112,6 +145,13 @@ ${html}`,
     makeSectionDescriptionPrompt(),
   ]);
 
+  screenCache.set(screenIdentifier, {
+    type: "section",
+    screenDescription: sectionDescription,
+    screenDescriptionKorean: sectionDescriptionKorean,
+  });
+  screenCache.save();
+
   return { sectionDescription, sectionDescriptionKorean };
 };
 
@@ -119,6 +159,16 @@ export const getListDescription = async (
   html: string,
   screenDescription: string
 ) => {
+  const screenCache = new ScreenCache("screenCache.json");
+  const screenIdentifier = generateIdentifier(html) + "-list";
+  const screen = screenCache.get(screenIdentifier);
+  if (screen) {
+    return {
+      listDescription: screen.screenDescription,
+      listDescriptionKorean: screen.screenDescriptionKorean,
+    };
+  }
+
   const describeListSystemPrompt: Prompt = {
     role: "SYSTEM",
     content: `Analyze the provided HTML code of the list and summarize its general purpose in one sentence. Focus on the type of information the list is designed to display and its intended use, based on the elements and structure found in the HTML. Avoid detailing the specific layout or design of the list's elements, but use the HTML to deduce the overall purpose of the list and the nature of the information it contains.
@@ -131,221 +181,22 @@ ${screenDescription}
 `,
   };
 
-  const listDescription = await getAiResponse([describeListSystemPrompt]);
+  const listDescription = await getAiResponse([describeListSystemPrompt], true);
   const listDescriptionKorean = await getAiResponse([
     describeListSystemPrompt,
     { content: listDescription, role: "AI" },
     makeSectionDescriptionPrompt(),
   ]);
 
+  screenCache.set(screenIdentifier, {
+    type: "list",
+    screenDescription: listDescription,
+    screenDescriptionKorean: listDescriptionKorean,
+  });
+  screenCache.save();
+
   return { listDescription, listDescriptionKorean };
 };
-
-export const getComponentInfo = async ({
-  componentHtml,
-  screenHtml,
-  actionType,
-  screenDescription,
-}: {
-  componentHtml: string;
-  screenHtml: string;
-  actionType: ActionType;
-  screenDescription: string;
-}) => {
-  const extractComponentSystemPrompt: Prompt = {
-    role: "SYSTEM",
-    content: `A user is looking at the web page screen. 
-
-Describe the action that the user can take on the given element with its purpose, starting with '${editActionType(
-      actionType
-    )} ' in one sentence briefly.
-
-HTML of the element:
-${componentHtml}
-
-Description of the screen where the element is located:
-${screenDescription}
-
-Surrounding HTML of the element:
-${extractSurroundingHtml(screenHtml, componentHtml)}
-`,
-  };
-
-  const firstActionPrompt: Prompt = {
-    role: "AI",
-    content: await getAiResponse([extractComponentSystemPrompt]),
-  };
-
-  // const modifyActionPrompt: Prompt = {
-  //   role: "HUMAN",
-  //   content: `Don't use the default value inside elements for the action and remove its attributes to identify each element. For example, 'Click the button to ' is allowed, but 'Click the "Change" button with/labeled ~' is not allowed.`,
-  // };
-
-  const modifyActionPrompt: Prompt = {
-    role: "HUMAN",
-    content: `Don't mention the attributes of the element to describe the action. Don't apologize.`,
-  };
-
-  // const modifyActionPrompt: Prompt = {
-  //   role: "HUMAN",
-  //   content: `Remove descriptions of the element's features within the action`,
-  // };
-
-  const componentDescription = await getAiResponse([
-    extractComponentSystemPrompt,
-    // firstActionPrompt,
-    // modifyActionPrompt,
-  ]);
-
-  return componentDescription;
-};
-
-export const getSelectInfo = async ({
-  componentHtml,
-  screenHtml,
-  screenDescription,
-}: {
-  componentHtml: string;
-  screenHtml: string;
-  screenDescription: string;
-}) => {
-  const components = await parsingItemAgent({
-    screenHtml: componentHtml,
-    screenDescription,
-  });
-
-  let extractComponentSystemPrompt: Prompt;
-
-  if (components.length === 0) {
-    return null;
-  }
-
-  if (components[0].actionType === "click") {
-    extractComponentSystemPrompt = {
-      role: "SYSTEM",
-      content: `Describe the action the user can take on the section in one sentence, starting with 'Select one '
-
-HTML code of the section:
-${componentHtml}
-
-Description of the screen where the element is located:
-${screenDescription}
-
-HTML code of the screen:
-${extractSurroundingHtml(screenHtml, componentHtml)}`,
-    };
-  } else {
-    const listString = components
-      .map((component) => `- ${component.description}`)
-      .join("\n");
-
-    extractComponentSystemPrompt = {
-      role: "SYSTEM",
-      content: `Here is information of an list on the screen.      
-
-Items in the list:
-${listString} 
-
-Description of the screen where the list is located:
-${screenDescription}
-
-Infer the purpose of the list and describe the action of a user selecting one item from that list in one sentence, starting with 'Select one '.`,
-    };
-
-    console.log(extractComponentSystemPrompt.content);
-  }
-
-  const componentDescription = await getAiResponse([
-    extractComponentSystemPrompt,
-  ]);
-  return componentDescription;
-};
-
-export const getItemDescription = async ({
-  itemHtml,
-  screenHtml,
-  screenDescription,
-}: {
-  itemHtml: string;
-  screenHtml: string;
-  screenDescription: string;
-}) => {
-  const describeItemPrompt: Prompt = {
-    role: "SYSTEM",
-    content: `
-Describe an item in the list in one sentence starting "It is ". The description must include all the information in the item.
-
-HTML of the item:
-${itemHtml}
-
-Description of the list:
-${screenDescription}
-`,
-  };
-
-  try {
-    return removeBeforeAndIncludingKeyword(
-      await getAiResponse([describeItemPrompt])
-    );
-  } catch (error) {
-    console.error("Error in loading item info: ", error);
-  }
-};
-
-export const getPartDescription = async ({
-  itemHtml,
-  screenHtml,
-  screenDescription,
-}: {
-  itemHtml: string;
-  screenHtml: string;
-  screenDescription: string;
-}) => {
-  const describeItemPrompt: Prompt = {
-    role: "SYSTEM",
-    content: `
-Describe the part of the screen in one sentence starting "It is ". 
-
-HTML of the part of webpage:
-${itemHtml}
-
-Description of the section where the item is located:
-${screenDescription}
-`,
-  };
-
-  try {
-    return removeBeforeAndIncludingKeyword(
-      await getAiResponse([describeItemPrompt])
-    );
-  } catch (error) {
-    console.error("Error in loading item info: ", error);
-  }
-};
-
-// export const selectActionTemplate = ({
-//   options,
-//   firstTwoItemsWithParentHtml,
-//   screenDescription,
-// }: {
-//   options: string[];
-//   firstTwoItemsWithParentHtml: string;
-//   screenDescription: string;
-// }): Prompt => ({
-//   role: "SYSTEM",
-//   content: `A user is looking at the list on the web page screen.
-
-// HTML around the list with first two items:
-// ${firstTwoItemsWithParentHtml}
-
-// items'text in the list:
-// ${options.map((option) => `- ${option}`).join("\n")}
-
-// Description of the screen where the list is located:
-// ${screenDescription}
-
-// Infer the purpose of the list and describe the action of a user selecting one item from that list in one sentence, starting with 'Select one '.`,
-// });
 
 export const selectActionTemplate = ({
   options,

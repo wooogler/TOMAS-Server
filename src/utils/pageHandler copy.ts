@@ -15,7 +15,7 @@ import {
   parsingAgent,
   parsingItemAgent,
   parsingListAgent,
-} from "./parsingAgent";
+} from "../agents/parsingAgent";
 import { Prompt, getAiResponse, getGpt4Response } from "./langchainHandler";
 import { getChats } from "../modules/chat/chat.service";
 
@@ -262,7 +262,7 @@ export class PageHandler {
 
     return this.handleAction(parsing, async () => {
       await this.scrollToElement(selector);
-      await new Promise((r) => setTimeout(r, 200));
+      await new Promise((r) => setTimeout(r, 500));
       await element.click();
     });
   }
@@ -275,7 +275,7 @@ export class PageHandler {
     const page = await this.getPage();
     return this.handleAction(parsing, async () => {
       await this.scrollToElement(selector);
-      await new Promise((r) => setTimeout(r, 200));
+      await new Promise((r) => setTimeout(r, 500));
       await page.$eval(
         selector,
         (input) => ((input as HTMLInputElement).value = "")
@@ -287,7 +287,7 @@ export class PageHandler {
   async modifyState(
     selector: string,
     userRequest: string,
-    isLongState: boolean,
+    mode: "one" | "state" | "history",
     oldActions: Action[] = []
   ): Promise<ScreenResult> {
     const page = await this.getPage();
@@ -313,17 +313,31 @@ export class PageHandler {
     const { sectionDescription, sectionDescriptionKorean } =
       await getSectionDescription(sectionHtml, screenDescription);
 
-    const { sectionState } = isLongState
-      ? { sectionState: "No State" }
-      : await getSectionState(sectionHtml);
-    const actions = await parsingAgent({
+    const { sectionState } =
+      mode === "state"
+        ? await getSectionState(sectionHtml)
+        : { sectionState: "No State" };
+    let actions = await parsingAgent({
       screenHtml: sectionHtml,
       screenDescription,
       pageHtml,
       excludeSelectable: true,
     });
 
-    const selectNextActionPrompt: Prompt = {
+    const selectOneNextActionPrompt: Prompt = {
+      role: "SYSTEM",
+      content: `As an agent, your task is to select the most suitable next action for the current situation considering the user's request
+Evaluate the available options and choose one action that seems most appropriate.
+
+User's request: ${userRequest}
+
+Description of the section: ${sectionDescription}
+
+Available actions:
+${actions.map((comp) => `- ${comp.content} (i=${comp.i})`).join("\n")}`,
+    };
+
+    const selectNextActionWithStatePrompt: Prompt = {
       role: "SYSTEM",
       content: `You are an agent tasked with modifying the state of the section according to the user's request. 
 Your goal is to select one next action with "(i=##)" that is most appropriate for the current situation. 
@@ -359,11 +373,25 @@ ${oldActions.map((comp) => `- ${comp.content}`).join("\n")}
 Available actions:
 ${actions.map((comp) => `- ${comp.content} (i=${comp.i})`).join("\n")}`,
     };
-    console.log(selectNextActionWithHistoryPrompt.content);
 
-    const response = isLongState
-      ? await getGpt4Response([selectNextActionWithHistoryPrompt])
-      : await getAiResponse([selectNextActionPrompt]);
+    switch (mode) {
+      case "one":
+        console.log(selectOneNextActionPrompt.content);
+        break;
+      case "state":
+        console.log(selectNextActionWithStatePrompt.content);
+        break;
+      case "history":
+        console.log(selectNextActionWithHistoryPrompt.content);
+        break;
+    }
+
+    const response =
+      mode === "history"
+        ? await getGpt4Response([selectNextActionWithHistoryPrompt])
+        : mode === "state"
+        ? await getGpt4Response([selectNextActionWithStatePrompt])
+        : await getGpt4Response([selectOneNextActionPrompt]);
     console.log(response);
 
     const iRegex = /\(i=(\d+)\)/;
@@ -374,27 +402,38 @@ ${actions.map((comp) => `- ${comp.content} (i=${comp.i})`).join("\n")}`,
       if (action.type === "click") {
         await this.scrollToElement(`[i="${action.i}"]`);
         new Promise((r) => setTimeout(r, 200));
-        await page.click(`[i="${action.i}"]`);
+        page.click(`[i="${action.i}"]`);
         new Promise((r) => setTimeout(r, 200));
       } else if (action.type === "input") {
         // input은 필요할 때 구현
       }
-      return await this.modifyState(selector, userRequest, isLongState, [
-        ...oldActions,
-        action,
-      ]);
-    } else {
-      console.log("done");
-      return {
-        type: screenType,
-        screenDescription: sectionDescription,
-        screenDescriptionKorean: sectionDescriptionKorean,
-        screenChangeType: "STATE_CHANGE",
-        actions: [],
-        id: `${this.extractBaseURL(page.url())}`,
-        screenHtml: sectionHtml,
-      };
+      if (mode !== "one") {
+        return await this.modifyState(selector, userRequest, mode, [
+          ...oldActions,
+          action,
+        ]);
+      }
     }
+    console.log("done");
+    ({ screen, screenType, pageHtml } = await getScreen(
+      await this.getPage(),
+      async () => {},
+      false
+    ));
+    actions = await parsingAgent({
+      screenHtml: screen,
+      screenDescription,
+      pageHtml,
+    });
+    return {
+      type: screenType,
+      screenDescription,
+      screenDescriptionKorean,
+      screenChangeType: "STATE_CHANGE",
+      actions,
+      id: `${this.extractBaseURL(page.url())}`,
+      screenHtml: screen,
+    };
   }
 
   async select(
@@ -403,6 +442,7 @@ ${actions.map((comp) => `- ${comp.content} (i=${comp.i})`).join("\n")}`,
   ): Promise<ScreenResult> {
     const page = await this.getPage();
     const { screen, screenType } = await getScreen(page, async () => {}, false);
+
     const dom = new JSDOM(screen);
     const screenElement = dom.window.document.body as Element;
     const listElement = dom.window.document.querySelector(selector) as Element;
@@ -454,8 +494,10 @@ ${actions.map((comp) => `- ${comp.content} (i=${comp.i})`).join("\n")}`,
     const { screen, screenType } = await getScreen(page, async () => {}, false);
     const dom = new JSDOM(screen);
     const element = dom.window.document.querySelector(selector);
-    const { screenDescription, screenDescriptionKorean } =
-      await getScreenDescription(screen, screenType);
+    const { listDescription, listDescriptionKorean } = await getListDescription(
+      screen,
+      screenType
+    );
 
     if (parsing === false) {
       return {
@@ -471,13 +513,13 @@ ${actions.map((comp) => `- ${comp.content} (i=${comp.i})`).join("\n")}`,
 
     const actions = await parsingItemAgent({
       elementHtml: element?.outerHTML || "",
-      screenDescription,
+      listDescription,
     });
 
     return {
       type: "item",
-      screenDescription,
-      screenDescriptionKorean,
+      screenDescription: listDescription,
+      screenDescriptionKorean: listDescriptionKorean,
       actions,
       id: `${this.extractBaseURL(page.url())}`,
       screenChangeType: "STATE_CHANGE",

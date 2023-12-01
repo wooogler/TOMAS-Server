@@ -6,7 +6,7 @@ import {
 } from "../utils/langchainHandler";
 import { ActionComponent, ScreenResult } from "../utils/pageHandler";
 import { JSDOM } from "jsdom";
-import { Action } from "../utils/parsingAgent";
+import { Action } from "../agents/parsingAgent";
 
 export async function extractTextLabelFromHTML(
   itemHtml: string,
@@ -129,7 +129,9 @@ Output:
 
 The output should be provided in a JSON array format that can be parsed.`,
   };
+  console.log(getAttrFromListPrompts.content);
   const jsonString = await getGpt4Response([getAttrFromListPrompts]);
+  console.log(jsonString);
   const regex = /\[\s*\{.*?\}\s*\]/gs;
   const match = jsonString.match(regex);
   const jsonArray = JSON.parse(match ? match[0] : "[]");
@@ -153,6 +155,8 @@ The output should be provided in a JSON array format that can be parsed.`,
       };
       processObject(json);
     });
+
+  console.log(allAttributes);
 
   return Array.from(allAttributes);
 }

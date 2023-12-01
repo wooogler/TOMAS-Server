@@ -31,16 +31,19 @@ async function main() {
 
   const resultBook = await pageHandler.click(
     "body > div.btn-bottom.bnb-main.col-5.whtm > button:nth-child(3)",
-    true
+    false
   );
 
-  showScreenResults(resultBook);
-  // const resultMovie = await pageHandler.click(
-  //   "body > div.container.reserve-main-con.pb55 > div.reserve-wrap > div > div:nth-child(2) > div:nth-child(1) > a",
-  //   true
-  // );
+  const resultMovie = await pageHandler.click(
+    "body > div.container.reserve-main-con.pb55 > div.reserve-wrap > div > div:nth-child(2) > div:nth-child(1) > a",
+    false
+  );
 
-  // showScreenResults(resultMovie);
+  const selectTheater = await pageHandler.click("#branch_sub_1372 > a", false);
+  const schedule = await pageHandler.click("#theaterChoiceBtn", false);
+  const dateSelect = await pageHandler.select("#playDateList", true);
+
+  showScreenResults(dateSelect);
 
   // console.log("Done");
 }

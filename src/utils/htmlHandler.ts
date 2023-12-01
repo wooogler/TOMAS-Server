@@ -567,7 +567,7 @@ export const editActionType = (actionType: string) => {
 export function extractSurroundingHtml(
   htmlString: string,
   target: string,
-  range = 2000
+  range = 1000
 ) {
   const startIndex = htmlString.indexOf(target);
   if (startIndex === -1) {

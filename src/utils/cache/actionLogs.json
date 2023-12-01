@@ -1,0 +1,9 @@
+[
+  {
+    "type": "modal",
+    "id": "https://m.megabox.co.kr/",
+    "screenDescription": "The purpose of the modal is to display a notice or announcement to the user. It includes a close button, a link, and an option to not show the notice for one day.",
+    "actionDescription": "The user tried to click the \"닫기\" button to close the modal notice.",
+    "screenChangeType": "URL_CHANGE"
+  }
+]

@@ -1,10 +1,11 @@
 import fs from "fs";
 import path from "path";
+import { Action } from "../agents/parsingAgent";
 
 const baseDir = __dirname;
 
 function getCacheFilePath(fileName: string): string {
-  return path.join(baseDir, fileName);
+  return path.join(baseDir, "cache", fileName);
 }
 
 export function loadCacheFromFile(fileName: string): Map<string, object> {
@@ -24,6 +25,13 @@ export function saveCacheToFile(
   fileName: string
 ): void {
   const filePath = getCacheFilePath(fileName);
+  const dirPath = path.dirname(filePath);
+
+  // 'cache' 폴더가 없으면 생성합니다.
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+  }
+
   const arrayifiedData: [string, object][] = Array.from(cache.entries());
   const jsonData = JSON.stringify(arrayifiedData, null, 2);
   fs.writeFileSync(filePath, jsonData, "utf-8");
@@ -57,5 +65,65 @@ export function deleteFile(fileName: string): void {
   const filePath = getCacheFilePath(fileName);
   if (fs.existsSync(filePath)) {
     fs.unlinkSync(filePath);
+  }
+}
+
+export class ActionCache {
+  private cache: Map<string, object>;
+  private cacheFileName: string;
+
+  constructor(cacheFileName: string) {
+    this.cache = loadCacheFromFile(cacheFileName);
+    this.cacheFileName = cacheFileName;
+  }
+
+  get(identifier: string): Action | undefined {
+    return this.cache.get(identifier) as Action | undefined;
+  }
+
+  set(identifier: string, action: Action) {
+    this.cache.set(identifier, action);
+  }
+
+  save() {
+    saveCacheToFile(this.cache, this.cacheFileName);
+  }
+
+  clear() {
+    this.cache.clear();
+    saveCacheToFile(this.cache, this.cacheFileName);
+  }
+}
+
+interface Screen {
+  type: string;
+  screenDescription: string;
+  screenDescriptionKorean: string;
+}
+
+export class ScreenCache {
+  private cache: Map<string, object>;
+  private cacheFileName: string;
+
+  constructor(cacheFileName: string) {
+    this.cache = loadCacheFromFile(cacheFileName);
+    this.cacheFileName = cacheFileName;
+  }
+
+  get(identifier: string): Screen | undefined {
+    return this.cache.get(identifier) as Screen | undefined;
+  }
+
+  set(identifier: string, screen: Screen) {
+    this.cache.set(identifier, screen);
+  }
+
+  save() {
+    saveCacheToFile(this.cache, this.cacheFileName);
+  }
+
+  clear() {
+    this.cache.clear();
+    saveCacheToFile(this.cache, this.cacheFileName);
   }
 }

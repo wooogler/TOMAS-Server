@@ -1,8 +1,16 @@
 import { JSDOM } from "jsdom";
-import { Prompt, getAiResponse, getGpt4Response } from "./langchainHandler";
-import { extractSurroundingHtml, simplifyHtml } from "./htmlHandler";
+import {
+  Prompt,
+  getAiResponse,
+  getGpt4Response,
+} from "../utils/langchainHandler";
+import { extractSurroundingHtml, simplifyHtml } from "../utils/htmlHandler";
 import { extractTextLabelFromHTML } from "../prompts/visualPrompts";
-import { loadCacheFromFile, saveCacheToFile } from "./fileUtil";
+import {
+  ActionCache,
+  loadCacheFromFile,
+  saveCacheToFile,
+} from "../utils/fileUtil";
 import {
   selectActionTemplate,
   singleActionTemplate,
@@ -68,69 +76,12 @@ export async function parsingListAgent({ listHtml }: { listHtml: string }) {
   return itemActions;
 }
 
-export async function parsingListAgentOriginal({
-  listHtml,
-}: {
-  listHtml: string;
-}) {
-  const dom = new JSDOM(listHtml);
-  const listElement = dom.window.document.body.firstElementChild as Element;
-  const itemElements = Array.from(listElement.children);
-
-  // 각 itemElement에 한해서만 클래스 빈도수 확인
-  const classFrequency = new Map();
-  itemElements.forEach((itemElement) => {
-    itemElement.classList.forEach((className) => {
-      if (className !== "on") {
-        classFrequency.set(className, (classFrequency.get(className) || 0) + 1);
-      }
-    });
-  });
-
-  // 각 itemElement에서 고유한 클래스를 가진 요소의 인덱스 찾기
-  const uniqueClassElementIndexes = itemElements.map((itemElement) => {
-    const isUniqueClass = Array.from(itemElement.classList).some(
-      (className) => classFrequency.get(className) === 1
-    );
-    return isUniqueClass ? itemElements.indexOf(itemElement) : -1;
-  });
-
-  const itemActions: Action[] = await itemElements.reduce(
-    async (prevPromise, itemElement, index) => {
-      const prevActions = await prevPromise;
-      const clickableElements = findClickableElements(itemElement);
-      const selectableElements = findSelectableElements(itemElement);
-      itemElement = removeElementsFromScreen(itemElement, selectableElements);
-
-      const itemText = itemElement.textContent?.replace(/\s+/g, " ").trim();
-      const itemI = itemElement.getAttribute("i");
-      if (
-        clickableElements.length > 0 &&
-        uniqueClassElementIndexes[index] === -1
-      ) {
-        if (uniqueClassElementIndexes)
-          prevActions.push({
-            type: "focus",
-            content: itemText || "",
-            question: `Do you want to select ${itemText}?`,
-            i: Number(itemI),
-            html: simplifyHtml(itemElement.outerHTML, true, true),
-          });
-      }
-      return prevActions;
-    },
-    Promise.resolve([] as Action[])
-  );
-
-  return itemActions;
-}
-
 export async function parsingItemAgent({
   elementHtml,
-  screenDescription,
+  listDescription,
 }: {
   elementHtml: string;
-  screenDescription: string;
+  listDescription: string;
 }) {
   const dom = new JSDOM(elementHtml);
   let element = dom.window.document.body as Element;
@@ -159,7 +110,7 @@ export async function parsingItemAgent({
   const actions = await getActions(
     actionableElements,
     originalElement,
-    screenDescription
+    listDescription
   );
 
   return actions.sort((a, b) => a.i - b.i);
@@ -183,19 +134,18 @@ export async function parsingAgent({
   let originalScreen = screen.cloneNode(true) as Element;
   const actionableElements: ActionableElement[] = [];
 
-  const modifiableElements = findModifiableElements(screen);
-  modifiableElements.forEach((element) => {
-    actionableElements.push({
-      i: element.getAttribute("i") || "",
-      type: "modify",
-      element: page.querySelector(
-        `[i="${element.getAttribute("i")}"]`
-      ) as Element,
-    });
-  });
-  screen = removeElementsFromScreen(screen, modifiableElements);
-
   if (!excludeSelectable) {
+    const modifiableElements = findModifiableElements(screen);
+    modifiableElements.forEach((element) => {
+      actionableElements.push({
+        i: element.getAttribute("i") || "",
+        type: "modify",
+        element: page.querySelector(
+          `[i="${element.getAttribute("i")}"]`
+        ) as Element,
+      });
+    });
+    screen = removeElementsFromScreen(screen, modifiableElements);
     const selectableElements = findSelectableElements(screen);
     selectableElements.forEach((element) => {
       actionableElements.push({
@@ -239,7 +189,7 @@ export async function parsingAgent({
 function findModifiableElements(screen: Element): Element[] {
   const modifiableElements: Element[] = [];
   const people = screen.querySelector("#ticketKindList");
-  const seat = screen.querySelector("#seatLayout > div");
+  const seat = screen.querySelector("#seatLayout");
   if (seat) {
     modifiableElements.push(seat);
   }
@@ -567,24 +517,31 @@ function extractOptions(element: Element): string[] {
 }
 
 export function modifySelectAction(elem: Element, screenElement: Element) {
-  const elemI = elem.getAttribute("i");
-  const element = screenElement.querySelector(`[i="${elemI}"]`) as Element;
-  const elementClone = element.cloneNode(true) as Element;
+  try {
+    const elemI = elem.getAttribute("i");
+    const element = screenElement.querySelector(`[i="${elemI}"]`) as Element;
+    const elementClone = element.cloneNode(true) as Element;
 
-  while (elementClone.children.length > 3) {
-    const lastChild = elementClone.lastChild;
-    if (lastChild) {
-      elementClone.removeChild(lastChild);
+    while (elementClone.children.length > 3) {
+      const lastChild = elementClone.lastChild;
+      if (lastChild) {
+        elementClone.removeChild(lastChild);
+      }
     }
+    const parentElement = element.parentElement;
+
+    const originalElementInParent = parentElement?.querySelector(
+      `[i="${elemI}"]`
+    );
+    parentElement?.replaceChild(
+      elementClone,
+      originalElementInParent as Element
+    );
+
+    return parentElement;
+  } catch (e) {
+    console.log(e);
   }
-  const parentElement = element.parentElement;
-
-  const originalElementInParent = parentElement?.querySelector(
-    `[i="${elemI}"]`
-  );
-  parentElement?.replaceChild(elementClone, originalElementInParent as Element);
-
-  return parentElement;
 }
 
 async function getSelectAction(
@@ -604,9 +561,9 @@ async function getSelectAction(
     ),
     screenDescription,
   });
-  console.log(selectActionPrompt.content);
+  // console.log(selectActionPrompt.content);
   const content = await getGpt4Response([selectActionPrompt]);
-  console.log(content);
+  // console.log(content);
 
   const question = await getAiResponse([
     {
@@ -647,14 +604,18 @@ async function getSingleAction(
     element.tagName.toLowerCase() === "table"
       ? tableActionPrompt
       : singleActionPrompt;
-  console.log(actionPrompt.content);
+  // console.log(actionPrompt.content);
   const content =
     elem.type === "modify"
       ? await getGpt4Response([actionPrompt])
       : await getAiResponse([actionPrompt]);
-  console.log(content);
-  const makeQuestionPrompt = makeModifyQuestionPrompt;
-  // elem.type === "input" ? makeInputQuestionPrompt : makeClickQuestionPrompt;
+  // console.log(content);
+  const makeQuestionPrompt =
+    elem.type === "modify"
+      ? makeModifyQuestionPrompt
+      : elem.type === "input"
+      ? makeInputQuestionPrompt
+      : makeClickQuestionPrompt;
   const question = await getAiResponse([
     {
       role: "SYSTEM",
@@ -671,33 +632,6 @@ Action: ${content}`,
   ]);
 
   return { content, question, description };
-}
-
-export class ActionCache {
-  private cache: Map<string, object>;
-  private cacheFileName: string;
-
-  constructor(cacheFileName: string) {
-    this.cache = loadCacheFromFile(cacheFileName);
-    this.cacheFileName = cacheFileName;
-  }
-
-  get(identifier: string): Action | undefined {
-    return this.cache.get(identifier) as Action | undefined;
-  }
-
-  set(identifier: string, action: Action) {
-    this.cache.set(identifier, action);
-  }
-
-  save() {
-    saveCacheToFile(this.cache, this.cacheFileName);
-  }
-
-  clear() {
-    this.cache.clear();
-    saveCacheToFile(this.cache, this.cacheFileName);
-  }
 }
 
 export function generateIdentifier(html: string): string {

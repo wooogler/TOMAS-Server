@@ -6,7 +6,7 @@ import {
   getGpt4Response,
 } from "../utils/langchainHandler";
 import { ActionComponent, ScreenChangeType } from "../utils/pageHandler";
-import { Action } from "../utils/parsingAgent";
+import { Action } from "../agents/parsingAgent";
 
 export async function findInputTextValueOriginal(
   pageDescription: string,

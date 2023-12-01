@@ -14,14 +14,14 @@ async function main() {
   };
 
   const number = await loginSite(pageHandler, false);
-  // const numberScreen = await pageHandler.modifyState(
-  //   "#ticketKindList",
-  //   "I want to book tickets for 3 adults and 1 child.",
-  //   false
-  // );
-  const upAdult = await pageHandler.click("#TKA_plus", false);
-  const clickAgree = await pageHandler.click("#seatSelectionBtn", true);
-  showScreenResults(clickAgree);
+  const numberScreen = await pageHandler.modifyState(
+    "#ticketKindList",
+    "I want to book tickets for 3 adults and 1 child.",
+    "state"
+  );
+  // const upAdult = await pageHandler.click("#TKA_plus", false);
+  // const clickAgree = await pageHandler.click("#seatSelectionBtn", true);
+  showScreenResults(numberScreen);
   // const screenResults = await pageHandler.modifyState(
   //   "#seatLayout > div",
   //   "뒷 자리를 예매해줘.",

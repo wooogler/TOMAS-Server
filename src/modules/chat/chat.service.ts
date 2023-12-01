@@ -22,7 +22,7 @@ import {
   PageHandler,
   ScreenResult,
 } from "../../utils/pageHandler";
-import { planningAgent } from "../agents";
+import { planningAgent } from "../../agents/planningAgent";
 import { ActionType } from "../../utils/htmlHandler";
 import {
   SystemLog,
@@ -41,7 +41,7 @@ import {
   loadObjectArrayFromFile,
   saveObjectArrayToFile,
 } from "../../utils/fileUtil";
-import { Action, ActionCache } from "../../utils/parsingAgent";
+import { Action } from "../../agents/parsingAgent";
 
 const page = new PageHandler();
 let focusSection: ScreenResult;
@@ -315,34 +315,46 @@ export async function answerForFilter(
   console.log("answerForFilter");
   let components = input.components;
   let component = input.component;
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(component.html, "text/html");
+  const topElement = doc.body.firstChild as HTMLElement;
+  const id = topElement ? topElement.id : null;
   const content = input.content;
-  if (components.length > 0) {
-    const tableData = components.map((component, index) => {
-      if (typeof component.data === "string") {
-        return { index, data: component.data };
-      } else {
-        return { index, ...component.data };
-      }
-    });
-    const tableString = JSON.stringify(tableData, null, 2);
-    const filteredData = await getFilteredData(tableString, content);
-    console.log(filteredData);
-    components = filteredData.map((item: any) => {
-      return {
-        ...components[item.index],
-      };
-    });
-    console.log(components);
+  if (id === "ticketKindList") {
+    focusSection = await page.modifyState(
+      `[i="${component.i}"]`,
+      content,
+      "state"
+    );
+  } else if (id === "seatLayout") {
+    focusSection = await page.modifyState(
+      `[i="${component.i}"]`,
+      content,
+      "state"
+    );
   } else {
-    console.log("modify");
-    await page.modifyState(`[i=${component.i}`, content, false);
-    return await planningAndAsk();
+    // focusSection = await page.modifyState(
+    //   `[i="${component.i}"]`,
+    //   content,
+    //   "one"
+    // );
+    // const tableData = components.map((component, index) => {
+    //   if (typeof component.data === "string") {
+    //     return { index, data: component.data };
+    //   } else {
+    //     return { index, ...component.data };
+    //   }
+    // });
+    // const tableString = JSON.stringify(tableData, null, 2);
+    // const filteredData = await getFilteredData(tableString, content);
+    // console.log(filteredData);
+    focusSection = await page.modifyState(
+      `[i="${component.i}"]`,
+      content,
+      "one"
+    );
   }
-
-  return {
-    components,
-    type: "questionForSelect",
-  };
+  return await planningAndAsk();
 }
 
 export async function answerForSelect(input: SelectInput) {
