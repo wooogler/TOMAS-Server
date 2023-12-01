@@ -8,39 +8,6 @@ import {
 import { ActionComponent, ScreenChangeType } from "../utils/pageHandler";
 import { Action } from "../agents/parsingAgent";
 
-export async function findInputTextValueOriginal(
-  pageDescription: string,
-  componentDescription: string | undefined,
-  userInfo: object
-) {
-  const inputComponentPrompt: Prompt = {
-    role: "SYSTEM",
-    content: `
-You are the AI assistant who sees the abstraction of part of the user's web page. Based on the user's context, you have to decide what to input in the given component abstraction on the web page. If you cannot decide what content to fill in the input box, please explain why you can't. Don't assume general context; only refer to the given user's context.
-
-Description of the web page:
-${pageDescription}
-
-Component description:
-${componentDescription}
-
-${userInfo}
-
-Output needs to follow one of the JSON formats in plain text. Never provide additional context.
-{
-  reason: <the reason why you need to input certain content>,
-  value: <the text that is most relevant for the given component>
-}
-OR
-{
-  reason: <the reason why you cannot decide what content to input>,
-  value: null
-}
-        `,
-  };
-  return await getAiResponse([inputComponentPrompt]);
-}
-
 export async function findInputTextValue(
   inputActionDescription: string,
   userInfo: object

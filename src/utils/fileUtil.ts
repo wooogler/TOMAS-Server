@@ -127,3 +127,65 @@ export class ScreenCache {
     saveCacheToFile(this.cache, this.cacheFileName);
   }
 }
+
+export type Row = {
+  data: any;
+  i: string;
+  description: string | undefined;
+  actionType: string;
+  content: string;
+};
+
+export class TableCache {
+  private cache: Map<string, object>;
+  private cacheFileName: string;
+
+  constructor(cacheFileName: string) {
+    this.cache = loadCacheFromFile(cacheFileName);
+    this.cacheFileName = cacheFileName;
+  }
+
+  get(identifier: string): Row | undefined {
+    return this.cache.get(identifier) as Row | undefined;
+  }
+
+  set(identifier: string, row: Row) {
+    this.cache.set(identifier, row);
+  }
+
+  save() {
+    saveCacheToFile(this.cache, this.cacheFileName);
+  }
+
+  clear() {
+    this.cache.clear();
+    saveCacheToFile(this.cache, this.cacheFileName);
+  }
+}
+
+export class AttrCache {
+  private cache: Map<string, object>;
+  private cacheFileName: string;
+
+  constructor(cacheFileName: string) {
+    this.cache = loadCacheFromFile(cacheFileName);
+    this.cacheFileName = cacheFileName;
+  }
+
+  get(identifier: string): Record<string, string> | undefined {
+    return this.cache.get(identifier) as Record<string, string> | undefined;
+  }
+
+  set(identifier: string, attr: Record<string, string>) {
+    this.cache.set(identifier, attr);
+  }
+
+  save() {
+    saveCacheToFile(this.cache, this.cacheFileName);
+  }
+
+  clear() {
+    this.cache.clear();
+    saveCacheToFile(this.cache, this.cacheFileName);
+  }
+}

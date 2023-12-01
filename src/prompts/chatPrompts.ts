@@ -84,51 +84,6 @@ User's context: ${userContext}
   return { ...defaultUserInfo };
 }
 
-export async function makeQuestionForActionValue(
-  screenDescription: string,
-  componentDescription: string | undefined,
-  componentHtml: string
-) {
-  const identifier = generateIdentifier(componentHtml);
-  const questionCache = loadCacheFromFile("questionCache.json");
-  const cachedQuestion = questionCache.get(identifier);
-  if (cachedQuestion) {
-    return cachedQuestion;
-  }
-
-  const makeQuestionPrompt: Prompt = {
-    role: "SYSTEM",
-    content: `Create a natural language question to ask to the user before doing the given action on the screen.
-
-Action: ${componentDescription}
-
-The description of the screen: ${screenDescription}
-`,
-  };
-
-  const firstQuestionPrompt: Prompt = {
-    role: "AI",
-    content: await getAiResponse([makeQuestionPrompt]),
-  };
-
-  const modifyQuestionPrompt: Prompt = {
-    role: "HUMAN",
-    content:
-      "The user does not see the screen and is unfamiliar with technology, so please do not mention the element and the action on the screen, and avoid the jargon, mechanical terms, and terms that are too specific to the webpage.",
-  };
-
-  const newQuestion = await getAiResponse([
-    makeQuestionPrompt,
-    firstQuestionPrompt,
-    modifyQuestionPrompt,
-  ]);
-
-  questionCache.set(identifier, { question: newQuestion });
-  saveCacheToFile(questionCache, "questionCache.json");
-
-  return newQuestion;
-}
-
 export async function makeQuestionForInputConfirmation(
   action: Action,
   screenDescription: string,

@@ -14,5 +14,117 @@
       "screenDescription": "The webpage appears to be a mobile version of the MEGABOX website, designed to provide information about movies, events, and promotions, as well as allow users to login and book tickets.",
       "screenDescriptionKorean": "해당 화면은 모바일 MEGABOX 웹사이트의 메인 화면으로, 영화, 이벤트, 프로모션 정보를 제공하고 사용자가 로그인하고 티켓을 예매할 수 있는 기능을 제공하는 것이 주요 목적입니다."
     }
+  ],
+  [
+    "header,예매,id=headerMain,class=reserve-main hd-bg-chg-page",
+    {
+      "type": "page",
+      "screenDescription": "The webpage is designed for movie ticket booking, allowing users to select movies and theaters for reservation.",
+      "screenDescriptionKorean": "이 웹페이지는 영화 예매를 위한 화면으로, 사용자에게 영화와 극장 선택을 제공하여 예매를 할 수 있도록 합니다."
+    }
+  ],
+  [
+    "header,예매,id=headerMain,class=reserve-main hd-bg-chg-modal",
+    {
+      "type": "modal",
+      "screenDescription": "The modal's specific purpose and function is to provide options for movie reservations, including popular movies and different ways to search for movies or theaters, as well as a special booking option for private screenings.",
+      "screenDescriptionKorean": "해당 화면의 주요 목적은 영화 예매를 위한 다양한 옵션과 정보를 제공하는 것입니다."
+    }
+  ],
+  [
+    "div,당신의 마음을 채우는두 시간의 이야기-list",
+    {
+      "type": "list",
+      "screenDescription": "The list is designed to display popular movies and provide links for users to make reservations for those movies.",
+      "screenDescriptionKorean": "해당 섹션은 인기 영화 목록을 표시하고 사용자가 해당 영화를 예매할 수 있는 링크를 제공하는 기능을 가지고 있습니다."
+    }
+  ],
+  [
+    "header,예매,id=headerMain,class=reserve-main hd-bg-chg-list",
+    {
+      "type": "list",
+      "screenDescription": "The purpose of the list is to display popular movies and provide links for users to reserve tickets for those movies.",
+      "screenDescriptionKorean": "해당 섹션은 인기 영화 목록을 보여주고, 사용자가 해당 영화의 예매를 할 수 있는 링크를 제공하는 기능을 수행합니다."
+    }
+  ],
+  [
+    "div,극장 선택 최대 3개까지 선택할 수 ,id=theaterChoiceWrap-page",
+    {
+      "type": "page",
+      "screenDescription": "The webpage is designed to allow users to select a theater from a list of options organized by region, and then choose a specific theater within that region.",
+      "screenDescriptionKorean": "이 화면은 사용자가 지역별로 극장을 선택하고 해당 지역 내에서 특정 극장을 선택할 수 있는 기능을 제공하는 것이 주요 목적입니다."
+    }
+  ],
+  [
+    "div,극장 선택 최대 3개까지 선택할 수 ,id=theaterChoiceWrap-modal",
+    {
+      "type": "modal",
+      "screenDescription": "The purpose of the modal is to allow the user to select a theater.",
+      "screenDescriptionKorean": "이 모달의 주요 목적은 사용자가 극장을 선택할 수 있도록 하는 것입니다."
+    }
+  ],
+  [
+    "div,나의극장 0서울 19경기 30-list",
+    {
+      "type": "list",
+      "screenDescription": "The list is designed to display a selection of theaters, categorized by different areas such as \"나의극장\" (My Theater), \"서울\" (Seoul), and \"경기\" (Gyeonggi). The numbers displayed next to each area indicate the number of theaters available in that area. The user can click on one of the areas to select a theater.",
+      "screenDescriptionKorean": "해당 섹션은 사용자가 극장을 선택할 수 있는 모달을 제공합니다. 섹션에는 \"나의극장\", \"서울\", \"경기\"와 같은 다양한 지역별 극장 목록이 표시됩니다. 각 지역 옆에 표시된 숫자는 해당 지역에 있는 극장의 수를 나타냅니다. 사용자는 지역 중 하나를 클릭하여 극장을 선택할 수 있습니다."
+    }
+  ],
+  [
+    "div,극장 선택 최대 3개까지 선택할 수 ,id=theaterChoiceWrap-list",
+    {
+      "type": "list",
+      "screenDescription": "The purpose of the list is to allow the user to select a theater. The list is divided into two tabs: \"지역별\" (by region) and \"특별관\" (special theaters). Each tab contains a list of theaters in that category, with the number of theaters listed next to each region. The user can select up to three theaters from the list.",
+      "screenDescriptionKorean": "이 섹션은 사용자가 극장을 선택할 수 있는 기능을 제공합니다. \"지역별\"과 \"특별관\" 두 가지 탭으로 구성되어 있으며, 각 탭에는 해당 카테고리의 극장 목록이 있습니다. 각 지역 옆에는 해당 지역의 극장 수가 표시되어 있습니다. 사용자는 목록에서 최대 세 개의 극장을 선택할 수 있습니다."
+    }
+  ],
+  [
+    "div,고양스타필드 광명AK플라자 광명소하-list",
+    {
+      "type": "list",
+      "screenDescription": "The list is designed to display a selection of theaters, with each theater represented by a list item containing a link to select that theater. The user can click on a theater to choose it.",
+      "screenDescriptionKorean": "해당 섹션은 사용자가 극장을 선택할 수 있도록 하는 목적으로 설계되었습니다. 각 극장은 링크로 표시되어 있으며, 사용자는 극장을 선택하기 위해 해당 링크를 클릭할 수 있습니다."
+    }
+  ],
+  [
+    "div,극장 선택 고양스타필드 지역별 특별관,id=theaterChoiceWrap-page",
+    {
+      "type": "page",
+      "screenDescription": "The webpage is designed to allow users to select a theater from a list of options organized by region, and then proceed to view movie schedules and seating arrangements for the selected theater.",
+      "screenDescriptionKorean": "해당 화면은 사용자가 지역별로 극장을 선택하고, 선택한 극장의 영화 스케줄과 좌석 배치를 확인할 수 있는 기능을 제공하는 것이 주요 목적입니다."
+    }
+  ],
+  [
+    "div,영화별 예매 영화변경 서울의 봄 극장,id=movieReserveWrap-page",
+    {
+      "type": "page",
+      "screenDescription": "The webpage is designed to allow users to book movie tickets for a specific movie and theater, with options to change the movie and theater, and select a date and time for the movie screening.",
+      "screenDescriptionKorean": "이 화면은 특정 영화와 극장에 대한 영화 티켓 예매를 가능하게 하며, 영화와 극장을 변경하고 상영 날짜와 시간을 선택할 수 있는 기능과 정보를 제공합니다."
+    }
+  ],
+  [
+    "div,영화별 예매 영화변경 서울의 봄 극장,id=movieReserveWrap-modal",
+    {
+      "type": "modal",
+      "screenDescription": "The modal's specific purpose and function is to display movie showtimes and theater information for the movie \"서울의 봄\" (Seoul Spring) in a specific theater (고양스타필드) in Seoul, South Korea.",
+      "screenDescriptionKorean": "해당 화면의 주요 목적은 \"서울의 봄\" 영화의 상영 시간표와 극장 정보를 제공하는 것입니다."
+    }
+  ],
+  [
+    "div,202312월 01오늘 02내일 03-list",
+    {
+      "type": "list",
+      "screenDescription": "The list is designed to display the dates and days of the week for which movie showtimes are available for the movie \"서울의 봄\" (Seoul Spring) in the theater \"고양스타필드\" in Seoul, South Korea.",
+      "screenDescriptionKorean": "해당 섹션은 \"서울의 봄\" 영화의 상영 일정과 서울에 위치한 \"고양스타필드\" 극장 정보를 표시하는 기능을 가지고 있습니다. 이 섹션은 영화 상영 날짜와 요일을 나타내는 목록을 보여주는 역할을 합니다."
+    }
+  ],
+  [
+    "div,어느곳에서보고 싶으세요?극장별 예매어-list",
+    {
+      "type": "list",
+      "screenDescription": "The list is designed to display options for movie reservations, including different ways to search for movies or theaters, as well as a special booking option for private screenings.",
+      "screenDescriptionKorean": "웹페이지의 해당 섹션을 보고 수행되는 동작을 설명하는 한국어 설명을 생성합니다. 해당 섹션이 나타내는 내용이나 위치에 대해 자세히 설명하지 않고 기능에 초점을 맞춥니다. \n\n해당 섹션은 영화 예매 옵션을 제공하는 기능으로, 영화나 극장을 검색하는 다양한 방법과 프라이빗 상영을 위한 특별 예매 옵션을 포함하고 있습니다."
+    }
   ]
 ]

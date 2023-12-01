@@ -106,6 +106,7 @@ export type AnswerResponse = z.infer<typeof answerResponseSchema>;
 export type SelectResponse = z.infer<typeof selectResponseSchema>;
 export type FilterResponse = z.infer<typeof filterResponseSchema>;
 export type navigateResponse = z.infer<typeof navigateResponseSchema>;
+export type SelectSchema = z.infer<typeof selectSchema>;
 
 export const { schemas: chatSchemas, $ref } = buildJsonSchemas(
   {

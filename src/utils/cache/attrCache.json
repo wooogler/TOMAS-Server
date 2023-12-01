@@ -1,0 +1,10 @@
+[
+  [
+    "div,어느곳에서보고 싶으세요?극장별 예매,class=item theater",
+    {
+      "item": "항목",
+      "question": "질문",
+      "text": "텍스트"
+    }
+  ]
+]

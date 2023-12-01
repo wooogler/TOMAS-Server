@@ -1,4 +1,4 @@
-import { simplifyItemHtml } from "../utils/htmlHandler";
+import { generateIdentifier, simplifyItemHtml } from "../utils/htmlHandler";
 import {
   Prompt,
   getAiResponse,
@@ -7,27 +7,7 @@ import {
 import { ActionComponent, ScreenResult } from "../utils/pageHandler";
 import { JSDOM } from "jsdom";
 import { Action } from "../agents/parsingAgent";
-
-export async function extractTextLabelFromHTML(
-  itemHtml: string,
-  screenDescription: string
-) {
-  const simpleItemHtml = simplifyItemHtml(itemHtml);
-
-  const makeTextLabelPrompts: Prompt[] = [
-    {
-      role: "SYSTEM",
-      content: `Generate the text label for the given HTML element.
-
-Description of the section where the element is located:
-${screenDescription}
-
-HTML of the element:
-${simpleItemHtml}`,
-    },
-  ];
-  return await getAiResponse(makeTextLabelPrompts);
-}
+import { AttrCache, TableCache } from "../utils/fileUtil";
 
 function removeAllElementsWithoutText(html: string): string {
   const dom = new JSDOM(html);
@@ -103,7 +83,35 @@ function classifyHTMLsByStructure(htmls: string[]): Record<string, string[]> {
   return classifiedHTMLs;
 }
 
+async function translateAttributes(
+  attributes: string[],
+  screenDescription: string
+): Promise<string[]> {
+  const translatePrompts = attributes.map<Prompt>((attr) => {
+    return {
+      role: "SYSTEM",
+      content: `Translate the following attribute to Korean based on screen.
+
+Description of the screen: ${screenDescription}
+
+English Attribute: ${attr}
+Korean Translation:`,
+    };
+  });
+
+  const translatedAttributes = await Promise.all(
+    translatePrompts.map((item) => getAiResponse([item]))
+  );
+  return translatedAttributes;
+}
+
 async function getAttrFromList(listHtml: string, screenDescription: string) {
+  const attrCache = new AttrCache("attrCache.json");
+  const identifier = generateIdentifier(listHtml);
+  const cachedAttr = attrCache.get(identifier);
+  if (cachedAttr) {
+    return cachedAttr;
+  }
   const getAttrFromListPrompts: Prompt = {
     role: "SYSTEM",
     content: `Given multiple HTML snippets in a screen, extract key information and present it in a structured JSON Array format. Ignore any scripting, styling, or link/button elements.
@@ -156,9 +164,20 @@ The output should be provided in a JSON array format that can be parsed.`,
       processObject(json);
     });
 
-  console.log(allAttributes);
+  const attributes = Array.from(allAttributes);
+  const attributesKorean = await translateAttributes(
+    attributes,
+    screenDescription
+  );
 
-  return Array.from(allAttributes);
+  const attributeMap: Record<string, string> = {};
+  for (let i = 0; i < attributes.length; i++) {
+    attributeMap[attributes[i]] = attributesKorean[i];
+  }
+  attrCache.set(identifier, attributeMap);
+  attrCache.save();
+
+  return attributeMap;
 }
 
 function hasOnlyOneTextContent(htmlString: string): boolean {
@@ -188,6 +207,7 @@ function hasOnlyOneTextContent(htmlString: string): boolean {
 }
 
 export async function getDataFromHTML(screen: ScreenResult) {
+  const tableCache = new TableCache("tableCache.json");
   const { actions, screenDescription } = screen;
 
   const actionHtml = actions.map((action) => {
@@ -206,9 +226,15 @@ export async function getDataFromHTML(screen: ScreenResult) {
       })
       .join("\n");
 
-    const attrList = await getAttrFromList(listHtml, screenDescription);
+    const attrMap = await getAttrFromList(listHtml, screenDescription);
 
     async function extractInfoFromAction(action: Action) {
+      const identifier = generateIdentifier(action.html);
+      const cachedAction = tableCache.get(identifier);
+      if (cachedAction) {
+        return cachedAction;
+      }
+
       const simpleActionHtml = removeAllElementsWithoutText(action.html);
       const extractInfoPrompt: Prompt = {
         role: "SYSTEM",
@@ -221,16 +247,29 @@ Extract and format the information in one-level JSON as follows:
 
 Output: 
 {
-  ${attrList.map((attr) => `"${attr}": <${attr}> or null`).join(",\n")}
+  ${Object.keys(attrMap)
+    .map((attr) => `"${attr}": <${attr}> or null`)
+    .join(",\n")}
 }
 `,
       };
       const jsonString = await getAiResponse([extractInfoPrompt]);
       const jsonObject = JSON.parse(jsonString);
+
+      tableCache.set(identifier, jsonObject);
+      tableCache.save();
+
       return jsonObject;
     }
 
     results = await Promise.all(actions.map(extractInfoFromAction));
+    results = results.map((item) => {
+      const result: Record<string, any> = {};
+      Object.keys(attrMap).forEach((attr) => {
+        result[attrMap[attr]] = item[attr];
+      });
+      return result;
+    });
   }
 
   const data = results.map((item, index) => {
@@ -243,7 +282,6 @@ Output:
     };
   });
 
-  console.log(data);
   return data;
 }
 

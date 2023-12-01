@@ -5,7 +5,6 @@ import {
   getGpt4Response,
 } from "../utils/langchainHandler";
 import { extractSurroundingHtml, simplifyHtml } from "../utils/htmlHandler";
-import { extractTextLabelFromHTML } from "../prompts/visualPrompts";
 import {
   ActionCache,
   loadCacheFromFile,
