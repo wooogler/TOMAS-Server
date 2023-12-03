@@ -189,3 +189,34 @@ export class AttrCache {
     saveCacheToFile(this.cache, this.cacheFileName);
   }
 }
+
+type Question = {
+  question: string;
+};
+
+export class QuestionCache {
+  private cache: Map<string, object>;
+  private cacheFileName: string;
+
+  constructor(cacheFileName: string) {
+    this.cache = loadCacheFromFile(cacheFileName);
+    this.cacheFileName = cacheFileName;
+  }
+
+  get(identifier: string): Question | undefined {
+    return this.cache.get(identifier) as Question | undefined;
+  }
+
+  set(identifier: string, attr: Question) {
+    this.cache.set(identifier, attr);
+  }
+
+  save() {
+    saveCacheToFile(this.cache, this.cacheFileName);
+  }
+
+  clear() {
+    this.cache.clear();
+    saveCacheToFile(this.cache, this.cacheFileName);
+  }
+}

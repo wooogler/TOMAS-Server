@@ -1,4 +1,8 @@
-import { generateIdentifier, simplifyItemHtml } from "../utils/htmlHandler";
+import {
+  generateIdentifier,
+  simplifyHtml,
+  simplifyItemHtml,
+} from "../utils/htmlHandler";
 import {
   Prompt,
   getAiResponse,
@@ -235,7 +239,7 @@ export async function getDataFromHTML(screen: ScreenResult) {
         return cachedAction;
       }
 
-      const simpleActionHtml = removeAllElementsWithoutText(action.html);
+      const simpleActionHtml = simplifyHtml(action.html, true, true);
       const extractInfoPrompt: Prompt = {
         role: "SYSTEM",
         content: `Given a HTML snippet, extract key information in a structured JSON format.
@@ -247,9 +251,9 @@ Extract and format the information in one-level JSON as follows:
 
 Output: 
 {
-  ${Object.keys(attrMap)
-    .map((attr) => `"${attr}": <${attr}> or null`)
-    .join(",\n")}
+${Object.keys(attrMap)
+  .map((attr) => `  "${attr}": <${attr}>`)
+  .join(",\n")}
 }
 `,
       };

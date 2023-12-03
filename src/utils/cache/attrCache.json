@@ -1,10 +1,25 @@
 [
   [
-    "div,어느곳에서보고 싶으세요?극장별 예매,class=item theater",
+    "li,12세이상관람가서울의 봄",
     {
-      "item": "항목",
-      "question": "질문",
-      "text": "텍스트"
+      "age_limit": "연령 제한",
+      "title": "제목"
+    }
+  ],
+  [
+    "li,나의극장 0",
+    {
+      "region": "지역",
+      "theater_count": "극장 수"
+    }
+  ],
+  [
+    "div,202312월 03오늘,class=date-box item swiper-slide on first-day swiper-slide-active",
+    {
+      "year": "연도",
+      "month": "월",
+      "day": "일",
+      "label": "라벨"
     }
   ]
 ]

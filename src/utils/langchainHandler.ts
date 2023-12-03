@@ -14,36 +14,40 @@ export type Prompt = {
 const chatNew = new ChatOpenAI({
   openAIApiKey: process.env.OPENAI_API_KEY,
   modelName: "gpt-3.5-turbo-1106",
-  maxTokens: 512,
   temperature: 0,
 });
 
 const chat = new ChatOpenAI({
   openAIApiKey: process.env.OPENAI_API_KEY,
   modelName: "gpt-3.5-turbo",
-  maxTokens: 512,
   temperature: 0,
 });
 
 const chat16k = new ChatOpenAI({
   openAIApiKey: process.env.OPENAI_API_KEY,
   modelName: "gpt-3.5-turbo-16k",
-  maxTokens: 512,
   temperature: 0,
 });
 
-const chat4 = new ChatOpenAI({
-  openAIApiKey: process.env.OPENAI_API_KEY,
-  modelName: "gpt-4",
-  temperature: 0.5,
-  maxTokens: 1024,
-});
-const chat432k = new ChatOpenAI({
-  openAIApiKey: process.env.OPENAI_API_KEY,
-  modelName: "gpt-4-32k",
-  temperature: 0.5,
-  maxTokens: 1024,
-});
+const chat4 = (temperature: number) =>
+  new ChatOpenAI({
+    openAIApiKey: process.env.OPENAI_API_KEY,
+    modelName: "gpt-4",
+    temperature,
+  });
+const chat432k = (temperature: number) =>
+  new ChatOpenAI({
+    openAIApiKey: process.env.OPENAI_API_KEY,
+    modelName: "gpt-4-32k",
+    temperature,
+  });
+
+const chat4New = (temperature: number) =>
+  new ChatOpenAI({
+    openAIApiKey: process.env.OPENAI_API_KEY,
+    modelName: "gpt-4-1106-preview",
+    temperature,
+  });
 
 const MAX_CHARACTERS = 30000;
 
@@ -70,10 +74,12 @@ export const getAiResponse = async (
 
 export const getGpt4Response = async (
   prompts: Prompt[],
-  long: boolean = false
+  long: boolean = false,
+  temperature: number = 0.5
 ) => {
   const promptMessages = prompts.map((prompt) => {
-    const promptContent = prompt.content.slice(0, MAX_CHARACTERS) + "...";
+    const promptContent = prompt.content;
+    // const promptContent = prompt.content.slice(0, MAX_CHARACTERS) + "...";
     if (prompt.role === "HUMAN") {
       return new HumanChatMessage(promptContent);
     } else if (prompt.role === "AI") {
@@ -83,7 +89,8 @@ export const getGpt4Response = async (
     }
   });
 
-  let chatModel = long ? chat432k : chat4;
+  // let chatModel = long ? chat432k(temperature) : chat4(temperature);
+  let chatModel = chatNew;
   const response = await chatModel.call(promptMessages);
 
   return response.text;

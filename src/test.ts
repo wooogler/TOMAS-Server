@@ -27,23 +27,26 @@ async function main() {
     false
   );
   console.log("메인 공지 닫기");
-  const resultMain = await pageHandler.click(".btn-close-main-notice", false);
+  const resultMain = await pageHandler.click(".btn-close-main-notice", true);
 
-  const resultBook = await pageHandler.click(
-    "body > div.btn-bottom.bnb-main.col-5.whtm > button:nth-child(3)",
-    false
-  );
+  console.log(resultMain);
 
-  const resultMovie = await pageHandler.click(
-    "body > div.container.reserve-main-con.pb55 > div.reserve-wrap > div > div:nth-child(2) > div:nth-child(1) > a",
-    false
-  );
+  // const resultBook = await pageHandler.click(
+  //   "body > div.btn-bottom.bnb-main.col-5.whtm > button:nth-child(3)",
+  //   true
+  // );
 
-  const selectTheater = await pageHandler.click("#branch_sub_1372 > a", false);
-  const schedule = await pageHandler.click("#theaterChoiceBtn", false);
-  const dateSelect = await pageHandler.select("#playDateList", true);
+  // const resultMovie = await pageHandler.click(
+  //   "body > div.container.reserve-main-con.pb55 > div.reserve-wrap > div > div:nth-child(2) > div:nth-child(1) > a",
+  //   false
+  // );
 
-  showScreenResults(dateSelect);
+  // const selectTheater = await pageHandler.click("#branch_sub_1003 > a", false);
+  // const schedule = await pageHandler.click("#theaterChoiceBtn", false);
+  // const movieSchedule = await pageHandler.select(".theater-group", true);
+  // const dateSchedule = await pageHandler.select("#playDateList", true);
+
+  // console.log(resultBook);
 
   // console.log("Done");
 }

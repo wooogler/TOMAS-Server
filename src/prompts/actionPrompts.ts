@@ -89,7 +89,11 @@ export function getActionHistoryOld(action: Action, actionValue: string) {
   }
 }
 
-export async function getActionHistory(action: Action, actionValue: string) {
+export async function getActionHistory(
+  action: Action,
+  actionValue: string,
+  screenDescription?: string
+) {
   let actionDone = "";
   const actionType = action.type;
   if (actionType === "click") {
@@ -103,17 +107,19 @@ export async function getActionHistory(action: Action, actionValue: string) {
   }
   const actionHistoryPrompt: Prompt = {
     role: "SYSTEM",
-    content: `Here are the actions that the user tried and have done on the web page. 
-
-Tried: ${action.content}
+    content: `Here are the suggested action and what the user have done on the web page. 
+${screenDescription ? `Screen: ${screenDescription}` : ""}
+Action: ${action.content}
 Done: ${
       actionType === "click"
         ? `${actionDone}`
         : `${editActionType(actionType)} '${actionDone}'`
     }
 
-Describe the action on the web page in one sentence`,
+Describe the user's action on the web page in one sentence`,
   };
+
+  console.log(actionHistoryPrompt.content);
   return await getAiResponse([actionHistoryPrompt]);
 }
 
@@ -143,25 +149,6 @@ export async function getSystemContext(systemLogs: SystemLog[]) {
       description: log.actionDescription,
     });
   });
-  // console.log(actionHistory);
-
-  //   const makeSystemContextPrompt: Prompt = {
-  //     role: "SYSTEM",
-  //     content: `Based on the history of the system's actions, please describe the actions the system have done in natural language.
-
-  // Action History:
-  // ${actionHistory.map((item) => {
-  //   if (item.type !== "action") {
-  //     return `In ${item.type}: ${item.description}\n`;
-  //   } else {
-  //     return ` - ${item.description}\n`;
-  //   }
-  // })}
-  // `,
-  //   };
-  //   console.log(makeSystemContextPrompt.content);
-
-  //   const systemContext = await getAiResponse([makeSystemContextPrompt]);
 
   const systemContext = actionHistory
     .map((item) => {

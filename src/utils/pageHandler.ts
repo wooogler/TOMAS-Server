@@ -52,10 +52,16 @@ export class PageHandler {
     const pages = await this.browser.pages();
     this.page = pages[0];
 
+    // 픽셀 4 XL에 맞는 유저 에이전트 설정
     await this.page.setUserAgent(
-      "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1"
+      "Mozilla/5.0 (Linux; Android 10; Pixel 4 XL) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.92 Mobile Safari/537.36"
     );
-    await this.page.setViewport({ width: 390, height: 844 });
+    // 뷰포트 설정에 해상도 및 deviceScaleFactor를 설정
+    await this.page.setViewport({
+      width: 412,
+      height: 869,
+      deviceScaleFactor: 3.5,
+    });
   }
   private async getPage() {
     if (!this.page) {
@@ -152,7 +158,7 @@ export class PageHandler {
     await page.evaluate(() => {
       const canvas = document.createElement("canvas");
       canvas.id = "highlight-canvas";
-      canvas.width = window.innerWidth; // 실제 드로잉 영역의 크기 설정
+      canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
       canvas.style.position = "absolute";
       canvas.style.top = "0";
@@ -163,6 +169,7 @@ export class PageHandler {
       canvas.style.pointerEvents = "none";
       document.body.appendChild(canvas);
     });
+
     await page.evaluate(
       ({ selector, borderWidth }) => {
         const element = document.querySelector(selector);
@@ -174,17 +181,31 @@ export class PageHandler {
               const rect = element.getBoundingClientRect();
               ctx.strokeStyle = "red";
               ctx.lineWidth = borderWidth;
-              ctx.strokeRect(
-                rect.left + borderWidth / 2,
-                rect.top + borderWidth / 2,
-                rect.width - borderWidth,
-                rect.height - borderWidth
-              );
+              // 깜빡임 효과를 위한 변수
+              let visible = true;
+
+              // 깜빡임 효과 함수
+              const blink = () => {
+                if (visible) {
+                  ctx.clearRect(0, 0, canvas.width, canvas.height);
+                } else {
+                  ctx.strokeRect(
+                    rect.left + borderWidth / 2,
+                    rect.top + borderWidth / 2,
+                    rect.width - borderWidth,
+                    rect.height - borderWidth
+                  );
+                }
+                visible = !visible;
+              };
+
+              // 일정 간격으로 깜빡임 효과 적용
+              setInterval(blink, 500); // 500ms 간격으로 깜빡임
             }
           }
         }
       },
-      { selector, borderWidth: 4 }
+      { selector, borderWidth: 5 }
     );
   }
 

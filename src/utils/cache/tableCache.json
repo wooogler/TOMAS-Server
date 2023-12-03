@@ -1,89 +1,353 @@
 [
   [
-    "li,인천 5",
+    "li,12세이상관람가매트",
     {
-      "Area": "인천",
-      "Number of Theaters": 5
+      "age_limit": "12세이상관람가",
+      "title": "매트"
     }
   ],
   [
-    "li,강원 4",
+    "li,12세이상관람가괴물",
     {
-      "Area": "강원",
-      "Number of Theaters": 4
+      "age_limit": "12세이상관람가",
+      "title": "괴물"
     }
   ],
   [
-    "li,서울 19,class=on",
+    "li,전체관람가마이 샤이니 월드",
     {
-      "Area": "서울",
-      "Number of Theaters": 19
+      "age_limit": "전체관람가",
+      "title": "마이 샤이니 월드"
     }
   ],
   [
-    "li,대전/충청/세종 14",
+    "li,12세이상관람가듄",
     {
-      "Area": "대전/충청/세종",
-      "Number of Theaters": 14
+      "age_limit": "12세이상관람가",
+      "title": "듄"
     }
   ],
   [
-    "li,제주 2",
+    "li,12세이상관람가프레디의 피자가게",
     {
-      "Area": "제주",
-      "Number of Theaters": 2
+      "age_limit": "12세이상관람가",
+      "title": "프레디의 피자가게"
+    }
+  ],
+  [
+    "li,전체관람가세계를 뒤흔든 43일",
+    {
+      "age_limit": "전체관람가",
+      "title": "세계를 뒤흔든 43일"
+    }
+  ],
+  [
+    "li,전체관람가사랑의 묘약 @The Met",
+    {
+      "age_limit": "전체관람가",
+      "title": "사랑의 묘약 @The Met"
+    }
+  ],
+  [
+    "li,12세이상관람가[REPLAY] 애프터",
+    {
+      "age_limit": "12세이상관람가",
+      "title": "[REPLAY] 애프터썬"
+    }
+  ],
+  [
+    "li,12세이상관람가더 마블스",
+    {
+      "age_limit": "12세이상관람가",
+      "title": "더 마블스"
+    }
+  ],
+  [
+    "li,전체관람가겨울왕국",
+    {
+      "age_limit": "전체관람가",
+      "title": "겨울왕국"
+    }
+  ],
+  [
+    "li,15세이상관람가[워너필소] 헤드윅",
+    {
+      "age_limit": "15세이상관람가",
+      "title": "[워너필소] 헤드윅"
+    }
+  ],
+  [
+    "li,12세이상관람가3일의 휴가",
+    {
+      "age_limit": "12세이상관람가",
+      "title": "3일의 휴가"
+    }
+  ],
+  [
+    "li,12세이상관람가싱글 인 서울",
+    {
+      "age_limit": "12세이상관람가",
+      "title": "싱글 인 서울"
+    }
+  ],
+  [
+    "li,전체관람가아이다 @The Met",
+    {
+      "age_limit": "전체관람가",
+      "title": "아이다 @The Met"
+    }
+  ],
+  [
+    "li,12세이상관람가서울의 봄",
+    {
+      "age_limit": "12세이상관람가",
+      "title": "서울의 봄"
+    }
+  ],
+  [
+    "li,전체관람가그대들은 어떻게 살 것인가",
+    {
+      "age_limit": "전체관람가",
+      "title": "그대들은 어떻게 살 것인가"
+    }
+  ],
+  [
+    "li,청소년관람불가비밀",
+    {
+      "age_limit": "청소년관람불가",
+      "title": "비밀"
+    }
+  ],
+  [
+    "li,12세이상관람가블루 자이언트",
+    {
+      "age_limit": "12세이상관람가",
+      "title": "블루 자이언트"
+    }
+  ],
+  [
+    "li,전체관람가겨울왕국 2",
+    {
+      "age_limit": "전체관람가",
+      "title": "겨울왕국 2"
+    }
+  ],
+  [
+    "li,15세이상관람가[REPLAY] 오펜하",
+    {
+      "age_limit": "15세이상관람가",
+      "title": "[REPLAY] 오펜하이머"
+    }
+  ],
+  [
+    "li,15세이상관람가나폴레옹",
+    {
+      "age_limit": "15세이상관람가",
+      "title": "나폴레옹"
+    }
+  ],
+  [
+    "li,15세이상관람가[REPLAY] 이니셰",
+    {
+      "age_limit": "15세이상관람가",
+      "title": "[REPLAY] 이니셰린의 밴시"
+    }
+  ],
+  [
+    "li,전체관람가[로열 발레] 돈 키호테",
+    {
+      "age_limit": "전체관람가",
+      "title": "[로열 발레] 돈 키호테"
+    }
+  ],
+  [
+    "li,12세이상관람가교토에서 온 편지",
+    {
+      "age_limit": "12세이상관람가",
+      "title": "교토에서 온 편지"
+    }
+  ],
+  [
+    "li,전체관람가[REPLAY] 너의 눈을 ",
+    {
+      "age_limit": "전체관람가",
+      "title": "[REPLAY] 너의 눈을 들여다보면"
+    }
+  ],
+  [
+    "li,청소년관람불가[REPLAY] 바빌론",
+    {
+      "age_limit": "청소년관람불가",
+      "title": "[REPLAY] 바빌론"
+    }
+  ],
+  [
+    "li,청소년관람불가[로열 오페라] 라인의 ",
+    {
+      "age_limit": "청소년관람불가",
+      "title": "[로열 오페라] 라인의 황금"
+    }
+  ],
+  [
+    "li,12세이상관람가[REPLAY] 파벨만",
+    {
+      "age_limit": "12세이상관람가",
+      "title": "[REPLAY] 파벨만스"
+    }
+  ],
+  [
+    "li,전체관람가스노우 폭스: 썰매개가 될 ",
+    {
+      "age_limit": "전체관람가",
+      "title": "스노우 폭스: 썰매개가 될 거야!"
+    }
+  ],
+  [
+    "li,12세이상관람가더 퍼스트 슬램덩크",
+    {
+      "age_limit": "12세이상관람가",
+      "title": "더 퍼스트 슬램덩크"
+    }
+  ],
+  [
+    "li,15세이상관람가[워너필소] 스타 이즈",
+    {
+      "age_limit": "15세이상관람가",
+      "title": "[워너필소] 스타 이즈 본"
+    }
+  ],
+  [
+    "li,전체관람가[라이브뷰잉] SEVENTE",
+    {
+      "age_limit": "전체관람가",
+      "title": "[라이브뷰잉] SEVENTEEN TOUR FOLLOW TO JAPAN"
+    }
+  ],
+  [
+    "li,15세이상관람가헝거게임: 노래하는 새",
+    {
+      "age_limit": "15세이상관람가",
+      "title": "헝거게임: 노래하는 새와 뱀의 발라드"
+    }
+  ],
+  [
+    "li,15세이상관람가마크로스 플러스 -무비",
+    {
+      "age_limit": "15세이상관람가",
+      "title": "마크로스 플러스 -무비 에디션-"
+    }
+  ],
+  [
+    "li,전체관람가투탕카멘의 진실 : 소년왕과",
+    {
+      "age_limit": "전체관람가",
+      "title": "투탕카멘의 진실 : 소년왕과 파라오의 저주"
+    }
+  ],
+  [
+    "li,전체관람가극장판 아이돌리쉬 세븐; L",
+    {
+      "age_limit": "전체관람가",
+      "title": "극장판 아이돌리쉬 세븐; LIVE 4bit BEYOND THE PERiOD - DAY 2"
     }
   ],
   [
     "li,나의극장 0",
     {
-      "Area": "나의극장",
-      "Number of Theaters": 0
-    }
-  ],
-  [
-    "li,광주/전라 10",
-    {
-      "Area": "광주/전라",
-      "Number of Theaters": 10
-    }
-  ],
-  [
-    "li,경기 30",
-    {
-      "Area": "경기",
-      "Number of Theaters": 30
+      "region": "my",
+      "theater_count": 0
     }
   ],
   [
     "li,부산/대구/경상 24",
     {
-      "Area": "부산/대구/경상",
-      "Number of Theaters": 24
+      "region": "부산/대구/경상",
+      "theater_count": 24
     }
   ],
   [
-    "div,어떤영화를보고 싶으세요?영화별 예매,class=item movie",
+    "li,경기 30",
     {
-      "item": "movie",
-      "question": "어떤영화를보고 싶으세요?",
-      "text": "영화별 예매"
+      "region": "경기",
+      "theater_count": 30
     }
   ],
   [
-    "div,어느곳에서보고 싶으세요?극장별 예매,class=item theater",
+    "li,인천 5",
     {
-      "item": "theater",
-      "question": "어느곳에서보고 싶으세요?",
-      "text": "극장별 예매"
+      "region": "인천",
+      "theater_count": 5
     }
   ],
   [
-    "div,특별한 날, 프라이빗관 어떠세요?코엑,class=item private",
+    "li,서울 19,class=on",
     {
-      "item": "private",
-      "question": "특별한 날, 프라이빗관 어떠세요?",
-      "text": "코엑스 프라이빗 대관예매"
+      "region": "서울",
+      "theater_count": 19
+    }
+  ],
+  [
+    "li,대전/충청/세종 14",
+    {
+      "region": "대전/충청/세종",
+      "theater_count": 14
+    }
+  ],
+  [
+    "li,제주 2",
+    {
+      "region": "제주",
+      "theater_count": 2
+    }
+  ],
+  [
+    "li,광주/전라 10",
+    {
+      "region": "광주/전라",
+      "theater_count": 10
+    }
+  ],
+  [
+    "li,강원 4",
+    {
+      "region": "강원",
+      "theater_count": 4
+    }
+  ],
+  [
+    "div,202312월 03오늘,class=date-box item swiper-slide on first-day swiper-slide-active",
+    {
+      "year": "2023",
+      "month": "12",
+      "day": "03",
+      "label": "오늘"
+    }
+  ],
+  [
+    "div,05화,class=date-box item swiper-slide",
+    {
+      "year": "2023",
+      "month": "12",
+      "day": "05",
+      "label": "화"
+    }
+  ],
+  [
+    "div,04내일,class=date-box item swiper-slide swiper-slide-next",
+    {
+      "year": "2023",
+      "month": "12",
+      "day": "04",
+      "label": "내일"
+    }
+  ],
+  [
+    "div,06수,class=date-box item swiper-slide",
+    {
+      "year": "2023",
+      "month": "12",
+      "day": "06",
+      "label": "수"
     }
   ]
 ]

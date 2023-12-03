@@ -18,8 +18,8 @@ import {
 import {
   makeClickQuestionPrompt,
   makeElementDescriptionPrompt,
+  makeGroupDescriptionPrompt,
   makeInputQuestionPrompt,
-  makeListDescriptionPrompt,
   makeModifyQuestionPrompt,
   makeSelectQuestionPrompt,
   translateQuestionTemplate,
@@ -55,6 +55,11 @@ export async function parsingListAgent({ listHtml }: { listHtml: string }) {
       const clickableElements = findClickableElements(itemElement);
       const selectableElements = findSelectableElements(itemElement);
       itemElement = removeElementsFromScreen(itemElement, selectableElements);
+
+      const timeWrapElements = Array.from(
+        itemElement.querySelectorAll(".time-wrap")
+      );
+      itemElement = removeElementsFromScreen(itemElement, timeWrapElements);
 
       const itemText = itemElement.textContent?.replace(/\s+/g, " ").trim();
       const itemI = itemElement.getAttribute("i");
@@ -95,6 +100,7 @@ export async function parsingItemAgent({
       element,
     });
   });
+
   element = removeElementsFromScreen(element, selectableElements);
 
   const clickableElements = findClickableElements(element);
@@ -211,6 +217,7 @@ function findSelectableElements(screen: Element): Element[] {
     "swipe",
     "display",
   ];
+  const excludeClasses = ["reserve-link-area2"];
 
   // Traverse the DOM and find all selectable elements
   function traverseAndFind(element: Element) {
@@ -249,14 +256,21 @@ function findSelectableElements(screen: Element): Element[] {
     );
   });
 
-  const selectableElements = repeatedElements.filter((element, _, arr) => {
-    let countClickable = 0;
-    const childElements = Array.from(element.children);
-    for (const childElement of childElements) {
-      findClickableElements(childElement).forEach(() => countClickable++);
-    }
-    return countClickable > arr.length / 2;
-  });
+  const selectableElements = repeatedElements
+    .filter((element, _, arr) => {
+      let countClickable = 0;
+      const childElements = Array.from(element.children);
+      for (const childElement of childElements) {
+        findClickableElements(childElement).forEach(() => countClickable++);
+      }
+      return countClickable > arr.length / 2;
+    })
+    .filter((element) => {
+      const classList = Array.from(element.classList);
+      return !excludeClasses.some((excludeClass) =>
+        classList.includes(excludeClass)
+      );
+    });
 
   return selectableElements;
 }
@@ -572,13 +586,13 @@ Action: ${content}`,
     },
   ]);
   const description = await getAiResponse([
+    selectActionPrompt,
     {
-      role: "SYSTEM",
-      content: `${makeListDescriptionPrompt().content}
-Action: ${content}`,
+      role: "AI",
+      content: content,
     },
+    makeGroupDescriptionPrompt(),
   ]);
-
   return { content, question, description, options };
 }
 
@@ -607,7 +621,7 @@ async function getSingleAction(
   const content =
     elem.type === "modify"
       ? await getGpt4Response([actionPrompt])
-      : await getAiResponse([actionPrompt]);
+      : await getGpt4Response([actionPrompt]);
   // console.log(content);
   const makeQuestionPrompt =
     elem.type === "modify"
@@ -615,6 +629,7 @@ async function getSingleAction(
       : elem.type === "input"
       ? makeInputQuestionPrompt
       : makeClickQuestionPrompt;
+
   const question = await getAiResponse([
     {
       role: "SYSTEM",
@@ -623,11 +638,12 @@ Action: ${content}`,
     },
   ]);
   const description = await getAiResponse([
+    singleActionPrompt,
     {
-      role: "SYSTEM",
-      content: `${makeElementDescriptionPrompt().content}
-Action: ${content}`,
+      role: "AI",
+      content: content,
     },
+    makeElementDescriptionPrompt(),
   ]);
 
   return { content, question, description };

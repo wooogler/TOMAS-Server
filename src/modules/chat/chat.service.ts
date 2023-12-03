@@ -1,9 +1,3 @@
-import { ChatOpenAI } from "langchain/chat_models/openai";
-import {
-  AIChatMessage,
-  HumanChatMessage,
-  SystemChatMessage,
-} from "langchain/schema";
 import prisma from "../../utils/prisma";
 import {
   AnswerInput,
@@ -17,11 +11,7 @@ import {
   SelectResponse,
   navigateResponse,
 } from "./chat.schema";
-import {
-  ActionComponent,
-  PageHandler,
-  ScreenResult,
-} from "../../utils/pageHandler";
+import { PageHandler, ScreenResult } from "../../utils/pageHandler";
 import { planningAgent } from "../../agents/planningAgent";
 import { ActionType } from "../../utils/htmlHandler";
 import {
@@ -32,6 +22,7 @@ import {
 } from "../../prompts/actionPrompts";
 import {
   getUserContext,
+  getUserFriendlyQuestion,
   getUserInfo,
   makeQuestionForInputConfirmation,
   makeQuestionForSelectConfirmation,
@@ -42,6 +33,8 @@ import {
   saveObjectArrayToFile,
 } from "../../utils/fileUtil";
 import { Action } from "../../agents/parsingAgent";
+import { Prompt, getAiResponse } from "../../utils/langchainHandler";
+import { JSDOM } from "jsdom";
 
 const page = new PageHandler();
 let focusSection: ScreenResult;
@@ -175,7 +168,12 @@ async function planningAndAsk(): Promise<
             return {
               component,
               type: "questionForInput",
-              screenDescription: screenDescriptionKorean,
+              screenDescription: await getUserFriendlyQuestion({
+                screenDescriptionKorean,
+                componentDescription: component.description || "",
+                componentQuestion: component.question || "",
+                componentHtml: component.html,
+              }),
             };
           } else {
             const confirmationQuestion = await makeQuestionForInputConfirmation(
@@ -194,7 +192,12 @@ async function planningAndAsk(): Promise<
               component,
               type: "requestConfirmation",
               actionValue,
-              screenDescription: screenDescriptionKorean,
+              screenDescription: await getUserFriendlyQuestion({
+                screenDescriptionKorean,
+                componentDescription: component.description || "",
+                componentQuestion: component.question || "",
+                componentHtml: component.html,
+              }),
             };
           }
         } else if (component.actionType === "select") {
@@ -210,7 +213,12 @@ async function planningAndAsk(): Promise<
             component,
             components: await getDataFromHTML(options),
             type: `questionForSelect`,
-            screenDescription: screenDescriptionKorean,
+            screenDescription: await getUserFriendlyQuestion({
+              screenDescriptionKorean,
+              componentDescription: component.description || "",
+              componentQuestion: component.question || "",
+              componentHtml: component.html,
+            }),
           };
         } else if (component.actionType === "click") {
           const question = action.question;
@@ -226,7 +234,15 @@ async function planningAndAsk(): Promise<
               actionType: actions.length === 1 ? "pass" : "click",
             },
             type: "requestConfirmation",
-            screenDescription: screenDescriptionKorean,
+            screenDescription:
+              actions.length === 1
+                ? screenDescriptionKorean
+                : await getUserFriendlyQuestion({
+                    screenDescriptionKorean,
+                    componentDescription: component.description || "",
+                    componentQuestion: component.question || "",
+                    componentHtml: component.html,
+                  }),
           };
         }
       }
@@ -301,7 +317,12 @@ export async function answerForInput(
         component,
         type: "requestConfirmation",
         actionValue,
-        screenDescription: screenDescriptionKorean,
+        screenDescription: await getUserFriendlyQuestion({
+          screenDescriptionKorean,
+          componentDescription: component.description || "",
+          componentQuestion: component.question || "",
+          componentHtml: component.html,
+        }),
       };
     }
   } else {
@@ -315,9 +336,9 @@ export async function answerForFilter(
   console.log("answerForFilter");
   let components = input.components;
   let component = input.component;
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(component.html, "text/html");
-  const topElement = doc.body.firstChild as HTMLElement;
+  const dom = new JSDOM(component.html);
+  const document = dom.window.document;
+  const topElement = document.body.firstChild as Element;
   const id = topElement ? topElement.id : null;
   const content = input.content;
   if (id === "ticketKindList") {
@@ -400,49 +421,6 @@ export async function answerForSelect(input: SelectInput) {
   return await planningAndAsk();
 }
 
-export async function answerForSelectOriginal(
-  input: SelectInput
-): Promise<AnswerResponse> {
-  console.log("answerForSelect");
-  if (page) {
-    page.removeHighlight();
-  }
-  await createHumanChat(
-    {
-      content: input.content,
-    },
-    "answerForSelect"
-  );
-
-  const component = input.component;
-  const screenDescription = focusSection.screenDescription;
-  const screenDescriptionKorean = focusSection.screenDescriptionKorean;
-  const confirmationQuestion = await makeQuestionForSelectConfirmation(
-    component.description || "",
-    screenDescription,
-    input.content
-  );
-  await createAIChat(
-    {
-      content: confirmationQuestion,
-    },
-    "confirmForSelect"
-  );
-  page.highlight(`[i="${component.i}"]`);
-  return {
-    component: {
-      i: component.i,
-      description: component.description,
-      html: "",
-      actionType: component.actionType as ActionType,
-      content: component.content,
-    },
-    type: "requestConfirmation",
-    actionValue: component.i + "---" + component.description,
-    screenDescription: screenDescriptionKorean,
-  };
-}
-
 export async function confirm(
   input: ConfirmInput
 ): Promise<AnswerResponse | SelectResponse | undefined> {
@@ -451,7 +429,14 @@ export async function confirm(
     page.removeHighlight();
   }
   await createHumanChat(
-    { content: input.content === "yes" ? "예" : "아니오" },
+    {
+      content:
+        input.content === "yes"
+          ? "예"
+          : input.content === "no"
+          ? "아니오"
+          : input.content,
+    },
     "confirm"
   );
   const component = input.component;
@@ -462,7 +447,20 @@ export async function confirm(
     html: component.html,
     i: Number(component.i),
   };
-  if (input.content === "yes") {
+  const classifyPositivePrompt: Prompt = {
+    role: "SYSTEM",
+    content: `Given the following question and user's answer, determine whether the answer implies agreement or disagreement.
+
+Question: "${component.question}"
+Answer: "${input.content}"
+
+If the answer implies agreement or a positive response, output 'yes'. If the answer implies disagreement or a negative response, output 'no'.`,
+  };
+  console.log(classifyPositivePrompt.content);
+
+  const response = await getAiResponse([classifyPositivePrompt]);
+  console.log(response);
+  if (response === "yes") {
     if (component) {
       if (component.actionType === "input") {
         if (!input.actionValue) {

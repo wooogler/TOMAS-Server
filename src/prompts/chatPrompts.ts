@@ -6,6 +6,7 @@ import {
 } from "../utils/langchainHandler";
 import { ActionComponent } from "../utils/pageHandler";
 import {
+  QuestionCache,
   loadCacheFromFile,
   loadJsonFromFile,
   saveCacheToFile,
@@ -47,7 +48,7 @@ ${conversation}
     `,
   };
 
-  const userGoalResponse = await getAiResponse([findUserGoalPrompt]);
+  const userGoalResponse = await getGpt4Response([findUserGoalPrompt]);
   console.log(findUserGoalPrompt.content);
   console.log(userGoalResponse);
   return userGoalResponse;
@@ -138,19 +139,19 @@ The description of the screen: ${screenDescription}`,
 export const makeSelectQuestionPrompt = (): Prompt => ({
   role: "HUMAN",
   content:
-    "Given the 'select' action, generate a Korean question that asks the user which item they wish to select. The question should directly inquire about the user's intention to perform the specific select action mentioned. Refrain from including any English translation in the output.",
+    "Given the 'select' action, generate only a Korean question that asks the user which item they wish to select. The question should directly inquire about the user's intention to perform the specific select action mentioned. Refrain from including any English translation in the output.",
 });
 
 export const makeInputQuestionPrompt = (): Prompt => ({
   role: "HUMAN",
   content:
-    "Given the 'input' action described, generate a Korean question that asks the user to input the specified information. The directive should clearly prompt the user to enter the information related to the input action. Avoid providing any English translation in the output.",
+    "Given the 'input' action described, generate only a Korean question that asks the user to input the specified information. The directive should clearly prompt the user to enter the information related to the input action. Avoid providing any English translation in the output.",
 });
 
 export const makeClickQuestionPrompt = (): Prompt => ({
   role: "HUMAN",
   content:
-    "Given the 'click' action described, create a Korean question that asks the user whether they wish to proceed with the click action. The question should directly inquire about the user's intention to perform the specific click action mentioned. Refrain from including any English translation in the output.",
+    "Given the 'click' action described, create only a Korean question that asks the user whether they wish to proceed with the click action. The question should directly inquire about the user's intention to perform the specific click action mentioned. Refrain from including any English translation in the output.",
 });
 
 export const makeModifyQuestionPrompt = (): Prompt => ({
@@ -162,13 +163,13 @@ export const makeModifyQuestionPrompt = (): Prompt => ({
 export const makeElementDescriptionPrompt = (): Prompt => ({
   role: "HUMAN",
   content:
-    "Generate a Korean description of the specific element on a webpage. Emphasize the immediate outcome or effect of this interaction, focusing on the functionality of the action. Avoid going into details about the nature, representation, or location of the element itself. The description should be clear, concise, and directly related to the user's interaction with the element.",
+    "Describe the given element in Korean. Emphasize the outcome or effect of this interaction, focusing on the functionality of the action. Avoid using technical terms like modal.",
 });
 
-export const makeListDescriptionPrompt = (): Prompt => ({
+export const makeGroupDescriptionPrompt = (): Prompt => ({
   role: "HUMAN",
   content:
-    "Generate a Korean description of the list. Emphasize the immediate outcome or effect of selecting an item from this list, focusing on the functionality of the action. Avoid going into details about the nature or representation of the list itself or its location on the webpage. The description should be clear, concise, and directly related to what happens when a user interacts with the list by selecting an item.",
+    "Describe the given element in Korean. Emphasize the outcome or effect of this interaction, focusing on the functionality of the action. Avoid using technical terms like modal.",
 });
 
 export const makeSectionDescriptionPrompt = (): Prompt => ({
@@ -181,3 +182,47 @@ export const translateQuestionTemplate = (): Prompt => ({
   role: "HUMAN",
   content: "Translate the question into Korean.",
 });
+
+export async function getUserFriendlyQuestion({
+  screenDescriptionKorean,
+  componentDescription,
+  componentQuestion,
+  componentHtml,
+}: {
+  screenDescriptionKorean: string;
+  componentDescription: string;
+  componentQuestion: string;
+  componentHtml: string;
+}): Promise<string> {
+  const questionCache = new QuestionCache("questionCache.json");
+  const identifier = generateIdentifier(componentHtml);
+  const cachedQuestion = questionCache.get(identifier);
+  if (cachedQuestion) {
+    return cachedQuestion.question;
+  }
+
+  const makeUserFriendlyQuestionPrompt: Prompt = {
+    role: "SYSTEM",
+    content: `당신은 노인들에게 스마트폰 사용방법을 친절하게 설명하는 사회복지사입니다. 주어진 화면 설명, UI 요소 설명, 그리고 요소에 대한 질문을 토대로, 해당 요소를 노인이 이해할 수 있을 수준으로 간단하게 설명하고 해당 요소와 상호작용할 지 물어보는 사회복지사의 말을 큰따옴표 없이 출력하세요.
+
+화면 설명: ${screenDescriptionKorean}
+UI 요소 설명: ${componentDescription}
+요소에 대한 질문: ${componentQuestion}`,
+  };
+  console.log(makeUserFriendlyQuestionPrompt.content);
+
+  const userFriendlyQuestion = await getGpt4Response(
+    [makeUserFriendlyQuestionPrompt],
+    false,
+    1.0
+  );
+
+  console.log(userFriendlyQuestion);
+
+  questionCache.set(identifier, {
+    question: userFriendlyQuestion,
+  });
+  questionCache.save();
+
+  return userFriendlyQuestion;
+}

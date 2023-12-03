@@ -39,13 +39,22 @@ export const getScreenDescription = async (
 HTML code of the page:
 ${html}`,
     };
-  } else {
+  } else if (screenType === "modal") {
     // screenType === 'modal'
     describeScreenSystemPrompt = {
       role: "SYSTEM",
       content: `Analyze the provided HTML code of the modal and describe the modal's specific purpose and function in one sentence. Focus on the type of information or interaction the modal is designed to convey or facilitate, based on its structure and elements.
       
 HTML code of the modal:
+${html}`,
+    };
+  } else {
+    // screenType === 'section'
+    describeScreenSystemPrompt = {
+      role: "SYSTEM",
+      content: `Analyze the provided HTML code of the section and describe the section's specific purpose and function in one sentence.
+      
+HTML code of the section:
 ${html}`,
     };
   }
@@ -55,7 +64,7 @@ ${html}`,
     content: `Summarize the main purpose of the described screen in one Korean sentence, focusing on its function and the type of information it provides, without detailing the specific elements or layout of the screen.`,
   };
 
-  const screenDescription = await getAiResponse(
+  const screenDescription = await getGpt4Response(
     [describeScreenSystemPrompt],
     true
   );
@@ -132,7 +141,7 @@ HTML code:
 ${html}`,
   };
 
-  const sectionDescription = await getAiResponse(
+  const sectionDescription = await getGpt4Response(
     [describeSectionSystemPrompt],
     true
   );
@@ -156,11 +165,11 @@ ${html}`,
 };
 
 export const getListDescription = async (
-  html: string,
+  listHtml: string,
   screenDescription: string
 ) => {
   const screenCache = new ScreenCache("screenCache.json");
-  const screenIdentifier = generateIdentifier(html) + "-list";
+  const screenIdentifier = generateIdentifier(listHtml) + "-list";
   const screen = screenCache.get(screenIdentifier);
   if (screen) {
     return {
@@ -168,6 +177,7 @@ export const getListDescription = async (
       listDescriptionKorean: screen.screenDescriptionKorean,
     };
   }
+  const html = simplifyHtml(listHtml, true, true);
 
   const describeListSystemPrompt: Prompt = {
     role: "SYSTEM",
@@ -181,7 +191,10 @@ ${screenDescription}
 `,
   };
 
-  const listDescription = await getAiResponse([describeListSystemPrompt], true);
+  const listDescription = await getGpt4Response(
+    [describeListSystemPrompt],
+    true
+  );
   const listDescriptionKorean = await getAiResponse([
     describeListSystemPrompt,
     { content: listDescription, role: "AI" },
@@ -208,16 +221,16 @@ export const selectActionTemplate = ({
   screenDescription: string;
 }): Prompt => ({
   role: "SYSTEM",
-  content: `Analyze the role of a list on the web page, considering both the types of items it displays and user interaction, as well as any comments within the list's HTML context. 
-Output a concise, one-sentence description starting with 'Select one '.
+  content: `Analyze the role of an group on the web page, considering both the types of items it displays and user interaction, as well as any comments within the group's HTML context. 
+Output only a concise, one-sentence description starting with 'Select one '.
 Your sentence should succinctly encapsulate the purpose of selecting an item and the action involved. 
-Rely on the provided list items, HTML context of the list, and screen description to accurately identify the types of items and ensure your description is brief yet comprehensive.
+Rely on the provided items, HTML context of the group, and screen description to accurately identify the types of items and ensure your description is brief yet comprehensive.
 Avoid mentioning javascript functions.
 
-List items:
+Items:
 ${options.map((option) => `- ${option}`).join("\n")}
 
-HTML context of the list:
+HTML context of the group:
 ${simplifyHtml(firstThreeItemsWithParentHtml, true, true)}
 
 Screen Context Description:
@@ -275,12 +288,9 @@ export const singleActionTemplate = ({
   } else {
     return {
       role: "SYSTEM",
-      content: `Provide a detailed analysis of the action with an HTML element in its screen context, starting your description with '${capitalizeFirstCharacter(
+      content: `Given the HTML element on the screen, describe the action on the element in one sentence, starting with '${capitalizeFirstCharacter(
         actionType
-      )} the [element]'. 
-Explain the purpose of this action in relation to the element and its surrounding interface. 
-Your description should be in the form of a directive, instructing a specific action to be performed, in one concise sentence.
-Avoid mentioning javascript functions.
+      )} the [element]'.
 
 HTML of the Element:
 ${simplifiedElementHtml}
