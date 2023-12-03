@@ -14,19 +14,23 @@ async function main() {
   };
 
   const number = await loginSite(pageHandler, false);
-  const numberScreen = await pageHandler.modifyState(
-    "#ticketKindList",
-    "I want to book tickets for 3 adults and 1 child.",
-    "state"
-  );
-  // const upAdult = await pageHandler.click("#TKA_plus", false);
-  // const clickAgree = await pageHandler.click("#seatSelectionBtn", true);
-  showScreenResults(numberScreen);
-  // const screenResults = await pageHandler.modifyState(
-  //   "#seatLayout > div",
-  //   "뒷 자리를 예매해줘.",
-  //   true
+  // showScreenResults(number);
+  // const numberScreen = await pageHandler.modifyState(
+  //   "#ticketKindList",
+  //   "어른 31명 예매해줘.",
+  //   "state"
   // );
+  await pageHandler.click("#TKA_plus", false);
+  await pageHandler.click("#TKA_plus", false);
+  const clickAgree = await pageHandler.click("#seatSelectionBtn", false);
+  // showScreenResults(clickAgree);
+  const screenResults = await pageHandler.modifyState(
+    "#seatLayout > div",
+    "가운데 두자리 선택해줘.",
+    "history"
+  );
+
+  showScreenResults(screenResults);
 }
 
 async function loginSite(pageHandler: PageHandler, parsing = false) {
@@ -51,7 +55,7 @@ async function loginSite(pageHandler: PageHandler, parsing = false) {
   const schedule = await pageHandler.click("#theaterChoiceBtn", false);
   console.log("schedule: ", schedule.type);
 
-  const selectDate = await pageHandler.click("#playDate_20231130 > a", false);
+  const selectDate = await pageHandler.click("#playDate_20231204 > a", false);
   const login = await pageHandler.click(
     "#scheduleListWrap > div > div:nth-child(2) > div > div:nth-child(1) > a",
     false

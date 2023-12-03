@@ -2,7 +2,7 @@
   [
     "li,12세이상관람가서울의 봄",
     {
-      "age_limit": "연령 제한",
+      "age_rating": "연령 등급",
       "title": "제목"
     }
   ],
@@ -10,16 +10,16 @@
     "li,나의극장 0",
     {
       "region": "지역",
-      "theater_count": "극장 수"
+      "theaters": "극장"
     }
   ],
   [
-    "div,202312월 03오늘,class=date-box item swiper-slide on first-day swiper-slide-active",
+    "div,202312월 04내일,class=date-box item swiper-slide on first-day swiper-slide-active",
     {
       "year": "연도",
       "month": "월",
-      "day": "일",
-      "label": "라벨"
+      "day": "요일",
+      "day_of_week": "요일"
     }
   ]
 ]

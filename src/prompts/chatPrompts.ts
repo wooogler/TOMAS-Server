@@ -41,7 +41,7 @@ export async function getUserContext(chats: Chat[]): Promise<string> {
 
   const findUserGoalPrompt: Prompt = {
     role: "SYSTEM",
-    content: `Based on the conversation between the system and the user, describe the user's goal.
+    content: `Based on the conversation between the system and the user, describe the user's context. The user has ID and password for the website.
     
 Conversation:
 ${conversation}
@@ -49,8 +49,8 @@ ${conversation}
   };
 
   const userGoalResponse = await getGpt4Response([findUserGoalPrompt]);
-  console.log(findUserGoalPrompt.content);
-  console.log(userGoalResponse);
+  // console.log(findUserGoalPrompt.content);
+  // console.log(userGoalResponse);
   return userGoalResponse;
 }
 
@@ -65,16 +65,24 @@ export async function getUserInfo(
 
   const findUserInfoPrompt: Prompt = {
     role: "SYSTEM",
-    content: `Based on the conversation and user's context, output any relevant information in a one-level JSON format.
+    content: `Based on the conversation and user's context, output any relevant information in a one-level JSON format. The JSON should not contain any nested objects or arrays.
 
 Conversation: 
 ${conversation}
 
 User's context: ${userContext}
+
+Output:
+{
+  "attr1": <value2>,
+  "attr2": <value2>,
+  ...
+}
 `,
   };
 
   const userInfoResponse = await getGpt4Response([findUserInfoPrompt]);
+  console.log(userInfoResponse);
   const jsonRegex = /{.*?}/s;
   const userInfoJson = userInfoResponse.match(jsonRegex);
   if (userInfoJson) {
@@ -100,7 +108,7 @@ Value: ${actionValue}
 The description of the screen: ${screenDescription}`,
   };
 
-  return await getAiResponse([makeConfirmationPrompt]);
+  return await getGpt4Response([makeConfirmationPrompt]);
 }
 
 export async function makeQuestionForSelectConfirmation(
@@ -120,7 +128,7 @@ The description of the screen: ${screenDescription}`,
 
   const firstConfirmationPrompt: Prompt = {
     role: "AI",
-    content: await getAiResponse([makeConfirmationPrompt]),
+    content: await getGpt4Response([makeConfirmationPrompt]),
   };
 
   const modifyConfirmationPrompt: Prompt = {
@@ -129,7 +137,7 @@ The description of the screen: ${screenDescription}`,
       "The user does not see the screen and is unfamiliar with technology, so please do not mention the element and the action on the screen, and avoid the jargon, mechanical terms, and terms that are too specific to the webpage.",
   };
 
-  return await getAiResponse([
+  return await getGpt4Response([
     makeConfirmationPrompt,
     firstConfirmationPrompt,
     modifyConfirmationPrompt,
@@ -139,19 +147,19 @@ The description of the screen: ${screenDescription}`,
 export const makeSelectQuestionPrompt = (): Prompt => ({
   role: "HUMAN",
   content:
-    "Given the 'select' action, generate only a Korean question that asks the user which item they wish to select. The question should directly inquire about the user's intention to perform the specific select action mentioned. Refrain from including any English translation in the output.",
+    "Given the 'select' action, output a simple Korean question that asks the user which item they wish to select. The question should directly inquire about the user's intention to perform the specific select action mentioned. Avoid providing any English translation and double quotes in the output.",
 });
 
 export const makeInputQuestionPrompt = (): Prompt => ({
   role: "HUMAN",
   content:
-    "Given the 'input' action described, generate only a Korean question that asks the user to input the specified information. The directive should clearly prompt the user to enter the information related to the input action. Avoid providing any English translation in the output.",
+    "Given the 'input' action described, output a simple Korean question that asks the user to input the specified information. The directive should clearly prompt the user to enter the information related to the input action. Avoid providing any English translation and double quotes in the output.",
 });
 
 export const makeClickQuestionPrompt = (): Prompt => ({
   role: "HUMAN",
   content:
-    "Given the 'click' action described, create only a Korean question that asks the user whether they wish to proceed with the click action. The question should directly inquire about the user's intention to perform the specific click action mentioned. Refrain from including any English translation in the output.",
+    "Given the 'click' action described, output a simple Korean question that asks the user whether they wish to proceed with the click action. The question should directly inquire about the user's intention to perform the specific click action mentioned. Avoid providing any English translation and double quotes in the output",
 });
 
 export const makeModifyQuestionPrompt = (): Prompt => ({
@@ -188,14 +196,16 @@ export async function getUserFriendlyQuestion({
   componentDescription,
   componentQuestion,
   componentHtml,
+  actionValue,
 }: {
   screenDescriptionKorean: string;
   componentDescription: string;
   componentQuestion: string;
   componentHtml: string;
+  actionValue?: string;
 }): Promise<string> {
   const questionCache = new QuestionCache("questionCache.json");
-  const identifier = generateIdentifier(componentHtml);
+  const identifier = generateIdentifier(componentHtml) + actionValue;
   const cachedQuestion = questionCache.get(identifier);
   if (cachedQuestion) {
     return cachedQuestion.question;
@@ -203,7 +213,7 @@ export async function getUserFriendlyQuestion({
 
   const makeUserFriendlyQuestionPrompt: Prompt = {
     role: "SYSTEM",
-    content: `당신은 노인들에게 스마트폰 사용방법을 친절하게 설명하는 사회복지사입니다. 주어진 화면 설명, UI 요소 설명, 그리고 요소에 대한 질문을 토대로, 해당 요소를 노인이 이해할 수 있을 수준으로 간단하게 설명하고 해당 요소와 상호작용할 지 물어보는 사회복지사의 말을 큰따옴표 없이 출력하세요.
+    content: `당신은 노인들에게 스마트폰 사용방법을 친절하게 설명하는 사회복지사입니다. 주어진 화면 설명, UI 요소 설명, 그리고 요소에 대한 질문을 토대로, 해당 요소를 노인이 이해할 수 있을 수준으로 간단하게 설명하고 해당 요소와 상호작용할 지 묻는 말을 자연어로 생성해주세요.
 
 화면 설명: ${screenDescriptionKorean}
 UI 요소 설명: ${componentDescription}

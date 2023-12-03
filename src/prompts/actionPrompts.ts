@@ -38,57 +38,6 @@ ${inputActionDescription}
   return value;
 }
 
-export async function findSelectValue(
-  pageDescription: string,
-  componentDescription: string,
-  userContext: string
-) {
-  const inputComponentPrompt: Prompt = {
-    role: "SYSTEM",
-    content: `
-You are the AI assistant who sees the abstraction of part of the user's web page. Based on the user's context, you have to decide what to input in the given component abstraction on the web page. If you cannot decide what content to fill in the input box, please explain why you can't. Don't assume general context; only refer to the given user's context.
-
-Description of the web page:
-${pageDescription}
-
-Component description:
-${componentDescription}
-
-${userContext}
-
-Output needs to follow one of the JSON formats in plain text. Never provide additional context.
-{
-  reason: <the reason why you need to input certain content>,
-  value: <the text that is most relevant for the given component>
-}
-OR
-{
-  reason: <the reason why you cannot decide what content to input>,
-  value: null
-}
-          `,
-  };
-  const response = await getAiResponse([inputComponentPrompt]);
-  console.log(response);
-  return response;
-}
-
-export function getActionHistoryOld(action: Action, actionValue: string) {
-  const actionType = action.type;
-  const actionContent = action.content;
-  if (actionType === "click") {
-    if (actionValue === "yes") {
-      return `${actionContent}`;
-    } else {
-      return `Not ${actionContent.toLowerCase()}`;
-    }
-  } else if (actionType === "input") {
-    return `Input ${actionValue} for ${actionContent.toLowerCase()}`;
-  } else {
-    return `Select ${actionValue} for ${actionContent.toLowerCase()}`;
-  }
-}
-
 export async function getActionHistory(
   action: Action,
   actionValue: string,

@@ -1,9 +1,5 @@
 import { JSDOM } from "jsdom";
-import {
-  Prompt,
-  getAiResponse,
-  getGpt4Response,
-} from "../utils/langchainHandler";
+import { Prompt, getGpt4Response } from "../utils/langchainHandler";
 import { extractSurroundingHtml, simplifyHtml } from "../utils/htmlHandler";
 import {
   ActionCache,
@@ -562,30 +558,58 @@ async function getSelectAction(
   screenElement: Element,
   screenDescription: string
 ) {
-  const options = extractOptions(elem.element);
-  const parentElement = modifySelectAction(elem.element, screenElement);
-  const firstThreeItemsWithParentHtml = parentElement?.outerHTML || "";
+  let element = elem.element;
+  let screen = screenElement;
+  const timeWrapElements = Array.from(element.querySelectorAll(".time-wrap"));
+  const timeWrapScreenElements = Array.from(
+    screen.querySelectorAll(".time-wrap")
+  );
+  const theaterTitleElements = Array.from(
+    element.querySelectorAll(".theater-tit")
+  );
+  const theaterTitleScreenElements = Array.from(
+    screen.querySelectorAll(".theater-tit")
+  );
+  screen = removeElementsFromScreen(screen, [
+    ...timeWrapScreenElements,
+    ...theaterTitleScreenElements,
+  ]);
+  element = removeElementsFromScreen(element, [
+    ...timeWrapElements,
+    ...theaterTitleElements,
+  ]);
+
+  const options = extractOptions(element);
+
+  // const parentElement = modifySelectAction(elem.element, screenElement);
+  // const firstThreeItemsWithParentHtml = parentElement?.outerHTML || "";
+  // const selectActionPrompt = selectActionTemplate({
+  //   options,
+  //   firstThreeItemsWithParentHtml: simplifyHtml(
+  //     firstThreeItemsWithParentHtml,
+  //     true,
+  //     true
+  //   ),
+  //   screenDescription,
+  // });
   const selectActionPrompt = selectActionTemplate({
-    options,
-    firstThreeItemsWithParentHtml: simplifyHtml(
-      firstThreeItemsWithParentHtml,
-      true,
-      true
-    ),
+    simplifiedElementHtml: simplifyHtml(element.outerHTML, true),
+    simplifiedScreenHtml: simplifyHtml(screen.outerHTML, true),
     screenDescription,
   });
-  // console.log(selectActionPrompt.content);
+  console.log(selectActionPrompt.content);
   const content = await getGpt4Response([selectActionPrompt]);
-  // console.log(content);
+  console.log(content);
 
-  const question = await getAiResponse([
+  const question = await getGpt4Response([
+    selectActionPrompt,
     {
-      role: "SYSTEM",
-      content: `${makeSelectQuestionPrompt().content}
-Action: ${content}`,
+      role: "AI",
+      content: content,
     },
+    makeSelectQuestionPrompt(),
   ]);
-  const description = await getAiResponse([
+  const description = await getGpt4Response([
     selectActionPrompt,
     {
       role: "AI",
@@ -630,14 +654,15 @@ async function getSingleAction(
       ? makeInputQuestionPrompt
       : makeClickQuestionPrompt;
 
-  const question = await getAiResponse([
+  const question = await getGpt4Response([
+    singleActionPrompt,
     {
-      role: "SYSTEM",
-      content: `${makeQuestionPrompt().content}
-Action: ${content}`,
+      role: "AI",
+      content: content,
     },
+    makeQuestionPrompt(),
   ]);
-  const description = await getAiResponse([
+  const description = await getGpt4Response([
     singleActionPrompt,
     {
       role: "AI",

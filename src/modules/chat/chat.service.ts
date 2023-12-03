@@ -122,16 +122,23 @@ async function planningAndAsk(): Promise<
 
     const systemContext = await getSystemContext(actionLogs);
 
-    const taskI =
-      actions.length === 1
-        ? actions[0].i.toString()
-        : (
-            await planningAgent(
-              focusSection,
-              userContext,
-              actionLogs.length !== 0 ? systemContext : "No action history"
-            )
-          )?.i;
+    let taskI: string | undefined;
+    let reason = "";
+
+    if (actions.length === 1) {
+      taskI = actions[0].i.toString();
+    } else {
+      const plan = await planningAgent(
+        focusSection,
+        userContext,
+        actionLogs.length !== 0 ? systemContext : "No action history"
+      );
+      if (plan) {
+        taskI = plan.i;
+        reason = plan.reason;
+      }
+      console.log(reason);
+    }
 
     if (taskI) {
       page.highlight(`[i="${taskI}"]`);
@@ -202,7 +209,9 @@ async function planningAndAsk(): Promise<
           }
         } else if (component.actionType === "select") {
           const question = action.question;
+          console.log(question);
           const options = await page.select(`[i="${component.i}"]`);
+          console.log(options);
           await createAIChat(
             {
               content: `${question}`,
@@ -320,8 +329,9 @@ export async function answerForInput(
         screenDescription: await getUserFriendlyQuestion({
           screenDescriptionKorean,
           componentDescription: component.description || "",
-          componentQuestion: component.question || "",
+          componentQuestion: confirmationQuestion || "",
           componentHtml: component.html,
+          actionValue,
         }),
       };
     }
@@ -334,6 +344,10 @@ export async function answerForFilter(
   input: FilterInput
 ): Promise<FilterResponse | AnswerResponse | undefined> {
   console.log("answerForFilter");
+  if (page) {
+    page.removeHighlight();
+  }
+  await createHumanChat({ content: input.content }, "answerForFilter");
   let components = input.components;
   let component = input.component;
   const dom = new JSDOM(component.html);
@@ -351,7 +365,7 @@ export async function answerForFilter(
     focusSection = await page.modifyState(
       `[i="${component.i}"]`,
       content,
-      "state"
+      "history"
     );
   } else {
     // focusSection = await page.modifyState(

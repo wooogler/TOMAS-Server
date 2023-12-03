@@ -257,8 +257,12 @@ ${Object.keys(attrMap)
 }
 `,
       };
-      const jsonString = await getAiResponse([extractInfoPrompt]);
-      const jsonObject = JSON.parse(jsonString);
+      const jsonString = await getGpt4Response([extractInfoPrompt]);
+      console.log(jsonString);
+
+      const regex = /{.*?\}/gs;
+      const match = jsonString.match(regex);
+      const jsonObject = JSON.parse(match ? match[0] : "{}");
 
       tableCache.set(identifier, jsonObject);
       tableCache.save();

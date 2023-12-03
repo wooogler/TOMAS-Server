@@ -34,7 +34,7 @@ export const getScreenDescription = async (
   if (screenType === "page") {
     describeScreenSystemPrompt = {
       role: "SYSTEM",
-      content: `Analyze the provided HTML code of the webpage and describe the page's general purpose and function in one sentence. Focus on the type of information the webpage is designed to convey and its intended use, based on the structure and elements found in the HTML.
+      content: `Analyze the provided HTML code of the webpage and describe the page's specific purpose and function in one sentence. Focus on the type of information the webpage is designed to convey and its intended use, based on the structure and elements found in the HTML.
       
 HTML code of the page:
 ${html}`,
@@ -61,14 +61,14 @@ ${html}`,
 
   const describePageInKoreanPrompt: Prompt = {
     role: "HUMAN",
-    content: `Summarize the main purpose of the described screen in one Korean sentence, focusing on its function and the type of information it provides, without detailing the specific elements or layout of the screen.`,
+    content: `Describe the main purpose of the described screen in one Korean sentence, focusing on its function and the type of information it provides, without detailing the specific elements or layout of the screen.`,
   };
 
   const screenDescription = await getGpt4Response(
     [describeScreenSystemPrompt],
     true
   );
-  const screenDescriptionKorean = await getAiResponse([
+  const screenDescriptionKorean = await getGpt4Response([
     describeScreenSystemPrompt,
     { content: screenDescription, role: "AI" },
     describePageInKoreanPrompt,
@@ -145,7 +145,7 @@ ${html}`,
     [describeSectionSystemPrompt],
     true
   );
-  const sectionDescriptionKorean = await getAiResponse([
+  const sectionDescriptionKorean = await getGpt4Response([
     describeSectionSystemPrompt,
     {
       content: sectionDescription,
@@ -195,7 +195,7 @@ ${screenDescription}
     [describeListSystemPrompt],
     true
   );
-  const listDescriptionKorean = await getAiResponse([
+  const listDescriptionKorean = await getGpt4Response([
     describeListSystemPrompt,
     { content: listDescription, role: "AI" },
     makeSectionDescriptionPrompt(),
@@ -211,7 +211,7 @@ ${screenDescription}
   return { listDescription, listDescriptionKorean };
 };
 
-export const selectActionTemplate = ({
+export const selectActionTemplateOriginal = ({
   options,
   firstThreeItemsWithParentHtml,
   screenDescription,
@@ -222,15 +222,15 @@ export const selectActionTemplate = ({
 }): Prompt => ({
   role: "SYSTEM",
   content: `Analyze the role of an group on the web page, considering both the types of items it displays and user interaction, as well as any comments within the group's HTML context. 
-Output only a concise, one-sentence description starting with 'Select one '.
+Output a concise, one-sentence description starting with 'Select one '.
 Your sentence should succinctly encapsulate the purpose of selecting an item and the action involved. 
 Rely on the provided items, HTML context of the group, and screen description to accurately identify the types of items and ensure your description is brief yet comprehensive.
 Avoid mentioning javascript functions.
 
-Items:
+Text on the items:
 ${options.map((option) => `- ${option}`).join("\n")}
 
-HTML context of the group:
+HTML of the first three items:
 ${simplifyHtml(firstThreeItemsWithParentHtml, true, true)}
 
 Screen Context Description:
@@ -262,6 +262,34 @@ ${extractSurroundingHtml(simplifiedScreenHtml, simplifiedElementHtml)}
 Infer the purpose of the table and describe the action of a user selecting one item from that table in one sentence, starting with 'Select one '.`,
 });
 
+export const selectActionTemplate = ({
+  screenDescription,
+  simplifiedElementHtml,
+  simplifiedScreenHtml,
+}: {
+  screenDescription: string;
+  simplifiedElementHtml: string;
+  simplifiedScreenHtml: string;
+}): Prompt => {
+  return {
+    role: "SYSTEM",
+    content: `Provide a detailed analysis of the action that select one item in a HTML element on the screen, starting your description with 'Select one '. 
+Explain the purpose of this action referring to the element and its surrounding interface. 
+Your description should be in the form of a directive, instructing a specific action to be performed, in one concise sentence.
+Avoid mentioning examples and javascript functions in the output.
+
+HTML of the Element:
+${simplifiedElementHtml}
+
+Surrounding HTML of the Element:
+${extractSurroundingHtml(simplifiedScreenHtml, simplifiedElementHtml)}
+
+Screen Context Description:
+${screenDescription}
+`,
+  };
+};
+
 export const singleActionTemplate = ({
   actionType,
   screenDescription,
@@ -288,9 +316,12 @@ export const singleActionTemplate = ({
   } else {
     return {
       role: "SYSTEM",
-      content: `Given the HTML element on the screen, describe the action on the element in one sentence, starting with '${capitalizeFirstCharacter(
+      content: `Provide a detailed analysis of the action with an HTML element in its screen context, starting your description with '${capitalizeFirstCharacter(
         actionType
-      )} the [element]'.
+      )} the [element]'. 
+Explain the purpose of this action referring to the element and its surrounding interface. 
+Your description should be in the form of a directive, instructing a specific action to be performed, in one concise sentence.
+Avoid mentioning javascript functions.
 
 HTML of the Element:
 ${simplifiedElementHtml}

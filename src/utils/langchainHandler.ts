@@ -75,7 +75,7 @@ export const getAiResponse = async (
 export const getGpt4Response = async (
   prompts: Prompt[],
   long: boolean = false,
-  temperature: number = 0.5
+  temperature: number = 0.2
 ) => {
   const promptMessages = prompts.map((prompt) => {
     const promptContent = prompt.content;
@@ -90,7 +90,7 @@ export const getGpt4Response = async (
   });
 
   // let chatModel = long ? chat432k(temperature) : chat4(temperature);
-  let chatModel = chatNew;
+  let chatModel = chat4New(temperature);
   const response = await chatModel.call(promptMessages);
 
   return response.text;

@@ -567,23 +567,39 @@ export const editActionType = (actionType: string) => {
 export function extractSurroundingHtml(
   htmlString: string,
   target: string,
-  range = 1000
+  range = 500
 ) {
-  const startIndex = htmlString.indexOf(target);
+  let searchTarget = target;
+  let extraRange = 0;
+
+  // 타겟 문자열이 100자를 초과할 경우, 가운데 3분의 1 부분을 사용합니다.
+  if (target.length > 100) {
+    const thirdLength = Math.floor(target.length / 3);
+    const startOfMiddleThird = thirdLength;
+    const endOfMiddleThird = startOfMiddleThird + thirdLength;
+    searchTarget = target.substring(startOfMiddleThird, endOfMiddleThird);
+    extraRange = thirdLength;
+  }
+
+  // htmlString에서 searchTarget의 위치를 찾습니다.
+  const startIndex = htmlString.indexOf(searchTarget);
   if (startIndex === -1) {
     return null;
   }
 
-  const endIndex = startIndex + target.length;
+  const endIndex = startIndex + searchTarget.length;
 
   const beforeTarget = htmlString.substring(
-    Math.max(0, startIndex - range),
+    Math.max(0, startIndex - extraRange - range),
     startIndex
   );
 
-  const afterTarget = htmlString.substring(endIndex, endIndex + range);
+  const afterTarget = htmlString.substring(
+    endIndex,
+    endIndex + extraRange + range
+  );
 
-  return "..." + beforeTarget + target + afterTarget + "...";
+  return "..." + beforeTarget + searchTarget + afterTarget + "...";
 }
 
 export function removeBeforeAndIncludingKeyword(sentence: string): string {

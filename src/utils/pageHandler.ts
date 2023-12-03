@@ -18,6 +18,8 @@ import {
 } from "../agents/parsingAgent";
 import { Prompt, getAiResponse, getGpt4Response } from "./langchainHandler";
 import { getChats } from "../modules/chat/chat.service";
+import { loadObjectArrayFromFile, saveObjectArrayToFile } from "./fileUtil";
+import { SystemLog, getActionHistory } from "../prompts/actionPrompts";
 
 const NO_PAGE_ERROR = new Error("Cannot find a page.");
 
@@ -348,7 +350,7 @@ export class PageHandler {
     const selectOneNextActionPrompt: Prompt = {
       role: "SYSTEM",
       content: `As an agent, your task is to select the most suitable next action for the current situation considering the user's request
-Evaluate the available options and choose one action that seems most appropriate.
+Evaluate the available options and choose one action with "(i=##)" that seems most appropriate.
 
 User's request: ${userRequest}
 
@@ -379,9 +381,9 @@ ${actions.map((comp) => `- ${comp.content} (i=${comp.i})`).join("\n")}
 
     const selectNextActionWithHistoryPrompt: Prompt = {
       role: "SYSTEM",
-      content: `As an agent, your task is to select the most suitable next action for the current situation, considering both the user's request and the history of previous actions taken. 
+      content: `As an agent, your task is to select one next action for the current situation, considering both the user's request and the history of previous actions taken. 
 Reflect on the sequence of actions already performed and their outcomes to make an informed decision about the next step. 
-Evaluate the available options based on this historical context and choose one action that seems most appropriate. 
+Evaluate the available options based on this historical context and output one action with "(i=##)" that seems most appropriate. 
 If you determine that no further actions are needed or beneficial, please output 'done'.
 
 User's request: ${userRequest}
@@ -418,17 +420,47 @@ ${actions.map((comp) => `- ${comp.content} (i=${comp.i})`).join("\n")}`,
     const iRegex = /\(i=(\d+)\)/;
     const iMatch = response.match(iRegex);
     const action = actions.find((comp) => comp.i === Number(iMatch?.[1]));
+    let showDialog = false;
 
     if (action) {
       if (action.type === "click") {
         await this.scrollToElement(`[i="${action.i}"]`);
+        const actionLogs =
+          loadObjectArrayFromFile<SystemLog>("actionLogs.json");
+        const actionDescription = await getActionHistory(action, "yes");
+        actionLogs.push({
+          type: screenType,
+          id: `${this.extractBaseURL(page.url())}`,
+          screenDescription,
+          actionDescription,
+          screenChangeType: "STATE_CHANGE",
+        });
+        saveObjectArrayToFile(actionLogs, "actionLogs.json");
         new Promise((r) => setTimeout(r, 200));
-        page.click(`[i="${action.i}"]`);
+        if (mode === "one") {
+          await this.highlight(`[i="${action.i}"]`);
+          new Promise((r) => setTimeout(r, 2000));
+          await this.removeHighlight();
+          return await this.click(`[i="${action.i}"]`);
+        }
+        page.removeAllListeners("dialog");
+
+        page.once("dialog", async (dialog) => {
+          showDialog = true;
+          try {
+            await dialog.accept();
+          } catch (error) {
+            console.error("Error handling dialog:", error);
+          }
+        });
+        await page.click(`[i="${action.i}"]`);
         new Promise((r) => setTimeout(r, 200));
+        console.log(showDialog);
       } else if (action.type === "input") {
         // input은 필요할 때 구현
       }
-      if (mode !== "one") {
+
+      if (mode !== "one" && showDialog === false) {
         return await this.modifyState(selector, userRequest, mode, [
           ...oldActions,
           action,
@@ -441,6 +473,7 @@ ${actions.map((comp) => `- ${comp.content} (i=${comp.i})`).join("\n")}`,
       async () => {},
       false
     ));
+    const newScreenDescription = await getScreenDescription(screen, screenType);
     actions = await parsingAgent({
       screenHtml: screen,
       screenDescription,
@@ -448,8 +481,8 @@ ${actions.map((comp) => `- ${comp.content} (i=${comp.i})`).join("\n")}`,
     });
     return {
       type: screenType,
-      screenDescription,
-      screenDescriptionKorean,
+      screenDescription: newScreenDescription.screenDescription,
+      screenDescriptionKorean: newScreenDescription.screenDescriptionKorean,
       screenChangeType: "STATE_CHANGE",
       actions,
       id: `${this.extractBaseURL(page.url())}`,
